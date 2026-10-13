@@ -1,13 +1,13 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import Header from "./assets/components/Header";
-import Apartments from "./assets/pages/ApartmentsPage";
-import About from "./assets/pages/AboutUsPage";
-import News from "./assets/pages/NewsPage";
-import Advantages from "./assets/pages/AdvantagesPage";
-import Contacts from "./assets/pages/ContactsPage";
-import AboutDeveloper from "./assets/pages/AboutDeveloperPage";
-import ConstructionProgress from "./assets/pages/ConstructionProgressPage";
+import Header from "./components/Header";
+import Apartments from "./pages/ApartmentsPage";
+import About from "./pages/AboutUsPage";
+import News from "./pages/NewsPage";
+import Advantages from "./pages/AdvantagesPage";
+import Contacts from "./pages/ContactsPage";
+import AboutDeveloper from "./pages/AboutDeveloperPage";
+import ConstructionProgress from "./pages/ConstructionProgressPage";
 
 
 function App() {

@@ -1,6 +1,7 @@
+import Hero from "@/components/Hero"
 const About = () => {
   return (
-    <div>About</div>
+    <Hero />
   )
 }
 
