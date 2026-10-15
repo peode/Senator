@@ -21,7 +21,7 @@ const places = [
   { id: "school", icon: School, title: "Школи №42", distance: "≈ 10 хв пішки", mode: "w", query: "Загальноосвітня школа №42" },
   { id: "shop", icon: ShoppingBag, title: "ТРЦ «Екватор»", distance: "≈ 10 хв пішки", mode: "w", query: "Велмарт" },
   { id: "hospital", icon: Ambulance, title: "Чернівецька лікарня швидкої медичної допомоги", distance: "≈ 5 хв авто", mode: "d", query: "Чернівецька лікарня швидкої медичної допомоги" },
-  { id: "park", icon: ShoppingBasket, title: "АТБ-Маркет", distance: "поруч", mode: "w", query: "АТБ-Маркет" },
+  { id: "shop", icon: ShoppingBasket, title: "АТБ-Маркет", distance: "поруч", mode: "w", query: "АТБ-Маркет" },
   { id: "center", icon: Drama, title: "Центр міста", distance: "≈ 15 хв авто", mode: "d", query: "Чернівецький академічний обласний український музично-драматичний театр ім. Ольги Кобилянської" },
 ];
 
