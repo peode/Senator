@@ -1,10 +1,10 @@
 import { useState } from "react";
 import {
-  MapPin,
-  GraduationCap,
-  Hospital,
+  Ambulance,
+  Drama,
+  School,
   ShoppingBag,
-  TreePine,
+  ShoppingBasket,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -16,18 +16,29 @@ import {
 
 const ADDRESS = "Чернівці, вулиця Руська, 236Б";
 
-// query — що шукати на карті поруч із ЖК
+// query — що шукати на карті поруч із ЖК, mode: "w" — пішки, "d" — авто
 const places = [
-  { id: "school", icon: GraduationCap, title: "Школи №11 і №42", distance: "≈ 10 хв пішки", query: "школа" },
-  { id: "shop", icon: ShoppingBag, title: "Супермаркети та ТРЦ «Екватор»", distance: "≈ 10 хв пішки", query: "супермаркет" },
-  { id: "hospital", icon: Hospital, title: "Міська клінічна лікарня №1", distance: "≈ 5 хв авто", query: "лікарня" },
-  { id: "park", icon: TreePine, title: "Озеро та лісопарк", distance: "поруч", query: "парк" },
-  { id: "center", icon: MapPin, title: "Центр міста", distance: "≈ 15 хв авто", query: "Чернівці центр" },
+  { id: "school", icon: School, title: "Школи №42", distance: "≈ 10 хв пішки", mode: "w", query: "Загальноосвітня школа №42" },
+  { id: "shop", icon: ShoppingBag, title: "ТРЦ «Екватор»", distance: "≈ 10 хв пішки", mode: "w", query: "Велмарт" },
+  { id: "hospital", icon: Ambulance, title: "Чернівецька лікарня швидкої медичної допомоги", distance: "≈ 5 хв авто", mode: "d", query: "Чернівецька лікарня швидкої медичної допомоги" },
+  { id: "park", icon: ShoppingBasket, title: "АТБ-Маркет", distance: "поруч", mode: "w", query: "АТБ-Маркет" },
+  { id: "center", icon: Drama, title: "Центр міста", distance: "≈ 15 хв авто", mode: "d", query: "Чернівецький академічний обласний український музично-драматичний театр ім. Ольги Кобилянської" },
 ];
 
+// З вибраним місцем показуємо маршрут від ЖК — так на карті видно обидві точки
 const getMapSrc = (place) => {
-  const q = place ? `${place.query} near ${ADDRESS}` : ADDRESS;
-  return `https://www.google.com/maps?q=${encodeURIComponent(q)}&output=embed`;
+  if (!place) {
+    return `https://www.google.com/maps?q=${encodeURIComponent(ADDRESS)}&output=embed`;
+  }
+
+  const params = new URLSearchParams({
+    saddr: ADDRESS,
+    daddr: `${place.query} near ${ADDRESS}`,
+    dirflg: place.mode,
+    output: "embed",
+  });
+
+  return `https://www.google.com/maps?${params}`;
 };
 
 const Location = () => {
