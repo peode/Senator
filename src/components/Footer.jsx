@@ -1,103 +1,103 @@
-
-// import {
-//    Facebook,
-//    Instagram,
-//    Youtube,
-// } from "lucide-react";
-import "./Footer.css";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import Logo from "@/assets/icons/SenatorLogo.jpg";
+
+const primaryLinks = [
+  { href: "/", label: "Про проект" },
+  { href: "/advantages", label: "Переваги" },
+  { href: "/apartments", label: "Планування" },
+  { href: "/constructionprogress", label: "Хід будівництва" },
+];
+
+const secondaryLinks = [
+  { href: "/news", label: "Новини" },
+  { href: "/aboutdeveloper", label: "Про забудовника" },
+  { href: "/contacts", label: "Контакти" },
+];
+
+const navLinkClass =
+  "text-base font-semibold leading-snug text-white transition-colors hover:text-brand";
+const contactLinkClass =
+  "text-base leading-relaxed text-white/80 transition-colors hover:text-brand";
 
 const Footer = () => {
   return (
-    <footer className="site-footer">
-      <div className="footer-inner">
-        {/* Логотипи */}
-        <div className="footer-brand">
-          <a href="/" className="footer-logo">
-            <img src={Logo} alt="Senator" />
+    <footer className="w-full bg-ink px-[6%] pt-11 pb-9 text-white/85 min-[851px]:px-[4.7%] min-[851px]:pt-[70px] min-[851px]:pb-[50px]">
+      <div className="mx-auto grid max-w-[1800px] grid-cols-2 items-start gap-x-6 gap-y-9 min-[851px]:gap-x-8 min-[1351px]:grid-cols-[1.1fr_1.4fr_1fr_1fr_1.4fr] min-[1351px]:gap-10 max-[1350px]:min-[851px]:grid-cols-[1fr_1.3fr_1fr_1fr]">
+        <div className="col-span-2 min-[851px]:col-span-1">
+          <a href="/" className="block w-fit">
+            <img
+              src={Logo}
+              alt="Senator"
+              className="block h-auto w-[140px] mix-blend-screen brightness-140 grayscale invert min-[851px]:w-[170px]"
+            />
           </a>
         </div>
 
-        {/* Контактна інформація */}
-        <div className="footer-contacts">
-          <h3>Відділ Продажу</h3>
+        <div className="col-span-2 flex flex-col items-start gap-4 min-[851px]:col-span-1">
+          <h3 className="text-lg font-bold text-white">Відділ Продажу</h3>
 
           <a
-            href="https://maps.google.com/?q=Чернівці,+вул.+Мізюна,+20"
+            className={contactLinkClass}
+            href="https://maps.google.com/?q=Чернівці,+вул.+Руська,+236Б"
             target="_blank"
             rel="noreferrer"
           >
-            Чернівці, вул. Мізюна, 20
+            Чернівці, вул. Руська, 236Б
           </a>
 
-          <p>
+          <p className="text-base leading-relaxed text-white/80">
             Пн - Пт: з 09:00 по 19:00
             <br />
             Сб: з 10:00 до 15:00
           </p>
 
-          <a href="tel:+380501991122">
+          <a className={contactLinkClass} href="tel:+380501991122">
             +38 (050) 199-11-22
           </a>
         </div>
 
-        {/* Навігація */}
-        <nav className="footer-nav" aria-label="Основна навігація">
-          <a href="/">Про проект</a>
-          <a href="/advantages">Переваги</a>
-          <a href="/apartments">Планування</a>
-          <a href="/constructionprogress">Хід будівництва</a>
+        <nav
+          className="flex flex-col items-start gap-4"
+          aria-label="Основна навігація"
+        >
+          {primaryLinks.map(({ href, label }) => (
+            <a key={href} href={href} className={navLinkClass}>
+              {label}
+            </a>
+          ))}
         </nav>
 
         <nav
-          className="footer-nav footer-nav-secondary"
+          className="flex flex-col items-start gap-4"
           aria-label="Додаткова навігація"
         >
-          <a href="/news">Новини</a>
-          <a href="/aboutdeveloper">Про забудовника</a>
-          <a href="/contacts">Контакти</a>
+          {secondaryLinks.map(({ href, label }) => (
+            <a key={href} href={href} className={navLinkClass}>
+              {label}
+            </a>
+          ))}
         </nav>
 
-        {/* Соціальні мережі та консультація */}
-        <div className="footer-social">
-          <p className="footer-social-title">
-            Ми в соціальних мережах
-          </p>
+        <div className="col-span-2 flex flex-col items-start gap-5 min-[1351px]:col-span-1 max-[1350px]:min-[851px]:col-start-2 max-[1350px]:min-[851px]:col-end-[-1]">
+          <p className="text-lg font-bold text-white">Залишились питання?</p>
 
-          {/* <div className="footer-social-links"> */}
-            {/* <a
-              href="https://www.facebook.com/"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Facebook"
-            >
-              <Facebook size={35} fill="currentColor" />
-            </a>
-
-            <a
-              href="https://www.instagram.com/"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Instagram"
-            >
-              <Instagram size={35} />
-            </a>
-
-            <a
-              href="https://www.youtube.com/"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="YouTube"
-            >
-              <Youtube size={39} fill="currentColor" />
-            </a>
-          </div> */}
-
-          <a className="footer-consultation" href="/contacts">
+          <Button
+            variant="gold"
+            size="xl"
+            className="h-[60px] w-full max-w-[400px] text-base"
+            render={<a href="/contacts" />}
+            nativeButton={false}
+          >
             Отримати консультацію
-          </a>
+          </Button>
         </div>
       </div>
+
+      <Separator className="mx-auto mt-12 max-w-[1800px] bg-white/10" />
+      <p className="mx-auto mt-6 max-w-[1800px] text-sm text-white/50">
+        © {new Date().getFullYear()} ЖК «Senator». Усі права захищено.
+      </p>
     </footer>
   );
 };

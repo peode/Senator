@@ -5,6 +5,18 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Фірмові кольори ЖК Senator */
+@theme {
+    --color-brand: #49c5e0;
+    --color-brand-dark: #2b9bb3;
+    --color-gold: #ffb52e;
+    --color-gold-hover: #ffc454;
+    --color-gold-soft: #ffca55;
+    --color-gold-active: #f6b82e;
+    --color-ink: #17252c;
+    --color-surface: #f5f7f8;
+}
+
 @theme inline {
     --font-heading: var(--font-sans);
     --font-sans: 'Geist Variable', sans-serif;
