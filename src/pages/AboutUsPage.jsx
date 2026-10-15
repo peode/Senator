@@ -1,8 +1,13 @@
 import Hero from "@/components/Hero"
-const About = () => {
+import About from "@/components/About"
+
+const AboutUsPage = () => {
   return (
-    <Hero />
+    <>
+      <Hero/>
+      <About/>
+    </>
   )
 }
 
-export default About
+export default AboutUsPage

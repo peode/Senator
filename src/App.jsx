@@ -8,6 +8,7 @@ import Advantages from "./pages/AdvantagesPage";
 import Contacts from "./pages/ContactsPage";
 import AboutDeveloper from "./pages/AboutDeveloperPage";
 import ConstructionProgress from "./pages/ConstructionProgressPage";
+import Footer from "./components/Footer";
 
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
           <Route path="/contacts" element={<Contacts />} />
           <Route path="/constructionprogress" element={<ConstructionProgress />} />
         </Routes>
+        <Footer />
       </BrowserRouter>
     </>
   )
