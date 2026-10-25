@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Phone, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { phoneHref, useSettings } from "@/lib/content";
 import Logo from "@/assets/icons/SenatorLogo.jpg";
 
 const navLinks = [
@@ -9,13 +10,13 @@ const navLinks = [
   { href: "/advantages", label: "Переваги" },
   { href: "/apartments", label: "Планування" },
   { href: "/news", label: "Новини" },
-  { href: "/constructionprogress", label: "Хід будівництва" },
   { href: "/aboutdeveloper", label: "Про забудовника" },
   { href: "/contacts", label: "Контакти" },
 ];
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { phone } = useSettings();
   const isHome = useLocation().pathname === "/";
 
   return (
@@ -55,7 +56,7 @@ const Header = () => {
 
       <div className="ml-auto flex shrink-0 items-center gap-4 min-[1051px]:ml-0">
         <a
-          href="tel:+380000000000"
+          href={phoneHref(phone)}
           className="hidden items-center gap-2 text-xs whitespace-nowrap min-[521px]:flex"
         >
           <Phone size={17} />

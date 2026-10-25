@@ -1,12 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { SocialIcon } from "@/components/SocialIcons";
+import { socialLabels } from "@/data/socials";
+import { phoneHref, useSettings } from "@/lib/content";
 import Logo from "@/assets/icons/SenatorLogo.jpg";
 
 const primaryLinks = [
   { href: "/", label: "Про проект" },
   { href: "/advantages", label: "Переваги" },
   { href: "/apartments", label: "Планування" },
-  { href: "/constructionprogress", label: "Хід будівництва" },
 ];
 
 const secondaryLinks = [
@@ -16,11 +18,13 @@ const secondaryLinks = [
 ];
 
 const navLinkClass =
-  "text-base font-semibold leading-snug text-white transition-colors hover:text-brand";
+  "text-[15px] font-normal leading-snug text-white/90 transition-colors hover:text-brand";
 const contactLinkClass =
-  "text-base leading-relaxed text-white/80 transition-colors hover:text-brand";
+  "text-[15px] font-light leading-relaxed text-white/70 transition-colors hover:text-brand";
 
 const Footer = () => {
+  const { phone, address, hours, socials } = useSettings();
+
   return (
     <footer className="w-full bg-ink px-[6%] pt-11 pb-9 text-white/85 min-[851px]:px-[4.7%] min-[851px]:pt-[70px] min-[851px]:pb-[50px]">
       <div className="mx-auto grid max-w-[1800px] grid-cols-2 items-start gap-x-6 gap-y-9 min-[851px]:gap-x-8 min-[1351px]:grid-cols-[1.1fr_1.4fr_1fr_1fr_1.4fr] min-[1351px]:gap-10 max-[1350px]:min-[851px]:grid-cols-[1fr_1.3fr_1fr_1fr]">
@@ -35,25 +39,23 @@ const Footer = () => {
         </div>
 
         <div className="col-span-2 flex flex-col items-start gap-4 min-[851px]:col-span-1">
-          <h3 className="text-lg font-bold text-white">Відділ Продажу</h3>
+          <h3 className="text-base font-medium tracking-wide text-white">Відділ Продажу</h3>
 
           <a
             className={contactLinkClass}
-            href="https://maps.google.com/?q=Чернівці,+вул.+Руська,+236Б"
+            href={`https://maps.google.com/?q=${encodeURIComponent(address)}`}
             target="_blank"
             rel="noreferrer"
           >
-            Чернівці, вул. Руська, 236Б
+            {address}
           </a>
 
-          <p className="text-base leading-relaxed text-white/80">
-            Пн - Пт: з 09:00 по 19:00
-            <br />
-            Сб: з 10:00 до 15:00
+          <p className="text-[15px] font-light leading-relaxed whitespace-pre-line text-white/70">
+            {hours}
           </p>
 
-          <a className={contactLinkClass} href="tel:+380501991122">
-            +38 (050) 199-11-22
+          <a className={contactLinkClass} href={phoneHref(phone)}>
+            {phone}
           </a>
         </div>
 
@@ -80,22 +82,40 @@ const Footer = () => {
         </nav>
 
         <div className="col-span-2 flex flex-col items-start gap-5 min-[1351px]:col-span-1 max-[1350px]:min-[851px]:col-start-2 max-[1350px]:min-[851px]:col-end-[-1]">
-          <p className="text-lg font-bold text-white">Залишились питання?</p>
+          <p className="text-base font-medium tracking-wide text-white">
+            Ми в соцмережах
+          </p>
+
+          <div className="flex gap-3">
+            {Object.entries(socials).map(([key, href]) => {
+              return (
+                <a
+                  key={key}
+                  href={href}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={socialLabels[key]}
+                  className="flex size-10 items-center justify-center rounded-full border border-white/25 text-white/80 transition-colors hover:border-brand hover:text-brand"
+                >
+                  <SocialIcon name={key} size={18} />
+                </a>
+              );
+            })}
+          </div>
 
           <Button
             variant="gold"
-            size="xl"
-            className="h-[60px] w-full max-w-[400px] text-base"
-            render={<a href="/contacts" />}
+            className="h-11 px-7 text-sm font-medium"
+            render={<a href={phoneHref(phone)} />}
             nativeButton={false}
           >
-            Отримати консультацію
+            Зателефонувати
           </Button>
         </div>
       </div>
 
       <Separator className="mx-auto mt-12 max-w-[1800px] bg-white/10" />
-      <p className="mx-auto mt-6 max-w-[1800px] text-sm text-white/50">
+      <p className="mx-auto mt-6 max-w-[1800px] text-sm font-light text-white/50">
         © {new Date().getFullYear()} ЖК «Senator». Усі права захищено.
       </p>
     </footer>

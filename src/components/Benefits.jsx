@@ -63,7 +63,7 @@ const Benefits = () => {
         {benefits.map(({ icon: Icon, title, text }) => (
           <Card
             key={title}
-            className="gap-0 rounded-2xl px-1 py-8 shadow-[0_6px_24px_rgb(12_27_34/7%)] ring-0 transition hover:-translate-y-1 hover:shadow-[0_14px_34px_rgb(12_27_34/13%)]"
+            className="gap-0 rounded-2xl px-1 py-8 shadow-card ring-0 transition hover:-translate-y-1 hover:shadow-card-hover"
           >
             <CardHeader className="gap-0">
               <span className="mb-5 inline-flex size-[58px] items-center justify-center rounded-full bg-amber-100 text-amber-800">
