@@ -1,19 +1,27 @@
-import { Play } from "lucide-react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import { Play, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import courtyard from "@/assets/images/courtyard.png";
 
-const socials = [
-  { href: "https://www.facebook.com/", label: "Facebook", short: "f" },
-  { href: "https://www.instagram.com/", label: "Instagram", short: "ig" },
-  { href: "https://www.youtube.com/", label: "YouTube", short: "yt" },
-];
-
 const Hero = () => {
-  const scrollToVideo = () => {
-    document.getElementById("video")?.scrollIntoView({
-      behavior: "smooth",
-    });
-  };
+  const [videoOpen, setVideoOpen] = useState(false);
+
+  useEffect(() => {
+    if (!videoOpen) return;
+
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") setVideoOpen(false);
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = "";
+    };
+  }, [videoOpen]);
 
   return (
     <main className="relative isolate min-h-svh overflow-hidden bg-[#24343c] text-white">
@@ -55,7 +63,7 @@ const Hero = () => {
             variant="outline"
             size="icon-lg"
             className="size-12 rounded-full border-white/75 bg-white/10 text-white hover:bg-white/25 hover:text-white"
-            onClick={scrollToVideo}
+            onClick={() => setVideoOpen(true)}
             aria-label="Переглянути відео"
           >
             <Play size={20} fill="currentColor" />
@@ -67,22 +75,38 @@ const Hero = () => {
         </div>
       </section>
 
-      <div className="absolute right-[5%] bottom-[38px] z-20 flex gap-[18px] md:top-1/2 md:right-[3.5%] md:bottom-auto md:-translate-y-1/2 md:flex-col">
-        {socials.map(({ href, label, short }) => (
-          <a
-            key={label}
-            href={href}
-            aria-label={label}
-            className="flex items-center justify-center text-[15px] leading-none font-bold text-white uppercase transition-colors hover:text-brand"
+      {videoOpen && createPortal(
+        <div
+          className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/80"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Відео про ЖК Senator"
+          onClick={() => setVideoOpen(false)}
+        >
+          <div
+            className="overflow-hidden rounded-[10px] bg-black"
+            onClick={(event) => event.stopPropagation()}
           >
-            {short}
-          </a>
-        ))}
-      </div>
+            <video
+              className="block max-h-[90vh] max-w-[94vw]"
+              src="/video/senator.mp4"
+              autoPlay
+              controls
+              playsInline
+            />
+          </div>
 
-      <div id="video" className="absolute bottom-0">
-        {/* Пізніше тут можна розмістити відео про житловий комплекс */}
-      </div>
+          <button
+            type="button"
+            className="absolute top-6 right-[3.5%] flex size-12 cursor-pointer items-center justify-center rounded-full border border-white/75 bg-white/10 text-white transition-colors hover:bg-white/25"
+            onClick={() => setVideoOpen(false)}
+            aria-label="Закрити відео"
+          >
+            <X size={28} />
+          </button>
+        </div>,
+        document.body
+      )}
     </main>
   );
 };

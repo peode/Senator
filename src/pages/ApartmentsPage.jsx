@@ -1,7 +1,7 @@
-const Apartments = () => {
-  return (
-    <div>Apartments</div>
-  )
-}
+import HouseMap from "@/components/HouseMap";
 
-export default Apartments
+const Apartments = () => {
+  return <HouseMap />;
+};
+
+export default Apartments;
