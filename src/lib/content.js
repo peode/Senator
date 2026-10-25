@@ -3,7 +3,7 @@ import { defaultNews } from "@/data/news";
 import { defaultSocials } from "@/data/socials";
 
 export const defaultSettings = {
-  phone: "+38 (050) 199-11-22",
+  phone: "+38 (068) 003-00-33",
   address: "Чернівці, вул. Руська, 236Б",
   hours: "Пн - Пт: з 09:00 по 19:00\nСб: з 10:00 до 15:00",
   socials: defaultSocials,

@@ -16,12 +16,13 @@ import {
 
 const ADDRESS = "Чернівці, вулиця Руська, 236Б";
 
-// query — що шукати на карті поруч із ЖК, mode: "w" — пішки, "d" — авто
+// query — що шукати на карті поруч із ЖК, mode: "w" — пішки, "d" — авто,
+// destination — точні координати, якщо пошук за назвою знаходить не ту точку
 const places = [
   { id: "school", icon: School, title: "Школи №42", distance: "≈ 10 хв пішки", mode: "w", query: "Загальноосвітня школа №42" },
-  { id: "shop", icon: ShoppingBag, title: "ТРЦ «Екватор»", distance: "≈ 10 хв пішки", mode: "w", query: "Велмарт" },
+  { id: "mall", icon: ShoppingBag, title: "ТРЦ «Екватор»", distance: "≈ 10 хв пішки", mode: "w", query: "Велмарт" },
   { id: "hospital", icon: Ambulance, title: "Чернівецька лікарня швидкої медичної допомоги", distance: "≈ 5 хв авто", mode: "d", query: "Чернівецька лікарня швидкої медичної допомоги" },
-  { id: "shop", icon: ShoppingBasket, title: "АТБ-Маркет", distance: "поруч", mode: "w", query: "АТБ-Маркет" },
+  { id: "atb", icon: ShoppingBasket, title: "АТБ-Маркет", distance: "≈ 5 хв авто", mode: "d", query: "АТБ-Маркет", destination: "48.2683082,26.0017738" },
   { id: "center", icon: Drama, title: "Центр міста", distance: "≈ 15 хв авто", mode: "d", query: "Чернівецький академічний обласний український музично-драматичний театр ім. Ольги Кобилянської" },
 ];
 
@@ -33,7 +34,7 @@ const getMapSrc = (place) => {
 
   const params = new URLSearchParams({
     saddr: ADDRESS,
-    daddr: `${place.query} near ${ADDRESS}`,
+    daddr: place.destination ?? `${place.query} near ${ADDRESS}`,
     dirflg: place.mode,
     output: "embed",
   });
