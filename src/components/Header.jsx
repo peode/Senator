@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "react-router-dom";
 import { Phone, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "@/assets/icons/SenatorLogo.jpg";
@@ -15,9 +16,16 @@ const navLinks = [
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const isHome = useLocation().pathname === "/";
 
   return (
-    <header className="absolute inset-x-0 top-0 z-100 flex min-h-[75px] items-center justify-between gap-2.5 bg-linear-to-b from-ink/55 to-transparent px-[5%] py-4 text-white min-[521px]:min-h-[85px] min-[521px]:px-[3.5%] min-[521px]:py-[22px] min-[1051px]:min-h-[100px] min-[1051px]:gap-7">
+    <header
+      className={`inset-x-0 top-0 z-100 flex items-center justify-between gap-2.5 px-[5%] text-white min-[521px]:px-[3.5%] min-[1051px]:gap-7 ${
+        isHome
+          ? "absolute min-h-[75px] bg-linear-to-b from-ink/55 to-transparent py-4 min-[521px]:min-h-[85px] min-[521px]:py-[22px] min-[1051px]:min-h-[100px]"
+          : "relative h-[100px] bg-ink"
+      }`}
+    >
       <a href="/" className="flex shrink-0 items-center">
         {/* темний логотип на білому фоні -> білий на прозорому */}
         <img

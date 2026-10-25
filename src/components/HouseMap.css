@@ -10,7 +10,6 @@ header.site-header {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 100px 3.5% 10px;
   background-position: center;
   background-size: cover;
   box-shadow: inset 0 0 0 100vmax rgb(12 27 34 / 55%);

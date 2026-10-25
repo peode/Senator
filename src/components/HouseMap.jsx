@@ -1,7 +1,6 @@
 import { useRef, useState } from "react";
 import "./HouseMap.css";
 
-import banner from "@/assets/images/courtyard.png";
 import topView from "@/assets/images/complex-top-view.jpg";
 
 const IMAGE_WIDTH = 1262;
@@ -53,12 +52,6 @@ const HouseMap = () => {
 
   return (
     <section className="house-map-section">
-      <div
-        className="house-map-banner"
-        style={{ backgroundImage: `url(${banner})` }}
-      >
-        <h1>Карта будинків</h1>
-      </div>
 
       <div className="house-map-footer">
         <p>Оберіть будинок, щоб побачити його план та іншу інформацію</p>
