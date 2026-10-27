@@ -13,6 +13,7 @@ export default defineConfig({
     seed: "node prisma/seed.js",
   },
   datasource: {
-    url: process.env.DATABASE_URL,
+    // міграціям потрібне пряме підключення: Neon-хост без "-pooler" (advisory lock не працює через pooler)
+    url: process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL?.replace("-pooler", ""),
   },
 });
