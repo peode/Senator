@@ -6,7 +6,7 @@ import { Section, SectionHeading } from "@/components/Section";
 import { useNews } from "@/lib/content";
 
 const News = () => {
-  const latestNews = useNews().slice(0, 3);
+  const latestNews = useNews().news.slice(0, 3);
 
   return (
     <Section id="news" className="bg-surface">

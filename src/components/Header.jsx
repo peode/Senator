@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Phone, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import LeadModal from "@/components/LeadModal";
 import { phoneHref, useSettings } from "@/lib/content";
 import Logo from "@/assets/icons/SenatorLogo.jpg";
 
@@ -16,6 +17,7 @@ const navLinks = [
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [leadOpen, setLeadOpen] = useState(false);
   const { phone } = useSettings();
   const isHome = useLocation().pathname === "/";
 
@@ -67,10 +69,12 @@ const Header = () => {
           variant="gold"
           className="h-auto px-3 py-2.5 text-[10px] min-[521px]:px-5 min-[521px]:py-3.5 min-[521px]:text-[13px]"
           onClick={() => {
-            window.location.href = "/apartments";
+            setMenuOpen(false);
+            setLeadOpen(true);
           }}
         >
-          Обрати квартиру
+          <span className="min-[521px]:hidden">Заявка на дзвінок</span>
+          <span className="hidden min-[521px]:inline">Залишити заявку на дзвінок</span>
         </Button>
       </div>
 
@@ -82,6 +86,8 @@ const Header = () => {
       >
         {menuOpen ? <X size={26} /> : <Menu size={26} />}
       </button>
+
+      <LeadModal open={leadOpen} onClose={() => setLeadOpen(false)} />
     </header>
   );
 };

@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model News {
+  id         Int      @id @default(autoincrement())
+  date       DateTime @db.Date
+  title      String
+  text       String
+  image      String
+  paragraphs String[]
+  gallery    String[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([date(sort: Desc)])
+}
+
+enum LeadStatus {
+  NEW
+  IN_PROGRESS
+  DONE
+}
+
+model Lead {
+  id        Int        @id @default(autoincrement())
+  name      String
+  phone     String
+  comment   String?
+  status    LeadStatus @default(NEW)
+  createdAt DateTime   @default(now())
+
+  @@index([createdAt(sort: Desc)])
+}

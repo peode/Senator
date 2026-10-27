@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { newsStore, useNews, formatDate } from "@/lib/content";
+import { formatDate } from "@/lib/content";
+import { api } from "@/lib/api";
 import ImagePicker from "./ImagePicker";
 import { fieldClass } from "./fields";
 
 const emptyArticle = () => ({
-  id: Date.now(),
+  id: null,
   date: new Date().toISOString().slice(0, 10),
   title: "",
   text: "",
@@ -22,7 +23,7 @@ const Label = ({ title, children }) => (
   </label>
 );
 
-const NewsEditor = ({ article, onSave, onCancel }) => {
+const NewsEditor = ({ article, onSave, onCancel, error, saving }) => {
   const [draft, setDraft] = useState({
     ...article,
     body: article.paragraphs.join("\n\n"),
@@ -107,8 +108,12 @@ const NewsEditor = ({ article, onSave, onCancel }) => {
         </Button>
       </div>
 
+      {error && <p className="text-sm text-red-600">{error}</p>}
+
       <div className="flex gap-3">
-        <Button type="submit" variant="gold" size="xl">Зберегти</Button>
+        <Button type="submit" variant="gold" size="xl" disabled={saving}>
+          {saving ? "Зберігаємо..." : "Зберегти"}
+        </Button>
         <Button type="button" variant="outline" size="xl" onClick={onCancel}>
           Скасувати
         </Button>
@@ -118,27 +123,61 @@ const NewsEditor = ({ article, onSave, onCancel }) => {
 };
 
 const NewsAdmin = () => {
-  const news = useNews();
+  const [news, setNews] = useState([]);
   const [editing, setEditing] = useState(null);
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  const save = (article) => {
-    const exists = news.some((item) => item.id === article.id);
-    const next = exists
-      ? news.map((item) => (item.id === article.id ? article : item))
-      : [article, ...news];
-    newsStore.set(next.sort((a, b) => b.date.localeCompare(a.date)));
-    setEditing(null);
+  const load = () =>
+    api("/news")
+      .then(setNews)
+      .catch((err) => setError(err.message));
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const save = async ({ id, ...article }) => {
+    setSaving(true);
+    setError("");
+    try {
+      await api(id ? `/admin/news/${id}` : "/admin/news", {
+        method: id ? "PUT" : "POST",
+        body: article,
+      });
+      await load();
+      setEditing(null);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const remove = (article) => {
-    if (window.confirm(`Видалити новину «${article.title}»?`)) {
-      newsStore.set(news.filter((item) => item.id !== article.id));
+  const remove = async (article) => {
+    if (!window.confirm(`Видалити новину «${article.title}»?`)) return;
+    try {
+      await api(`/admin/news/${article.id}`, { method: "DELETE" });
+      await load();
+    } catch (err) {
+      setError(err.message);
     }
+  };
+
+  const edit = (article) => {
+    setError("");
+    setEditing(article);
   };
 
   if (editing) {
     return (
-      <NewsEditor article={editing} onSave={save} onCancel={() => setEditing(null)} />
+      <NewsEditor
+        article={editing}
+        onSave={save}
+        onCancel={() => setEditing(null)}
+        error={error}
+        saving={saving}
+      />
     );
   }
 
@@ -148,10 +187,12 @@ const NewsAdmin = () => {
         variant="gold"
         size="xl"
         className="w-fit"
-        onClick={() => setEditing(emptyArticle())}
+        onClick={() => edit(emptyArticle())}
       >
         <Plus size={18} /> Додати новину
       </Button>
+
+      {error && <p className="text-sm text-red-600">{error}</p>}
 
       {news.length === 0 && <p className="text-slate-500">Новин поки немає.</p>}
 
@@ -167,7 +208,7 @@ const NewsAdmin = () => {
             <p className="truncate text-base font-medium">{article.title}</p>
           </div>
           <div className="flex shrink-0 gap-2">
-            <Button variant="outline" size="icon" onClick={() => setEditing(article)} aria-label="Редагувати">
+            <Button variant="outline" size="icon" onClick={() => edit(article)} aria-label="Редагувати">
               <Pencil size={16} />
             </Button>
             <Button variant="outline" size="icon" onClick={() => remove(article)} aria-label="Видалити">

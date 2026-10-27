@@ -8,6 +8,7 @@ export default defineConfig([
   globalIgnores(['dist']),
   {
     files: ['**/*.{js,jsx}'],
+    rules: { 'no-unused-vars': ['error', { ignoreRestSiblings: true }] },
     extends: [
       js.configs.recommended,
       reactHooks.configs.flat.recommended,
@@ -17,6 +18,10 @@ export default defineConfig([
       globals: globals.browser,
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
+  },
+  {
+    files: ['server/**', 'prisma/**', 'prisma.config.js'],
+    languageOptions: { globals: globals.node },
   },
   {
     files: ['src/components/ui/**'],

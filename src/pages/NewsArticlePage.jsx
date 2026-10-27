@@ -8,8 +8,10 @@ import { resolveImage } from "@/data/images";
 
 const NewsArticle = () => {
   const { id } = useParams();
-  const news = useNews();
+  const { news, loading } = useNews();
   const article = news.find((item) => String(item.id) === id);
+
+  if (loading) return <PageBanner title="Завантаження..." />;
 
   if (!article) {
     return (

@@ -1,5 +1,6 @@
+import { useEffect, useState } from "react";
 import { createStore } from "@/lib/store";
-import { defaultNews } from "@/data/news";
+import { api } from "@/lib/api";
 import { defaultSocials } from "@/data/socials";
 
 export const defaultSettings = {
@@ -9,10 +10,24 @@ export const defaultSettings = {
   socials: defaultSocials,
 };
 
-export const newsStore = createStore("senator:news", defaultNews);
 export const settingsStore = createStore("senator:settings", defaultSettings);
 
-export const useNews = () => newsStore.useStore();
+// Новини живуть у базі даних: беремо їх із сервера при кожному відкритті сторінки
+export const useNews = () => {
+  const [state, setState] = useState({ news: [], loading: true, error: false });
+
+  useEffect(() => {
+    let active = true;
+    api("/news")
+      .then((news) => active && setState({ news, loading: false, error: false }))
+      .catch(() => active && setState({ news: [], loading: false, error: true }));
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  return state;
+};
 
 export const useSettings = () => {
   const settings = settingsStore.useStore();
