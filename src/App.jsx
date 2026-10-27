@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 import Header from "./components/Header";
 import Apartments from "./pages/ApartmentsPage";
+import SectionPage from "./pages/SectionPage";
 import About from "./pages/AboutUsPage";
 import News from "./pages/NewsPage";
 import NewsArticle from "./pages/NewsArticlePage";
@@ -20,6 +21,7 @@ const Layout = () => {
       <Routes>
         <Route path="/" element={<About />} />
         <Route path="/apartments" element={<Apartments />} />
+        <Route path="/apartments/:sectionId" element={<SectionPage />} />
         <Route path="/advantages" element={<Advantages />} />
         <Route path="/aboutdeveloper" element={<AboutDeveloper />} />
         <Route path="/news" element={<News />} />

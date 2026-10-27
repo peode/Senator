@@ -1,5 +1,7 @@
 import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./HouseMap.css";
+import { getSection } from "@/data/sections";
 
 import topView from "@/assets/images/complex-top-view.jpg";
 
@@ -36,6 +38,7 @@ const houses = [
 const formatPrice = (value) => value.toLocaleString("uk-UA");
 
 const HouseMap = () => {
+  const navigate = useNavigate();
   const mapRef = useRef(null);
   const [activeHouse, setActiveHouse] = useState(null);
   const [cursor, setCursor] = useState({ x: 0, y: 0 });
@@ -102,6 +105,9 @@ const HouseMap = () => {
               onPointerDown={(event) => {
                 updateCursor(event);
                 setActiveHouse(house);
+              }}
+              onClick={() => {
+                if (getSection(house.id)) navigate(`/apartments/${house.id}`);
               }}
             />
           ))}
