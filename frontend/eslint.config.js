@@ -20,7 +20,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['server/**', 'prisma/**', 'prisma.config.js'],
+    files: ['vite.config.js'],
     languageOptions: { globals: globals.node },
   },
   {

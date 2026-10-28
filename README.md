@@ -1,16 +1,27 @@
-# React + Vite
+# Senator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Сайт ЖК «Senator». Репозиторій складається з двох частин (npm workspaces):
 
-Currently, two official plugins are available:
+```
+frontend/   React + Vite (сайт і адмінка)
+backend/    Express API + Prisma (PostgreSQL)
+api/        точка входу для Vercel — підключає backend/src/app.js
+```
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Запуск локально
 
-## React Compiler
+```bash
+npm install                 # ставить залежності обох частин і генерує Prisma Client
+cp backend/.env.example backend/.env   # заповнити змінні
+npm run dev:server          # API на http://localhost:3001
+npm run dev                 # сайт на Vite, /api проксюється на 3001
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Інші команди
 
-## Expanding the ESLint configuration
+- `npm run build` — зібрати фронтенд у `frontend/dist`
+- `npm start` — продакшн-сервер: API + зібраний фронтенд
+- `npm run lint` — лінт обох частин
+- `npm run db:deploy` / `npm run db:seed` — міграції та стартові новини
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Команди конкретної частини: `npm run <script> -w frontend` або `-w backend`.

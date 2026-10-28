@@ -1,5 +1,5 @@
-import { createPrisma } from "../server/lib/db.js";
-import { defaultNews } from "../src/data/news.js";
+import { createPrisma } from "../src/lib/db.js";
+import { defaultNews } from "./news.js";
 
 try {
   process.loadEnvFile();
