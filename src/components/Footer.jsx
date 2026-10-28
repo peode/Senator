@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import LeadModal from "@/components/LeadModal";
 import { Separator } from "@/components/ui/separator";
 import { SocialIcon } from "@/components/SocialIcons";
 import { socialLabels } from "@/data/socials";
@@ -23,6 +25,7 @@ const contactLinkClass =
   "text-[15px] font-light leading-relaxed text-white/70 transition-colors hover:text-brand";
 
 const Footer = () => {
+  const [leadOpen, setLeadOpen] = useState(false);
   const { phone, address, hours, socials } = useSettings();
 
   return (
@@ -106,13 +109,14 @@ const Footer = () => {
           <Button
             variant="gold"
             className="h-11 px-7 text-sm font-medium"
-            render={<a href={phoneHref(phone)} />}
-            nativeButton={false}
+            onClick={() => setLeadOpen(true)}
           >
-            Зателефонувати
+            Залишити заявку на дзвінок
           </Button>
         </div>
       </div>
+
+      <LeadModal open={leadOpen} onClose={() => setLeadOpen(false)} />
 
       <Separator className="mx-auto mt-12 max-w-[1800px] bg-white/10" />
       <p className="mx-auto mt-6 max-w-[1800px] text-sm font-light text-white/50">

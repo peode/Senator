@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
-import { Phone, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import LeadModal from "@/components/LeadModal";
-import { phoneHref, useSettings } from "@/lib/content";
 import Logo from "@/assets/icons/SenatorLogo.jpg";
 
 const navLinks = [
@@ -18,7 +17,6 @@ const navLinks = [
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [leadOpen, setLeadOpen] = useState(false);
-  const { phone } = useSettings();
   const isHome = useLocation().pathname === "/";
 
   return (
@@ -57,14 +55,6 @@ const Header = () => {
       </nav>
 
       <div className="ml-auto flex shrink-0 items-center gap-4 min-[1051px]:ml-0">
-        <a
-          href={phoneHref(phone)}
-          className="hidden items-center gap-2 text-xs whitespace-nowrap min-[521px]:flex"
-        >
-          <Phone size={17} />
-          <span className="hidden min-[1251px]:inline">Зателефонувати</span>
-        </a>
-
         <Button
           variant="gold"
           className="h-auto px-3 py-2.5 text-[10px] min-[521px]:px-5 min-[521px]:py-3.5 min-[521px]:text-[13px]"
