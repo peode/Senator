@@ -141,7 +141,7 @@ const NewsAdmin = () => {
     setSaving(true);
     setError("");
     try {
-      await api(id ? `/admin/news/${id}` : "/admin/news", {
+      await api(id ? `/news/${id}` : "/news", {
         method: id ? "PUT" : "POST",
         body: article,
       });
@@ -157,7 +157,7 @@ const NewsAdmin = () => {
   const remove = async (article) => {
     if (!window.confirm(`Видалити новину «${article.title}»?`)) return;
     try {
-      await api(`/admin/news/${article.id}`, { method: "DELETE" });
+      await api(`/news/${article.id}`, { method: "DELETE" });
       await load();
     } catch (err) {
       setError(err.message);

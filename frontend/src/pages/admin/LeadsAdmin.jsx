@@ -19,14 +19,14 @@ const LeadsAdmin = () => {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    api("/admin/leads")
+    api("/leads")
       .then(setLeads)
       .catch((err) => setError(err.message));
   }, []);
 
   const setStatus = async (lead, status) => {
     try {
-      const updated = await api(`/admin/leads/${lead.id}`, { method: "PATCH", body: { status } });
+      const updated = await api(`/leads/${lead.id}`, { method: "PATCH", body: { status } });
       setLeads((current) => current.map((item) => (item.id === lead.id ? updated : item)));
     } catch (err) {
       setError(err.message);
@@ -36,7 +36,7 @@ const LeadsAdmin = () => {
   const remove = async (lead) => {
     if (!window.confirm(`Видалити заявку від ${lead.name}?`)) return;
     try {
-      await api(`/admin/leads/${lead.id}`, { method: "DELETE" });
+      await api(`/leads/${lead.id}`, { method: "DELETE" });
       setLeads((current) => current.filter((item) => item.id !== lead.id));
     } catch (err) {
       setError(err.message);

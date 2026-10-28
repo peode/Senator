@@ -21,7 +21,7 @@ const Login = ({ onLogin }) => {
     event.preventDefault();
     setError("");
     try {
-      await api("/admin/login", {
+      await api("/session", {
         method: "POST",
         body: { password: new FormData(event.currentTarget).get("password") },
       });
@@ -60,7 +60,7 @@ const Admin = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    api("/admin/me")
+    api("/session")
       .then(({ authenticated }) => setLoggedIn(authenticated))
       .catch(() => setLoggedIn(false));
   }, []);
@@ -69,7 +69,7 @@ const Admin = () => {
   if (!loggedIn) return <Login onLogin={() => setLoggedIn(true)} />;
 
   const logout = async () => {
-    await api("/admin/logout", { method: "POST" }).catch(() => {});
+    await api("/session", { method: "DELETE" }).catch(() => {});
     navigate("/");
   };
 

@@ -15,5 +15,8 @@
     "lint": "npm run lint --workspaces",
     "db:deploy": "npm run db:deploy -w backend",
     "db:seed": "npm run db:seed -w backend"
+  },
+  "engines": {
+    "node": ">=22.9"
   }
 }

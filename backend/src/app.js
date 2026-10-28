@@ -2,17 +2,18 @@ import express from "express";
 import { ZodError } from "zod";
 import newsRouter from "./routes/news.js";
 import leadsRouter from "./routes/leads.js";
-import adminRouter from "./routes/admin.js";
+import sessionRouter from "./routes/session.js";
 
 const app = express();
 
 app.disable("x-powered-by");
-// за reverse-proxy (Nginx, хостинг) потрібен справжній IP клієнта для rate limit
-if (process.env.NODE_ENV === "production") app.set("trust proxy", 1);
+// запити йдуть через проксі (Vercel → хостинг бекенда), а rate limit потребує справжній IP клієнта.
+// TRUST_PROXY — кількість проксі перед сервером
+if (process.env.NODE_ENV === "production") app.set("trust proxy", Number(process.env.TRUST_PROXY) || 1);
 
 app.use("/api/news", newsRouter);
 app.use("/api/leads", leadsRouter);
-app.use("/api/admin", adminRouter);
+app.use("/api/session", sessionRouter);
 app.use("/api", (req, res) => res.status(404).json({ error: "Не знайдено" }));
 
 app.use((err, req, res, next) => {
