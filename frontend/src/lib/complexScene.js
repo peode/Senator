@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { sunDirection } from "@/lib/sunPath";
 
 // 3D-модель ЖК: будинки будуються зі статусів і кількості поверхів секцій.
 // Усі координати задані на стандартній карті ЖК, один поверх — FLOOR її пікселів
@@ -53,10 +54,20 @@ const FRONT = {
 // Фасади за фото ЖК
 const styleOf = (id) => (id === 16 ? "tower" : id >= 4 && id <= 9 ? "brown" : "grey");
 
+// Верх плану дивиться на північний схід: вул. О. Пчілки йде від Руської на 218° за даними OpenStreetMap
+const NORTH_TURN = THREE.MathUtils.degToRad(-38);
+const NORTH = { x: Math.sin(NORTH_TURN), z: -Math.cos(NORTH_TURN) };
+const EAST = { x: Math.cos(NORTH_TURN), z: Math.sin(NORTH_TURN) };
+
+const SKY = { day: "#e6edf1", dusk: "#f4e0cd", night: "#121c2e" };
+const SUN_RADIUS = 1000;
+
+const between = (value, from, to) => THREE.MathUtils.smoothstep(value, from, to);
+
 const toX = (x) => x - CENTER.x;
 const toZ = (y) => y - CENTER.y;
 
-export const createComplexScene = ({ container, sections, mapSrc, onHover, onFocus, onFloorHover, onFloorSelect }) => {
+export const createComplexScene = ({ container, sections, mapSrc, onHover, onFocus, onFloorHover, onFloorSelect, onTurn }) => {
   const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
   let disposed = false;
 
@@ -73,7 +84,7 @@ export const createComplexScene = ({ container, sections, mapSrc, onHover, onFoc
   container.appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color("#e6edf1");
+  scene.background = new THREE.Color(SKY.day);
 
   const camera = new THREE.PerspectiveCamera(32, 1, 10, 6000);
   camera.position.set(-640, 760, 1040);
@@ -96,9 +107,11 @@ export const createComplexScene = ({ container, sections, mapSrc, onHover, onFoc
   controls.autoRotateSpeed = 0.5;
   controls.addEventListener("start", () => { controls.autoRotate = false; });
 
-  scene.add(new THREE.HemisphereLight("#ffffff", "#8c9a78", 0.85));
+  const ambient = new THREE.HemisphereLight("#ffffff", "#8c9a78", 0.85);
+  scene.add(ambient);
   const sun = new THREE.DirectionalLight("#fff2dc", 0.95);
-  sun.position.set(-520, 900, 420);
+  const restingSun = new THREE.Vector3(-520, 900, 420);
+  sun.position.copy(restingSun);
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048);
   Object.assign(sun.shadow.camera, { left: -800, right: 800, top: 800, bottom: -800, near: 100, far: 2200 });
@@ -133,6 +146,7 @@ export const createComplexScene = ({ container, sections, mapSrc, onHover, onFoc
 
   const glassDark = () => new THREE.MeshStandardMaterial({ color: "#0b1119", metalness: 0.9, roughness: 0.12, envMap: sky, envMapIntensity: 0.5 });
   const glassClear = new THREE.MeshStandardMaterial({ color: "#a8cfe2", metalness: 0.55, roughness: 0.08, envMap: sky, transparent: true, opacity: 0.6 });
+  const glasses = [glassClear];
   const concrete = new THREE.MeshStandardMaterial({ color: "#f3f0ea", roughness: 0.7 });
   const leaves = new THREE.MeshLambertMaterial({ color: "#1e3f18", flatShading: true });
 
@@ -383,6 +397,7 @@ export const createComplexScene = ({ container, sections, mapSrc, onHover, onFoc
     geometry.addGroup(curvedCount + 6, 6, 2);
 
     const glass = glassDark();
+    glasses.push(glass);
     glass.side = THREE.DoubleSide;
     const side = () => new THREE.MeshStandardMaterial({ map: facade("towerBack", rx, floors), roughness: 0.85, side: THREE.DoubleSide });
     const mesh = new THREE.Mesh(geometry, [glass, side(), side()]);
@@ -794,6 +809,87 @@ export const createComplexScene = ({ container, sections, mapSrc, onHover, onFoc
     controls.maxDistance = away.length() * 1.15;
   }
 
+  // Сонце вмикається окремою кнопкою: без нього лишається звичайне світло моделі
+  const toWorld = ({ east, north, up }) =>
+    new THREE.Vector3(EAST.x * east + NORTH.x * north, up, EAST.z * east + NORTH.z * north).multiplyScalar(SUN_RADIUS);
+
+  const glow = (() => {
+    const c = document.createElement("canvas");
+    c.width = c.height = 128;
+    const g = c.getContext("2d");
+    const fill = g.createRadialGradient(64, 64, 8, 64, 64, 64);
+    fill.addColorStop(0, "#fffbe6");
+    fill.addColorStop(0.3, "rgba(255, 214, 120, .95)");
+    fill.addColorStop(1, "rgba(255, 190, 90, 0)");
+    g.fillStyle = fill;
+    g.fillRect(0, 0, 128, 128);
+    const tex = new THREE.CanvasTexture(c);
+    tex.encoding = THREE.sRGBEncoding;
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false }));
+    sprite.scale.set(170, 170, 1);
+    sprite.visible = false;
+    scene.add(sprite);
+    return sprite;
+  })();
+
+  const path = new THREE.Line(
+    new THREE.BufferGeometry(),
+    new THREE.LineDashedMaterial({ color: "#ffb52e", dashSize: 26, gapSize: 16 }),
+  );
+  path.visible = false;
+  scene.add(path);
+
+  const white = new THREE.Color("#fff2dc");
+  const warm = new THREE.Color("#ff9a4d");
+  const skyColors = Object.fromEntries(Object.entries(SKY).map(([key, value]) => [key, new THREE.Color(value)]));
+
+  const setSun = (hour, date) => {
+    const on = hour !== null;
+    glow.visible = on;
+    path.visible = on;
+
+    if (!on) {
+      sun.position.copy(restingSun);
+      sun.intensity = 0.95;
+      sun.color.copy(white);
+      ambient.intensity = 0.85;
+      scene.background.copy(skyColors.day);
+      glasses.forEach((glass) => {
+        glass.envMapIntensity = glass === glassClear ? 1 : 0.5;
+      });
+      return;
+    }
+
+    controls.autoRotate = false;
+    const direction = sunDirection(hour, date);
+    const position = toWorld(direction);
+    // Світло згасає разом із висотою сонця, а біля горизонту стає теплим
+    const light = between(direction.up, -0.03, 0.2);
+    const low = 1 - between(direction.up, 0.02, 0.32);
+
+    sun.position.copy(position);
+    sun.intensity = 1.25 * between(direction.up, 0, 0.1);
+    sun.color.copy(white).lerp(warm, low);
+    ambient.intensity = 0.14 + 0.6 * light;
+    scene.background.copy(skyColors.night).lerp(skyColors.dusk, between(direction.up, -0.12, 0.02)).lerp(skyColors.day, between(direction.up, 0.03, 0.16));
+    glasses.forEach((glass) => {
+      glass.envMapIntensity = (glass === glassClear ? 1 : 0.5) * (0.2 + 0.8 * light);
+    });
+
+    glow.position.copy(position);
+    glow.visible = direction.up > -0.02;
+
+    const points = [];
+    for (let h = 0; h <= 24; h += 0.25) {
+      const step = sunDirection(h, date);
+      if (step.up > 0) points.push(toWorld(step));
+    }
+    path.geometry.setFromPoints(points);
+    path.computeLineDistances();
+  };
+
+  let turned = null;
+
   const applyShift = () => {
     const { width, height } = container.getBoundingClientRect();
     if (shift.x || shift.y) camera.setViewOffset(width, height, shift.x, shift.y, width, height);
@@ -817,6 +913,11 @@ export const createComplexScene = ({ container, sections, mapSrc, onHover, onFoc
       }
     }
     controls.update();
+    const turn = Math.round(THREE.MathUtils.radToDeg(controls.getAzimuthalAngle() + NORTH_TURN));
+    if (turn !== turned) {
+      turned = turn;
+      onTurn(turn);
+    }
     const current = hovered && hovered !== focused ? hovered : null;
     parts.forEach((p) => {
       const goal = p === current ? 1 : 0;
@@ -855,5 +956,5 @@ export const createComplexScene = ({ container, sections, mapSrc, onHover, onFoc
     el.remove();
   };
 
-  return { focus, overview, showFloor, dispose };
+  return { focus, overview, showFloor, setSun, dispose };
 };
