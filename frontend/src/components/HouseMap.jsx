@@ -31,6 +31,42 @@ const webgl = (() => {
 
 const modelSkeleton = <Skeleton className="h-[68svh] min-h-[440px] w-full rounded-none md:h-[calc(100svh-120px)]" />;
 
+const HEADER_HEIGHT = 104;
+
+// На телефоні план обрізаний праворуч (ширина 152% лишає 830 зі 1262 пікселів карти).
+// Залишок будівлі без номера над секціями закриваємо травою з поля поруч, як у 3D-моделі
+const STANDARD_MAP_WIDTH = 1262;
+const COVER = { x: 628, y: 100, width: 202, height: 195 };
+const GRASS = { x: 880, y: 505, width: 240, height: 130 };
+
+const PhoneCover = ({ map }) => {
+  const scale = map.width / STANDARD_MAP_WIDTH;
+
+  return (
+    <g className="md:hidden">
+      <defs>
+        <pattern
+          id="map-grass"
+          patternUnits="userSpaceOnUse"
+          x={COVER.x * scale}
+          y={COVER.y * scale}
+          width={GRASS.width * scale}
+          height={GRASS.height * scale}
+        >
+          <image href={map.src} x={-GRASS.x * scale} y={-GRASS.y * scale} width={map.width} height={map.height} />
+        </pattern>
+      </defs>
+      <rect
+        x={COVER.x * scale}
+        y={COVER.y * scale}
+        width={COVER.width * scale}
+        height={COVER.height * scale}
+        fill="url(#map-grass)"
+      />
+    </g>
+  );
+};
+
 const views = [
   { key: "3d", label: "3D" },
   { key: "2d", label: "2D" },
@@ -160,13 +196,15 @@ const HouseMap = () => {
         )
       ) : (
         <div
-          className={mapClass}
+          className={cn(mapClass, "mx-auto")}
+          // план вміщується в екран під шапкою, тому на ноутбуці видно його весь
+          style={complexMap && { maxWidth: `calc((100svh - ${HEADER_HEIGHT}px) * ${complexMap.width / complexMap.height})` }}
           ref={mapRef}
           onPointerMove={updateCursor}
           onPointerLeave={() => setActiveHouse(null)}
         >
           {complexMap ? (
-            <>
+            <div className="relative max-md:w-[152%]">
               <img
                 src={complexMap.src}
                 alt="Вигляд ЖК Senator зверху"
@@ -183,6 +221,7 @@ const HouseMap = () => {
                 role="group"
                 aria-label="Карта будинків"
               >
+                <PhoneCover map={complexMap} />
                 {houses.map((house) => {
                   const status = sectionStatuses[house.status];
 
@@ -206,13 +245,13 @@ const HouseMap = () => {
                   );
                 })}
               </svg>
-            </>
+            </div>
           ) : (
             <Skeleton className="aspect-square w-full rounded-none" />
           )}
 
           {activeStatus && (
-            <div className={mapTooltipClass} style={mapTooltipStyle(cursor)}>
+            <div className={cn(mapTooltipClass, "md:max-w-none")} style={mapTooltipStyle(cursor)}>
               <strong>Секція №{activeHouse.id}</strong>
               <span
                 className={cn(

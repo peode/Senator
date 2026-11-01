@@ -18,33 +18,48 @@ const StatusLabel = ({ status }) => (
   </span>
 );
 
-// Підписи тримаються рівно, поки шкала обертається разом із камерою
 const compassMarks = [
-  { label: "Пн", x: 32, y: 13, className: "fill-red-600" },
-  { label: "Сх", x: 52, y: 33, className: "fill-ink" },
-  { label: "Пд", x: 32, y: 53, className: "fill-ink" },
-  { label: "Зх", x: 12, y: 33, className: "fill-ink" },
+  { label: "Пн", angle: 0, className: "fill-red-600" },
+  { label: "Сх", angle: 90, className: "fill-ink" },
+  { label: "Пд", angle: 180, className: "fill-ink" },
+  { label: "Зх", angle: 270, className: "fill-ink" },
 ];
+
+const MARK_RADIUS = 20;
+
+const markPosition = (degrees) => ({
+  x: 32 + MARK_RADIUS * Math.sin((degrees * Math.PI) / 180),
+  y: 32 - MARK_RADIUS * Math.cos((degrees * Math.PI) / 180),
+});
+
+// Позиції задаємо атрибутами SVG: Safari на iPhone по-своєму обертає текст через CSS-трансформації
+const turnCompass = (compass, degrees) => {
+  compass.querySelector("[data-needle]").setAttribute("transform", `rotate(${degrees} 32 32)`);
+  compass.querySelectorAll("[data-mark]").forEach((mark) => {
+    const { x, y } = markPosition(degrees + Number(mark.dataset.mark));
+    mark.setAttribute("x", x);
+    mark.setAttribute("y", y);
+  });
+};
 
 const Compass = ({ ref }) => (
   <svg ref={ref} viewBox="0 0 64 64" role="img" aria-label="Компас: сторони світу" className="size-16 rounded-full bg-white/95 shadow-card">
-    <g style={{ transform: "rotate(var(--turn, 0deg))", transformOrigin: "32px 32px" }}>
+    <g data-needle="">
       <path d="M32 22 35.5 32H28.5Z" className="fill-red-600" />
       <path d="M32 42 28.5 32H35.5Z" className="fill-slate-400" />
-      {compassMarks.map(({ label, x, y, className }) => (
-        <text
-          key={label}
-          x={x}
-          y={y}
-          textAnchor="middle"
-          dominantBaseline="central"
-          className={cn("text-[10px] font-bold", className)}
-          style={{ transform: "rotate(calc(var(--turn, 0deg) * -1))", transformBox: "fill-box", transformOrigin: "center" }}
-        >
-          {label}
-        </text>
-      ))}
     </g>
+    {compassMarks.map(({ label, angle, className }) => (
+      <text
+        key={label}
+        data-mark={angle}
+        {...markPosition(angle)}
+        textAnchor="middle"
+        dominantBaseline="central"
+        className={cn("text-[10px] font-bold", className)}
+      >
+        {label}
+      </text>
+    ))}
   </svg>
 );
 
@@ -95,7 +110,7 @@ const ComplexModel = ({ sections, map }) => {
         const section = sectionsRef.current.find((item) => item.id === id);
         if (section?.plan) navigate(`/apartments/${id}?floor=${floor}`);
       },
-      onTurn: (degrees) => compassRef.current?.style.setProperty("--turn", `${degrees}deg`),
+      onTurn: (degrees) => compassRef.current && turnCompass(compassRef.current, degrees),
     });
     sceneRef.current = scene;
 
