@@ -31,6 +31,11 @@ const webgl = (() => {
 
 const modelSkeleton = <Skeleton className="h-[68svh] min-h-[440px] w-full rounded-none md:h-[calc(100svh-120px)]" />;
 
+const views = [
+  { key: "3d", label: "3D" },
+  { key: "2d", label: "2D" },
+];
+
 const statusOrder = Object.keys(sectionStatuses);
 
 const freeUnits = ({ apartments }) =>
@@ -72,13 +77,16 @@ const SectionCard = ({ section }) => {
 const HouseMap = () => {
   const navigate = useNavigate();
   const mapRef = useRef(null);
+  const [view, setView] = useState("3d");
   const [activeHouse, setActiveHouse] = useState(null);
   const [cursor, setCursor] = useState({ x: 0, y: 0, width: 0, height: 0 });
   const { sections, error } = useSections();
   const complexMap = useComplexMap();
   const t = useSiteText();
   const houses = sections.filter(({ mapPoints }) => mapPoints);
-  const show3d = webgl && !error && sections.length > 0 && complexMap;
+  // Без WebGL або даних секцій модель не побудувати, тому лишається плоска карта
+  const can3d = webgl && !error;
+  const show3d = can3d && view === "3d";
   const sortedSections = sections.toSorted(
     (a, b) => statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status) || a.id - b.id,
   );
@@ -97,22 +105,43 @@ const HouseMap = () => {
           </p>
         </div>
 
-        <ul className="flex flex-wrap gap-2">
-          {Object.entries(sectionStatuses).map(([key, status]) => (
-            <li
-              key={key}
-              className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-2 text-[13px] font-medium whitespace-nowrap"
-            >
-              <span className={cn("inline-block size-[9px] rounded-full", status.dotClass)} />
-              {status.label}
-              {houses.length > 0 && (
-                <span className="font-bold text-white/60">
-                  {houses.filter((house) => house.status === key).length}
-                </span>
-              )}
-            </li>
-          ))}
-        </ul>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-3 md:justify-end">
+          {can3d && (
+            <div role="group" aria-label="Вигляд карти" className="inline-flex rounded-full bg-white/10 p-1">
+              {views.map(({ key, label }) => (
+                <button
+                  key={key}
+                  type="button"
+                  aria-pressed={view === key}
+                  onClick={() => setView(key)}
+                  className={cn(
+                    "min-h-9 min-w-12 cursor-pointer rounded-full px-3.5 text-[13px] font-bold transition-colors",
+                    view === key ? "bg-white text-ink" : "text-white/70 hover:text-white",
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <ul className="flex flex-wrap gap-2">
+            {Object.entries(sectionStatuses).map(([key, status]) => (
+              <li
+                key={key}
+                className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-2 text-[13px] font-medium whitespace-nowrap"
+              >
+                <span className={cn("inline-block size-[9px] rounded-full", status.dotClass)} />
+                {status.label}
+                {houses.length > 0 && (
+                  <span className="font-bold text-white/60">
+                    {houses.filter((house) => house.status === key).length}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
 
       {error && (
@@ -122,11 +151,13 @@ const HouseMap = () => {
       )}
 
       {show3d ? (
-        <Suspense fallback={modelSkeleton}>
-          <ComplexModel sections={sections} map={complexMap} />
-        </Suspense>
-      ) : webgl && !error ? (
-        modelSkeleton
+        sections.length > 0 && complexMap ? (
+          <Suspense fallback={modelSkeleton}>
+            <ComplexModel sections={sections} map={complexMap} />
+          </Suspense>
+        ) : (
+          modelSkeleton
+        )
       ) : (
         <div
           className={mapClass}
@@ -199,7 +230,7 @@ const HouseMap = () => {
         </div>
       )}
 
-      {sections.length > 0 && (
+      {!show3d && sections.length > 0 && (
         <div className="px-[5%] py-8 text-ink md:px-[3.5%] md:py-12">
           <h2 className="mb-5 text-2xl font-extrabold">Усі секції</h2>
           <ul className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-6">
