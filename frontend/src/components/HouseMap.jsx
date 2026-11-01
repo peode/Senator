@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { lazy, Suspense, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import MapZone from "@/components/MapZone";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -16,6 +16,20 @@ import { cn } from "@/lib/utils";
 import { useSections } from "@/stores/sectionsStore";
 import { useComplexMap } from "@/stores/siteImagesStore";
 import { useSiteText } from "@/stores/siteTextsStore";
+
+// Бібліотека 3D важка, тому завантажується лише на цій сторінці
+const ComplexModel = lazy(() => import("@/components/ComplexModel"));
+
+// Без WebGL лишається плоска карта. Проста перевірка не тягне за собою саму бібліотеку 3D
+const webgl = (() => {
+  try {
+    return Boolean(document.createElement("canvas").getContext("webgl"));
+  } catch {
+    return false;
+  }
+})();
+
+const modelSkeleton = <Skeleton className="h-[68svh] min-h-[440px] w-full rounded-none md:h-[calc(100svh-120px)]" />;
 
 const statusOrder = Object.keys(sectionStatuses);
 
@@ -64,6 +78,7 @@ const HouseMap = () => {
   const complexMap = useComplexMap();
   const t = useSiteText();
   const houses = sections.filter(({ mapPoints }) => mapPoints);
+  const show3d = webgl && !error && sections.length > 0 && complexMap;
   const sortedSections = sections.toSorted(
     (a, b) => statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status) || a.id - b.id,
   );
@@ -106,75 +121,83 @@ const HouseMap = () => {
         </p>
       )}
 
-      <div
-        className={mapClass}
-        ref={mapRef}
-        onPointerMove={updateCursor}
-        onPointerLeave={() => setActiveHouse(null)}
-      >
-        {complexMap ? (
-          <>
-            <img
-              src={complexMap.src}
-              alt="Вигляд ЖК Senator зверху"
-              width={complexMap.width}
-              height={complexMap.height}
-              fetchPriority="high"
-              className={mapImageClass}
-              draggable="false"
-            />
+      {show3d ? (
+        <Suspense fallback={modelSkeleton}>
+          <ComplexModel sections={sections} map={complexMap} />
+        </Suspense>
+      ) : webgl && !error ? (
+        modelSkeleton
+      ) : (
+        <div
+          className={mapClass}
+          ref={mapRef}
+          onPointerMove={updateCursor}
+          onPointerLeave={() => setActiveHouse(null)}
+        >
+          {complexMap ? (
+            <>
+              <img
+                src={complexMap.src}
+                alt="Вигляд ЖК Senator зверху"
+                width={complexMap.width}
+                height={complexMap.height}
+                fetchPriority="high"
+                className={mapImageClass}
+                draggable="false"
+              />
 
-            <svg
-              className={mapSvgClass}
-              viewBox={`0 0 ${complexMap.width} ${complexMap.height}`}
-              role="group"
-              aria-label="Карта будинків"
-            >
-              {houses.map((house) => {
-                const status = sectionStatuses[house.status];
+              <svg
+                className={mapSvgClass}
+                viewBox={`0 0 ${complexMap.width} ${complexMap.height}`}
+                role="group"
+                aria-label="Карта будинків"
+              >
+                {houses.map((house) => {
+                  const status = sectionStatuses[house.status];
 
-                return (
-                  <MapZone
-                    key={house.id}
-                    label={`Секція №${house.id}, ${status.label}`}
-                    points={house.mapPoints}
-                    className={mapZoneClass({
-                      active: activeHouse?.id === house.id,
-                      tint: status.zoneClass,
-                      clickable: Boolean(house.plan),
-                    })}
-                    onSelect={house.plan ? () => navigate(`/apartments/${house.id}`) : undefined}
-                    onPreview={(event) => {
-                      updateCursor(event);
-                      setActiveHouse(house);
-                    }}
-                    onPreviewEnd={() => setActiveHouse(null)}
-                  />
-                );
-              })}
-            </svg>
-          </>
-        ) : (
-          <Skeleton className="aspect-square w-full rounded-none" />
-        )}
+                  return (
+                    <MapZone
+                      key={house.id}
+                      label={`Секція №${house.id}, ${status.label}`}
+                      points={house.mapPoints}
+                      className={mapZoneClass({
+                        active: activeHouse?.id === house.id,
+                        tint: status.zoneClass,
+                        clickable: Boolean(house.plan),
+                      })}
+                      onSelect={house.plan ? () => navigate(`/apartments/${house.id}`) : undefined}
+                      onPreview={(event) => {
+                        updateCursor(event);
+                        setActiveHouse(house);
+                      }}
+                      onPreviewEnd={() => setActiveHouse(null)}
+                    />
+                  );
+                })}
+              </svg>
+            </>
+          ) : (
+            <Skeleton className="aspect-square w-full rounded-none" />
+          )}
 
-        {activeStatus && (
-          <div className={mapTooltipClass} style={mapTooltipStyle(cursor)}>
-            <strong>Секція №{activeHouse.id}</strong>
-            <span
-              className={cn(
-                "inline-flex items-center gap-[7px] text-xs font-semibold before:inline-block before:size-[9px] before:rounded-full before:bg-current",
-                activeStatus.textClass,
+          {activeStatus && (
+            <div className={mapTooltipClass} style={mapTooltipStyle(cursor)}>
+              <strong>Секція №{activeHouse.id}</strong>
+              <span
+                className={cn(
+                  "inline-flex items-center gap-[7px] text-xs font-semibold before:inline-block before:size-[9px] before:rounded-full before:bg-current",
+                  activeStatus.textClass,
+                )}
+              >
+                {activeStatus.label}
+              </span>
+              {activeHouse.status === "SELLING" && (
+                <p>від {formatPrice(activeHouse.price)} $/м²</p>
               )}
-            >
-              {activeStatus.label}
-            </span>
-            {activeHouse.status === "SELLING" && (
-              <p>від {formatPrice(activeHouse.price)} $/м²</p>
-            )}
-          </div>
-        )}
-      </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {sections.length > 0 && (
         <div className="px-[5%] py-8 text-ink md:px-[3.5%] md:py-12">
