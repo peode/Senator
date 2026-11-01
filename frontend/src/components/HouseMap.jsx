@@ -196,13 +196,13 @@ const HouseMap = () => {
         )
       ) : (
         <div className="relative overflow-hidden">
-          {/* план вміщується в екран, а тло з тієї ж картинки заповнює поля по боках */}
+          {/* план вміщується в екран, а його краї плавно переходять у тло з тієї ж картинки */}
           {complexMap && (
             <img
               src={complexMap.src}
               alt=""
               aria-hidden="true"
-              className="absolute inset-0 hidden size-full scale-110 object-cover blur-md brightness-75 select-none md:block"
+              className="absolute inset-0 hidden size-full scale-110 object-cover blur-xl brightness-90 select-none md:block"
               draggable="false"
             />
           )}
@@ -222,7 +222,7 @@ const HouseMap = () => {
                   width={complexMap.width}
                   height={complexMap.height}
                   fetchPriority="high"
-                  className={mapImageClass}
+                  className={cn(mapImageClass, "md:mask-[linear-gradient(to_right,transparent,black_9%,black_91%,transparent)]")}
                   draggable="false"
                 />
 
