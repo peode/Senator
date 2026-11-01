@@ -40,7 +40,7 @@ const Section = () => {
   const mapRef = useRef(null);
   const infoRef = useRef(null);
   const [hovered, setHovered] = useState(null);
-  // квартира й поверх в адресі: посиланням можна поділитися, а каталог веде одразу до квартири
+  // квартира й поверх в адресі: посиланням можна поділитися
   const [selectedId, setSelectedId] = useState(() => searchParams.get("apt"));
   const [cursor, setCursor] = useState({ x: 0, y: 0, width: 0, height: 0 });
   const { sections, loading, error } = useSections();

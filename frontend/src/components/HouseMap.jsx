@@ -1,6 +1,5 @@
 import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowDown } from "lucide-react";
 import MapZone from "@/components/MapZone";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatPrice, sectionStatuses } from "@/data/sections";
@@ -81,12 +80,6 @@ const HouseMap = () => {
           <p className="mt-1 text-sm text-white/70 md:text-[15px]">
             {t("apartments.hint")}
           </p>
-          <a
-            href="#catalog"
-            className="mt-1 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-gold hover:text-gold-hover"
-          >
-            Підібрати квартиру за параметрами <ArrowDown size={16} />
-          </a>
         </div>
 
         <ul className="flex flex-wrap gap-2">
