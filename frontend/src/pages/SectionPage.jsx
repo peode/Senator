@@ -7,6 +7,7 @@ import FloorPicker from "@/components/FloorPicker";
 import MapZone from "@/components/MapZone";
 import PageBanner from "@/components/PageBanner";
 import Seo from "@/components/Seo";
+import ShareButton from "@/components/ShareButton";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatPrice, leadComment, roomsLabel, sectionStatuses } from "@/data/sections";
@@ -159,7 +160,7 @@ const Section = () => {
         <div className="mx-auto max-w-[1100px]">
           <ApartmentFilters className="mb-6" />
 
-          <div ref={infoRef} aria-live="polite" className="mb-6 rounded-md bg-surface p-5">
+          <div ref={infoRef} aria-live="polite" className="relative mb-6 rounded-md bg-surface p-5">
             {chosen && isSold(chosen) ? (
               <>
                 <div className="flex flex-wrap items-center gap-3">
@@ -227,7 +228,15 @@ const Section = () => {
             ) : (
               <p>Оберіть квартиру на плані, щоб побачити площу та вартість.</p>
             )}
-            <p className="mt-3 text-sm text-ink/80">Такий план на всіх поверхах секції.</p>
+            <p className={cn("mt-3 text-sm text-ink/80", chosen && "pr-14 max-md:mt-5")}>Такий план на всіх поверхах секції.</p>
+            {chosen && (
+              <ShareButton
+                url={`${window.location.origin}/apartments/${sectionId}?floor=${floor}&apt=${chosen.id}`}
+                title={`${roomsLabel(chosen)} квартира, ${chosen.area} м², ЖК «Senator»`}
+                label="Поділитися квартирою"
+                className="absolute right-3 bottom-3"
+              />
+            )}
           </div>
 
           <div className="flex flex-col gap-4 md:flex-row md:items-start">
