@@ -32,51 +32,10 @@ const webgl = (() => {
 const modelSkeleton = <Skeleton className="h-[68svh] min-h-[440px] w-full rounded-none md:h-[calc(100svh-120px)]" />;
 
 const HEADER_HEIGHT = 104;
-const STANDARD_MAP_WIDTH = 1262;
-
-// На комп'ютері план повернутий за годинниковою стрілкою й обрізаний там, де вул. О. Пчілки.
-// Усе рахуємо від розміру картинки: контури секцій повертаються разом із нею
-const CROP_RIGHT = 1130;
-
-const turnedMap = ({ width, height }) => {
-  const shownWidth = (CROP_RIGHT / STANDARD_MAP_WIDTH) * width;
-  const ratio = height / shownWidth;
-
-  return {
-    ratio,
-    style: {
-      "--map-ratio": ratio,
-      "--map-width": `${(width / height) * 100}%`,
-      "--map-turn": `translateX(${(height / width) * 100}%) rotate(90deg)`,
-    },
-  };
-};
-
-// Номери на картинці лежали б боком, тому поверх них стоять рівні
-const SECTION_BADGES = {
-  1: [365, 185], 2: [466, 185], 3: [571, 185], 4: [580, 405], 5: [699, 405], 6: [756, 530], 7: [756, 668], 8: [727, 790],
-  9: [600, 780], 10: [233, 396], 11: [234, 527], 12: [236, 674], 13: [237, 819], 14: [244, 978], 15: [388, 1006], 16: [233, 270],
-};
-
-const SectionBadges = ({ map }) => {
-  const scale = map.width / STANDARD_MAP_WIDTH;
-
-  return (
-    <g className="pointer-events-none hidden md:block">
-      {Object.entries(SECTION_BADGES).map(([id, [x, y]]) => (
-        <g key={id} transform={`translate(${x * scale} ${y * scale}) rotate(-90) scale(${scale})`}>
-          <circle r="21" className="fill-ink/90" />
-          <text textAnchor="middle" dominantBaseline="central" className="fill-white text-[22px] font-bold">
-            {id}
-          </text>
-        </g>
-      ))}
-    </g>
-  );
-};
 
 // На телефоні план обрізаний праворуч (ширина 152% лишає 830 зі 1262 пікселів карти).
 // Залишок будівлі без номера над секціями закриваємо травою з поля поруч, як у 3D-моделі
+const STANDARD_MAP_WIDTH = 1262;
 const COVER = { x: 628, y: 100, width: 202, height: 195 };
 const GRASS = { x: 880, y: 505, width: 240, height: 130 };
 
@@ -168,8 +127,6 @@ const HouseMap = () => {
     (a, b) => statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status) || a.id - b.id,
   );
 
-  const turned = complexMap && turnedMap(complexMap);
-
   const updateCursor = (event) => setCursor(mapPointer(event, mapRef.current));
 
   const activeStatus = activeHouse && sectionStatuses[activeHouse.status];
@@ -238,78 +195,89 @@ const HouseMap = () => {
           modelSkeleton
         )
       ) : (
-        <div
-          className={cn(mapClass, "mx-auto md:[aspect-ratio:var(--map-ratio)]")}
-          // план вміщується в екран під шапкою, тому на ноутбуці видно його весь
-          style={turned && { ...turned.style, maxWidth: `calc((100svh - ${HEADER_HEIGHT}px) * ${turned.ratio})` }}
-          ref={mapRef}
-          onPointerMove={updateCursor}
-          onPointerLeave={() => setActiveHouse(null)}
-        >
-          {complexMap ? (
-            <div className="relative max-md:w-[152%] md:absolute md:top-0 md:left-0 md:w-(--map-width) md:origin-top-left md:[transform:var(--map-turn)]">
-              <img
-                src={complexMap.src}
-                alt="Вигляд ЖК Senator зверху"
-                width={complexMap.width}
-                height={complexMap.height}
-                fetchPriority="high"
-                className={mapImageClass}
-                draggable="false"
-              />
-
-              <svg
-                className={mapSvgClass}
-                viewBox={`0 0 ${complexMap.width} ${complexMap.height}`}
-                role="group"
-                aria-label="Карта будинків"
-              >
-                <PhoneCover map={complexMap} />
-                {houses.map((house) => {
-                  const status = sectionStatuses[house.status];
-
-                  return (
-                    <MapZone
-                      key={house.id}
-                      label={`Секція №${house.id}, ${status.label}`}
-                      points={house.mapPoints}
-                      className={mapZoneClass({
-                        active: activeHouse?.id === house.id,
-                        tint: status.zoneClass,
-                        clickable: Boolean(house.plan),
-                      })}
-                      onSelect={house.plan ? () => navigate(`/apartments/${house.id}`) : undefined}
-                      onPreview={(event) => {
-                        updateCursor(event);
-                        setActiveHouse(house);
-                      }}
-                      onPreviewEnd={() => setActiveHouse(null)}
-                    />
-                  );
-                })}
-                <SectionBadges map={complexMap} />
-              </svg>
-            </div>
-          ) : (
-            <Skeleton className="aspect-square w-full rounded-none" />
+        <div className="relative overflow-hidden">
+          {/* план вміщується в екран, а тло з тієї ж картинки заповнює поля по боках */}
+          {complexMap && (
+            <img
+              src={complexMap.src}
+              alt=""
+              aria-hidden="true"
+              className="absolute inset-0 hidden size-full scale-110 object-cover blur-md brightness-75 select-none md:block"
+              draggable="false"
+            />
           )}
+          <div
+            className={cn(mapClass, "mx-auto")}
+            // план вміщується в екран під шапкою, тому на ноутбуці видно його весь
+            style={complexMap && { maxWidth: `calc((100svh - ${HEADER_HEIGHT}px) * ${complexMap.width / complexMap.height})` }}
+            ref={mapRef}
+            onPointerMove={updateCursor}
+            onPointerLeave={() => setActiveHouse(null)}
+          >
+            {complexMap ? (
+              <div className="relative max-md:w-[152%]">
+                <img
+                  src={complexMap.src}
+                  alt="Вигляд ЖК Senator зверху"
+                  width={complexMap.width}
+                  height={complexMap.height}
+                  fetchPriority="high"
+                  className={mapImageClass}
+                  draggable="false"
+                />
 
-          {activeStatus && (
-            <div className={cn(mapTooltipClass, "md:max-w-none")} style={mapTooltipStyle(cursor)}>
-              <strong>Секція №{activeHouse.id}</strong>
-              <span
-                className={cn(
-                  "inline-flex items-center gap-[7px] text-xs font-semibold before:inline-block before:size-[9px] before:rounded-full before:bg-current",
-                  activeStatus.textClass,
+                <svg
+                  className={mapSvgClass}
+                  viewBox={`0 0 ${complexMap.width} ${complexMap.height}`}
+                  role="group"
+                  aria-label="Карта будинків"
+                >
+                  <PhoneCover map={complexMap} />
+                  {houses.map((house) => {
+                    const status = sectionStatuses[house.status];
+
+                    return (
+                      <MapZone
+                        key={house.id}
+                        label={`Секція №${house.id}, ${status.label}`}
+                        points={house.mapPoints}
+                        className={mapZoneClass({
+                          active: activeHouse?.id === house.id,
+                          tint: status.zoneClass,
+                          clickable: Boolean(house.plan),
+                        })}
+                        onSelect={house.plan ? () => navigate(`/apartments/${house.id}`) : undefined}
+                        onPreview={(event) => {
+                          updateCursor(event);
+                          setActiveHouse(house);
+                        }}
+                        onPreviewEnd={() => setActiveHouse(null)}
+                      />
+                    );
+                  })}
+                </svg>
+              </div>
+            ) : (
+              <Skeleton className="aspect-square w-full rounded-none" />
+            )}
+
+            {activeStatus && (
+              <div className={cn(mapTooltipClass, "md:max-w-none")} style={mapTooltipStyle(cursor)}>
+                <strong>Секція №{activeHouse.id}</strong>
+                <span
+                  className={cn(
+                    "inline-flex items-center gap-[7px] text-xs font-semibold before:inline-block before:size-[9px] before:rounded-full before:bg-current",
+                    activeStatus.textClass,
+                  )}
+                >
+                  {activeStatus.label}
+                </span>
+                {activeHouse.status === "SELLING" && (
+                  <p>від {formatPrice(activeHouse.price)} $/м²</p>
                 )}
-              >
-                {activeStatus.label}
-              </span>
-              {activeHouse.status === "SELLING" && (
-                <p>від {formatPrice(activeHouse.price)} $/м²</p>
-              )}
-            </div>
-          )}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
