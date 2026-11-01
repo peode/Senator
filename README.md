@@ -9,7 +9,7 @@
 |---|---|
 | `frontend/` | React 19, Vite, React Router, Zustand, Tailwind CSS 4, shadcn/ui |
 | `backend/` | Node.js, Express 5, Prisma 7, PostgreSQL, Zod, cors |
-| Інше | npm workspaces, ESLint, Telegram Bot API (сповіщення про заявки) |
+| Інше | npm workspaces, ESLint, Vitest, GitHub Actions, Telegram Bot API (сповіщення про заявки) |
 
 ## Структура проєкту
 
@@ -221,11 +221,15 @@ npm run dev                             # термінал 2
 | `npm run build` | Продакшн-збірка фронтенду в `frontend/dist` |
 | `npm start` | Продакшн-запуск API (`NODE_ENV=production`) |
 | `npm run lint` | ESLint для обох частин |
+| `npm test` | Юніт-тести обох частин (Vitest, потрібна Node.js 22.12+). База даних для них не потрібна |
 | `npm run db:deploy` | Застосувати міграції Prisma (`prisma migrate deploy`) |
 | `npm run db:seed` | Заповнити базу стартовими даними: новини, секції, квартири, контакти (`prisma db seed`) |
 
 Скрипт конкретної частини: `npm run <script> -w frontend` або `npm run <script> -w backend`
 (наприклад, `npm run preview -w frontend` — переглянути продакшн-збірку локально).
+
+Тести лежать поруч із кодом (`*.test.js`). CI (`.github/workflows/ci.yml`) на кожен push у `main` і pull request
+перевіряє схему Prisma, запускає лінт, тести й збірку фронтенду.
 
 ## API
 
@@ -266,7 +270,7 @@ npm run dev                             # термінал 2
 |---|---|
 | `Cannot find module '.prisma/client'` / `@prisma/client did not initialize yet` | Виконати `npm exec -w backend -- prisma generate` |
 | `The table "public.News" does not exist` (або `Section`, `Apartment`, `SiteSettings`) | Не застосовані міграції — `npm run db:deploy` |
-| Порожній каталог квартир і карта без статусів | База не заповнена — `npm run db:seed` |
+| Секції без квартир і карта без статусів | База не заповнена — `npm run db:seed` |
 | «Планування цієї секції поки що недоступне» | Секції без плану: завантажте його в `/admin` або виконайте `npm run db:seed` для стартових планів |
 | `P1001: Can't reach database server` | Перевірити `DATABASE_URL`, що Postgres запущений (`docker ps`) |
 | Міграція зависає на Neon | Використовується pooled-рядок — потрібен хост без `-pooler` або `DATABASE_URL_UNPOOLED` |
