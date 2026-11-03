@@ -17,6 +17,15 @@ export const mapPointer = (event, element) => {
   return { x: event.clientX - left, y: event.clientY - top, width, height };
 };
 
+export const mapPolygonCenter = (points) => {
+  const [x, y] = points.reduce(
+    ([sumX, sumY], [pointX, pointY]) => [sumX + pointX, sumY + pointY],
+    [0, 0],
+  );
+
+  return { x: x / points.length, y: y / points.length };
+};
+
 export const mapTooltipStyle = ({ x, y, width, height }) => ({
   left: x,
   top: y,

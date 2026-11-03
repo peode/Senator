@@ -19,6 +19,7 @@ import {
   mapClass,
   mapImageClass,
   mapPointer,
+  mapPolygonCenter,
   mapSvgClass,
   mapTooltipClass,
   mapTooltipStyle,
@@ -301,6 +302,21 @@ const Section = () => {
                   );
                 })}
               </svg>
+
+              {apartments.filter(isSold).map((apartment) => {
+                const { x, y } = mapPolygonCenter(apartment.points);
+
+                return (
+                  <span
+                    key={apartment.id}
+                    aria-hidden="true"
+                    className="pointer-events-none absolute z-1 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-status-sold-strong px-1.5 py-0.5 text-[10px] leading-none font-bold text-white shadow-card md:text-xs"
+                    style={{ left: `${(x / plan.width) * 100}%`, top: `${(y / plan.height) * 100}%` }}
+                  >
+                    Продано
+                  </span>
+                );
+              })}
 
               {hovered && (
                 <div className={mapTooltipClass} style={mapTooltipStyle(cursor)}>
