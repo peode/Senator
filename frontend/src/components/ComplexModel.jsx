@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Sun } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, Sun } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { formatPrice, sectionStatuses } from "@/data/sections";
 import { createComplexScene } from "@/lib/complexScene";
@@ -64,13 +64,147 @@ const Compass = ({ ref }) => (
 );
 
 const dayLabel = new Intl.DateTimeFormat("uk-UA", { day: "numeric", month: "long" });
+const calendarDateLabel = new Intl.DateTimeFormat("uk-UA", { day: "numeric", month: "long", year: "numeric" });
+const monthLabel = new Intl.DateTimeFormat("uk-UA", { month: "long", year: "numeric" });
+const weekdays = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"];
 
-const dateInputValue = (date) =>
-  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+const SunDatePicker = ({ date, onChange }) => {
+  const [open, setOpen] = useState(false);
+  const [visibleMonth, setVisibleMonth] = useState(() => new Date(date.getFullYear(), date.getMonth(), 1));
+  const pickerRef = useRef(null);
 
-const dateFromInputValue = (value) => {
-  const [year, month, day] = value.split("-").map(Number);
-  return new Date(year, month - 1, day);
+  useEffect(() => {
+    if (!open) return undefined;
+
+    const closeOnOutsideClick = (event) => {
+      if (!pickerRef.current?.contains(event.target)) setOpen(false);
+    };
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+
+    document.addEventListener("pointerdown", closeOnOutsideClick);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsideClick);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [open]);
+
+  const firstDay = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth(), 1);
+  const startOffset = (firstDay.getDay() + 6) % 7;
+  const calendarDays = Array.from(
+    { length: 42 },
+    (_, index) => new Date(visibleMonth.getFullYear(), visibleMonth.getMonth(), index - startOffset + 1),
+  );
+  const today = new Date();
+  const isSameDay = (first, second) =>
+    first.getFullYear() === second.getFullYear()
+    && first.getMonth() === second.getMonth()
+    && first.getDate() === second.getDate();
+
+  const changeMonth = (amount) => {
+    setVisibleMonth((month) => new Date(month.getFullYear(), month.getMonth() + amount, 1));
+  };
+  const selectDate = (selectedDate) => {
+    onChange(selectedDate);
+    setOpen(false);
+  };
+
+  return (
+    <div ref={pickerRef} className="relative">
+      <label htmlFor="sun-date" className="mb-1.5 block text-sm font-medium text-slate-700">
+        Дата
+      </label>
+      <button
+        id="sun-date"
+        type="button"
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        aria-controls="sun-calendar"
+        onClick={() => {
+          if (!open) setVisibleMonth(new Date(date.getFullYear(), date.getMonth(), 1));
+          setOpen((isOpen) => !isOpen);
+        }}
+        className="flex h-11 w-full items-center justify-between rounded-lg border border-neutral-300 bg-white px-3 text-left text-base text-ink transition-colors hover:border-brand-dark focus-visible:border-brand-dark"
+      >
+        <span>{calendarDateLabel.format(date)}</span>
+        <CalendarDays aria-hidden="true" className="size-5 shrink-0 text-brand-dark" />
+      </button>
+
+      {open && (
+        <div
+          id="sun-calendar"
+          role="dialog"
+          aria-label="Вибір дати"
+          className="absolute top-full left-0 z-20 mt-2 w-[min(320px,calc(100vw-24px))] rounded-2xl border border-slate-200 bg-white p-3 text-ink shadow-card-hover"
+        >
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <p className="min-w-0 flex-1 truncate text-sm font-bold capitalize">
+              {monthLabel.format(visibleMonth)}
+            </p>
+            <button
+              type="button"
+              aria-label="Попередній місяць"
+              onClick={() => changeMonth(-1)}
+              className="flex size-9 shrink-0 items-center justify-center rounded-lg text-ink transition-colors hover:bg-surface focus-visible:bg-surface"
+            >
+              <ChevronLeft aria-hidden="true" className="size-5" />
+            </button>
+            <button
+              type="button"
+              aria-label="Наступний місяць"
+              onClick={() => changeMonth(1)}
+              className="flex size-9 shrink-0 items-center justify-center rounded-lg text-ink transition-colors hover:bg-surface focus-visible:bg-surface"
+            >
+              <ChevronRight aria-hidden="true" className="size-5" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-7 text-center text-xs font-semibold text-slate-500" aria-hidden="true">
+            {weekdays.map((weekday) => <span key={weekday} className="py-2">{weekday}</span>)}
+          </div>
+          <div className="grid grid-cols-7 gap-1">
+            {calendarDays.map((calendarDay) => {
+              const isSelected = isSameDay(calendarDay, date);
+              const isCurrentMonth = calendarDay.getMonth() === visibleMonth.getMonth();
+              const isToday = isSameDay(calendarDay, today);
+
+              return (
+                <button
+                  key={calendarDay.getTime()}
+                  type="button"
+                  aria-label={calendarDateLabel.format(calendarDay)}
+                  aria-pressed={isSelected}
+                  onClick={() => selectDate(calendarDay)}
+                  className={cn(
+                    "flex aspect-square items-center justify-center rounded-lg text-sm font-medium tabular-nums transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand-dark",
+                    isSelected
+                      ? "bg-gold font-bold text-ink"
+                      : isCurrentMonth
+                        ? "text-ink hover:bg-gold/25"
+                        : "text-slate-400 hover:bg-surface",
+                    isToday && !isSelected && "ring-1 ring-brand-dark",
+                  )}
+                >
+                  {calendarDay.getDate()}
+                </button>
+              );
+            })}
+          </div>
+          <div className="mt-2 flex justify-end border-t border-slate-100 pt-2">
+            <button
+              type="button"
+              onClick={() => selectDate(today)}
+              className="min-h-10 rounded-lg px-3 text-sm font-semibold text-brand-dark transition-colors hover:bg-surface focus-visible:bg-surface"
+            >
+              Сьогодні
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 const ComplexModel = ({ sections, map }) => {
@@ -174,18 +308,7 @@ const ComplexModel = ({ sections, map }) => {
 
         {sunOpen && (
           <div className="pointer-events-auto rounded-xl bg-white/95 p-3 text-ink shadow-card">
-            <label htmlFor="sun-date" className="text-sm font-semibold">
-              Дата
-            </label>
-            <input
-              id="sun-date"
-              type="date"
-              value={dateInputValue(date)}
-              onChange={(event) => {
-                if (event.target.value) setDate(dateFromInputValue(event.target.value));
-              }}
-              className="mt-1 mb-3 h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ffb52e]"
-            />
+            <SunDatePicker date={date} onChange={setDate} />
             <label htmlFor="sun-hour" className="flex items-baseline justify-between text-sm font-semibold">
               Час доби
               <span className="text-lg font-extrabold tabular-nums">{formatHour(hour)}</span>
