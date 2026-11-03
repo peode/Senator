@@ -65,6 +65,14 @@ const Compass = ({ ref }) => (
 
 const dayLabel = new Intl.DateTimeFormat("uk-UA", { day: "numeric", month: "long" });
 
+const dateInputValue = (date) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+
+const dateFromInputValue = (value) => {
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(year, month - 1, day);
+};
+
 const ComplexModel = ({ sections, map }) => {
   const navigate = useNavigate();
   const containerRef = useRef(null);
@@ -77,8 +85,8 @@ const ComplexModel = ({ sections, map }) => {
   const [cursor, setCursor] = useState({ x: 0, y: 0, width: 0, height: 0 });
   const [sunOpen, setSunOpen] = useState(false);
   const [hour, setHour] = useState(13);
-  const [today] = useState(() => new Date());
-  const { sunrise, sunset } = daylight(today);
+  const [date, setDate] = useState(() => new Date());
+  const { sunrise, sunset } = daylight(date);
 
   const find = (id) => sections.find((section) => section.id === id);
   const hovered = find(hoveredId);
@@ -129,8 +137,8 @@ const ComplexModel = ({ sections, map }) => {
   }, [layout, map.src, navigate]);
 
   useEffect(() => {
-    sceneRef.current?.setSun(sunOpen ? hour : null, today);
-  }, [sunOpen, hour, today, layout, map.src]);
+    sceneRef.current?.setSun(sunOpen ? hour : null, date);
+  }, [sunOpen, hour, date, layout, map.src]);
 
   const previewFloor = (floor) => {
     setActiveFloor(floor);
@@ -166,6 +174,18 @@ const ComplexModel = ({ sections, map }) => {
 
         {sunOpen && (
           <div className="pointer-events-auto rounded-xl bg-white/95 p-3 text-ink shadow-card">
+            <label htmlFor="sun-date" className="text-sm font-semibold">
+              Дата
+            </label>
+            <input
+              id="sun-date"
+              type="date"
+              value={dateInputValue(date)}
+              onChange={(event) => {
+                if (event.target.value) setDate(dateFromInputValue(event.target.value));
+              }}
+              className="mt-1 mb-3 h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ffb52e]"
+            />
             <label htmlFor="sun-hour" className="flex items-baseline justify-between text-sm font-semibold">
               Час доби
               <span className="text-lg font-extrabold tabular-nums">{formatHour(hour)}</span>
@@ -182,7 +202,7 @@ const ComplexModel = ({ sections, map }) => {
               className="mt-2 h-8 w-full cursor-pointer touch-none accent-[#ffb52e]"
             />
             <p className="mt-1 text-xs text-slate-700">
-              {dayLabel.format(today)}: схід {formatHour(sunrise)}, захід {formatHour(sunset)}
+              {dayLabel.format(date)}: схід {formatHour(sunrise)}, захід {formatHour(sunset)}
             </p>
           </div>
         )}
