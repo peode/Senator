@@ -137,17 +137,17 @@ const SunDatePicker = ({ date, onChange }) => {
           id="sun-calendar"
           role="dialog"
           aria-label="Вибір дати"
-          className="absolute top-full left-0 z-20 mt-2 w-[min(320px,calc(100vw-24px))] rounded-2xl border border-slate-200 bg-white p-3 text-ink shadow-card-hover"
+          className="absolute top-full left-0 z-20 mt-2 w-[min(320px,calc(100vw-24px))] rounded-2xl border border-gold/50 bg-white p-3 text-ink shadow-card-hover"
         >
-          <div className="mb-2 flex items-center justify-between gap-2">
-            <p className="min-w-0 flex-1 truncate text-sm font-bold capitalize">
+          <div className="mb-2 flex items-center justify-between gap-2 rounded-xl bg-ink px-2 py-1.5 text-white">
+            <p className="min-w-0 flex-1 truncate text-sm font-bold capitalize text-gold">
               {monthLabel.format(visibleMonth)}
             </p>
             <button
               type="button"
               aria-label="Попередній місяць"
               onClick={() => changeMonth(-1)}
-              className="flex size-9 shrink-0 items-center justify-center rounded-lg text-ink transition-colors hover:bg-surface focus-visible:bg-surface"
+              className="flex size-9 shrink-0 items-center justify-center rounded-lg text-white transition-colors hover:bg-white/10 focus-visible:bg-white/10"
             >
               <ChevronLeft aria-hidden="true" className="size-5" />
             </button>
@@ -155,13 +155,13 @@ const SunDatePicker = ({ date, onChange }) => {
               type="button"
               aria-label="Наступний місяць"
               onClick={() => changeMonth(1)}
-              className="flex size-9 shrink-0 items-center justify-center rounded-lg text-ink transition-colors hover:bg-surface focus-visible:bg-surface"
+              className="flex size-9 shrink-0 items-center justify-center rounded-lg text-white transition-colors hover:bg-white/10 focus-visible:bg-white/10"
             >
               <ChevronRight aria-hidden="true" className="size-5" />
             </button>
           </div>
 
-          <div className="grid grid-cols-7 text-center text-xs font-semibold text-slate-500" aria-hidden="true">
+          <div className="grid grid-cols-7 text-center text-xs font-bold text-brand-dark" aria-hidden="true">
             {weekdays.map((weekday) => <span key={weekday} className="py-2">{weekday}</span>)}
           </div>
           <div className="grid grid-cols-7 gap-1">
@@ -180,7 +180,7 @@ const SunDatePicker = ({ date, onChange }) => {
                   className={cn(
                     "flex aspect-square items-center justify-center rounded-lg text-sm font-medium tabular-nums transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand-dark",
                     isSelected
-                      ? "bg-gold font-bold text-ink"
+                      ? "bg-gold font-extrabold text-ink shadow-sm ring-2 ring-gold ring-offset-1"
                       : isCurrentMonth
                         ? "text-ink hover:bg-gold/25"
                         : "text-slate-400 hover:bg-surface",
@@ -196,7 +196,7 @@ const SunDatePicker = ({ date, onChange }) => {
             <button
               type="button"
               onClick={() => selectDate(today)}
-              className="min-h-10 rounded-lg px-3 text-sm font-semibold text-brand-dark transition-colors hover:bg-surface focus-visible:bg-surface"
+              className="min-h-10 rounded-lg bg-gold px-4 text-sm font-bold text-ink transition-colors hover:bg-gold-hover focus-visible:bg-gold-hover"
             >
               Сьогодні
             </button>
