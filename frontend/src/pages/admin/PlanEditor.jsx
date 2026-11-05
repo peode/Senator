@@ -8,10 +8,18 @@ import { fieldClass } from "./fields";
 import PlanCanvas from "./PlanCanvas";
 
 // Чернетка: на сайт і в базу потрапляє лише після «Зберегти план»
-const toDraft = ({ plan, apartments }) => ({
+const toDraft = ({ plan, mobilePlan, apartments }) => ({
   plan,
   image: null,
-  apartments: apartments.map(({ id, rooms, area, points }) => ({ id, rooms, area, points })),
+  mobilePlan,
+  mobileImage: null,
+  apartments: apartments.map(({ id, rooms, area, points, mobilePoints }) => ({
+    id,
+    rooms,
+    area,
+    points,
+    mobilePoints: mobilePoints ?? [],
+  })),
 });
 
 const ApartmentRow = ({ apartment, number, selected, onSelect, onChange, onDelete }) => (
@@ -75,6 +83,7 @@ const ApartmentRow = ({ apartment, number, selected, onSelect, onChange, onDelet
 const PlanEditor = ({ section, onDirtyChange, className }) => {
   const savePlan = useSectionsStore((state) => state.savePlan);
   const [draft, setDraft] = useState(() => toDraft(section));
+  const [activeLayout, setActiveLayout] = useState("desktop");
   const [dirty, setDirty] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   // точки контуру, який зараз малюють; null — малювання вимкнене
@@ -103,7 +112,7 @@ const PlanEditor = ({ section, onDirtyChange, className }) => {
       apartments.map((apartment) => (apartment.id === id ? { ...apartment, ...patch } : apartment)),
     );
 
-  const onFile = async (event) => {
+  const onFile = async (event, layout) => {
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file) return;
@@ -111,10 +120,30 @@ const PlanEditor = ({ section, onDirtyChange, className }) => {
     setError("");
     try {
       const { src, width, height } = await readImage(file);
-      // старі контури не збігаються з новим зображенням: квартири обводяться заново
-      setDraft({ plan: { src, width, height }, image: src, apartments: [] });
+      if (layout === "desktop" && width <= height) {
+        throw new Error("Для плану ПК завантажте горизонтальне зображення.");
+      }
+      if (layout === "mobile" && height <= width) {
+        throw new Error("Для плану телефона завантажте вертикальне зображення.");
+      }
+
+      if (layout === "desktop") {
+        setDraft((current) => ({
+          ...current,
+          plan: { src, width, height },
+          image: src,
+          apartments: [],
+        }));
+      } else {
+        setDraft((current) => ({
+          ...current,
+          mobilePlan: { src, width, height },
+          mobileImage: src,
+          apartments: current.apartments.map((apartment) => ({ ...apartment, mobilePoints: [] })),
+        }));
+      }
       setSelectedId(null);
-      setDrawing([]);
+      setDrawing(null);
       setDirty(true);
       setSaved(false);
     } catch (err) {
@@ -123,15 +152,25 @@ const PlanEditor = ({ section, onDirtyChange, className }) => {
   };
 
   const closePath = () => {
+    if (activeLayout === "mobile") {
+      changeApartment(selectedId, { mobilePoints: drawing });
+      setDrawing(null);
+      return;
+    }
+
     const id = crypto.randomUUID();
-    changeApartments((apartments) => [...apartments, { id, rooms: "", area: "", points: drawing }]);
+    changeApartments((apartments) => [
+      ...apartments,
+      { id, rooms: "", area: "", points: drawing, mobilePoints: [] },
+    ]);
     setDrawing(null);
     setSelectedId(id);
   };
 
   const movePoint = (index, point) => {
-    const { points } = draft.apartments.find((apartment) => apartment.id === selectedId);
-    changeApartment(selectedId, { points: points.toSpliced(index, 1, point) });
+    const pointsKey = activeLayout === "desktop" ? "points" : "mobilePoints";
+    const points = draft.apartments.find((apartment) => apartment.id === selectedId)[pointsKey];
+    changeApartment(selectedId, { [pointsKey]: points.toSpliced(index, 1, point) });
   };
 
   const deleteApartment = (id) => {
@@ -141,6 +180,7 @@ const PlanEditor = ({ section, onDirtyChange, className }) => {
 
   const reset = () => {
     setDraft(toDraft(section));
+    setActiveLayout("desktop");
     setDirty(false);
     setSelectedId(null);
     setDrawing(null);
@@ -162,16 +202,21 @@ const PlanEditor = ({ section, onDirtyChange, className }) => {
     setSaving(true);
     setError("");
     try {
-      const { plan, image, apartments } = draft;
+      const { plan, image, mobilePlan, mobileImage, apartments } = draft;
       const updated = await savePlan(section.id, {
         plan: image ? { image, width: plan.width, height: plan.height } : undefined,
+        mobilePlan: mobileImage
+          ? { image: mobileImage, width: mobilePlan.width, height: mobilePlan.height }
+          : undefined,
         apartments: apartments.map(({ rooms, area, ...apartment }) => ({
           ...apartment,
           rooms: Number(rooms),
           area: Number(area),
+          mobilePoints: apartment.mobilePoints,
         })),
       });
       setDraft(toDraft(updated));
+      setActiveLayout("desktop");
       setDirty(false);
       setSaved(true);
       setSelectedId(null);
@@ -182,7 +227,11 @@ const PlanEditor = ({ section, onDirtyChange, className }) => {
     }
   };
 
-  const { plan, apartments } = draft;
+  const { plan, mobilePlan, apartments } = draft;
+  const currentPlan = activeLayout === "desktop" ? plan : mobilePlan;
+  const currentPointsKey = activeLayout === "desktop" ? "points" : "mobilePoints";
+  const missingMobileContours =
+    Boolean(mobilePlan) && apartments.some(({ mobilePoints }) => mobilePoints.length < 3);
 
   return (
     <form onSubmit={submit} className={className}>
@@ -208,32 +257,79 @@ const PlanEditor = ({ section, onDirtyChange, className }) => {
             </>
           ) : (
             <>
-              <label className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-neutral-300 px-3 text-sm font-medium hover:border-brand">
-                <Upload size={16} /> {plan ? "Змінити план" : "Завантажити план"}
-                <input type="file" accept="image/*" className="hidden" onChange={onFile} />
-              </label>
-              {plan && (
+              <Button
+                type="button"
+                variant={activeLayout === "desktop" ? "secondary" : "outline"}
+                aria-pressed={activeLayout === "desktop"}
+                onClick={() => setActiveLayout("desktop")}
+              >
+              План ПК · горизонтальний
+              </Button>
+              <Button
+                type="button"
+                variant={activeLayout === "mobile" ? "secondary" : "outline"}
+                aria-pressed={activeLayout === "mobile"}
+                onClick={() => setActiveLayout("mobile")}
+              >
+              План телефона · вертикальний
+              </Button>
+              {currentPlan && (activeLayout === "desktop" || selectedId) && (
                 <Button
                   type="button"
                   variant="outline"
                   size="lg"
                   className="px-3"
                   onClick={() => {
-                    setSelectedId(null);
+                    if (activeLayout === "desktop") setSelectedId(null);
                     setDrawing([]);
                   }}
                 >
-                  <Plus /> Обвести квартиру
+                  <Plus />
+                  {activeLayout === "mobile" ? "Обвести контур" : "Обвести квартиру"}
                 </Button>
+              )}
+              {activeLayout === "desktop" || plan ? (
+                <label className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-neutral-300 px-3 text-sm font-medium hover:border-brand">
+                  <Upload size={16} />
+                  {currentPlan
+                    ? activeLayout === "desktop"
+                      ? "Змінити план ПК"
+                      : "Змінити план телефона"
+                    : activeLayout === "desktop"
+                      ? "Завантажити план ПК"
+                      : "Завантажити план телефона"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(event) => onFile(event, activeLayout)}
+                  />
+                </label>
+              ) : null}
+              {activeLayout === "mobile" && !plan && (
+                <p className="self-center text-sm text-slate-500">Спочатку завантажте план ПК.</p>
               )}
             </>
           )}
         </div>
       </div>
 
-      {draft.image && (
+      {(draft.image || draft.mobileImage) && (
         <p className="mb-3 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">
-          Це новий план: обведіть на ньому квартири й збережіть. Старий план і його квартири зникнуть лише після збереження.
+          {draft.image
+            ? "Завантажено новий план ПК: старі контури квартир очищено. Обведіть квартири на обох версіях плану й збережіть зміни."
+            : "Завантажено новий мобільний план: обведіть на ньому контури квартир і збережіть зміни."}
+        </p>
+      )}
+
+      {missingMobileContours && !drawing && (
+        <p className="mb-3 rounded-lg bg-surface px-3 py-2 text-sm text-slate-700">
+          Перейдіть до плану телефона, виберіть квартиру у списку та обведіть її контур, щоб зберегти зміни.
+        </p>
+      )}
+      {activeLayout === "mobile" && currentPlan && !selectedId && (
+        <p className="mb-3 rounded-lg bg-surface px-3 py-2 text-sm text-slate-700">
+          Виберіть квартиру у списку нижче, щоб обвести її контур на плані телефона.
         </p>
       )}
 
@@ -243,10 +339,11 @@ const PlanEditor = ({ section, onDirtyChange, className }) => {
         </p>
       )}
 
-      {plan ? (
+      {currentPlan ? (
         <PlanCanvas
-          plan={plan}
-          zones={apartments}
+          plan={currentPlan}
+          zones={apartments.map((apartment) => ({ ...apartment, points: apartment[currentPointsKey] ?? [] }))}
+          pointsKey="points"
           selectedId={selectedId}
           drawing={drawing}
           onSelect={setSelectedId}
@@ -256,14 +353,16 @@ const PlanEditor = ({ section, onDirtyChange, className }) => {
         />
       ) : (
         <p className="rounded-lg border border-dashed border-neutral-300 px-4 py-16 text-center text-sm text-slate-500">
-          Завантажте зображення плану, щоб обвести на ньому квартири.
+          {activeLayout === "desktop"
+            ? "Завантажте горизонтальне зображення плану для ПК."
+            : "Завантажте вертикальне зображення плану для телефона."}
         </p>
       )}
 
       {apartments.length > 0 && (
         <>
           <h4 className="mt-5 mb-2 text-sm font-medium text-slate-700">
-            Квартири на плані: {apartments.length}
+            Квартири на плані: {apartments.filter((apartment) => apartment[currentPointsKey]?.length > 0).length}
           </h4>
           {/* нові згори: одразу під планом, де щойно обвели квартиру */}
           <ul className="flex flex-col gap-2">
@@ -289,7 +388,12 @@ const PlanEditor = ({ section, onDirtyChange, className }) => {
 
       {dirty && (
         <div className="mt-4 flex flex-wrap items-center gap-3">
-          <Button type="submit" variant="gold" size="xl" disabled={saving || Boolean(drawing)}>
+          <Button
+            type="submit"
+            variant="gold"
+            size="xl"
+            disabled={saving || Boolean(drawing) || missingMobileContours}
+          >
             {saving ? "Зберігаємо..." : "Зберегти план"}
           </Button>
           <Button type="button" variant="ghost" size="xl" disabled={saving} onClick={reset}>

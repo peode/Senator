@@ -26,6 +26,17 @@ export const mapPolygonCenter = (points) => {
   return { x: x / points.length, y: y / points.length };
 };
 
+export const mapContainedPoint = (point, plan, viewport) => {
+  const scale = Math.min(viewport.width / plan.width, viewport.height / plan.height);
+  const offsetX = (viewport.width - plan.width * scale) / 2;
+  const offsetY = (viewport.height - plan.height * scale) / 2;
+
+  return {
+    x: ((offsetX + point.x * scale) / viewport.width) * 100,
+    y: ((offsetY + point.y * scale) / viewport.height) * 100,
+  };
+};
+
 export const mapTooltipStyle = ({ x, y, width, height }) => ({
   left: x,
   top: y,

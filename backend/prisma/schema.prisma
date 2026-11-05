@@ -46,30 +46,36 @@ enum SectionStatus {
 
 // id — номер секції на карті ЖК
 model Section {
-  id         Int           @id
-  status     SectionStatus @default(PLANNED)
-  price      Int?
-  floors     Int           @default(9)
+  id               Int           @id
+  status           SectionStatus @default(PLANNED)
+  price            Int?
+  floors           Int           @default(9)
   // вершини багатокутника секції на карті ЖК; без них секції на карті немає
-  mapPoints  Json?
+  mapPoints        Json?
   // зображення плану (JPEG); координати квартир задані в його розмірах
-  planImage  Bytes?
-  planWidth  Int?
-  planHeight Int?
-  apartments Apartment[]
-  updatedAt  DateTime      @updatedAt
+  planImage        Bytes?
+  planWidth        Int?
+  planHeight       Int?
+  // окрема вертикальна версія плану для мобільного екрана
+  mobilePlanImage  Bytes?
+  mobilePlanWidth  Int?
+  mobilePlanHeight Int?
+  apartments       Apartment[]
+  updatedAt        DateTime      @updatedAt
 }
 
 // Планування: одне на всі поверхи секції
 model Apartment {
-  id        String          @id
-  sectionId Int
-  section   Section         @relation(fields: [sectionId], references: [id], onDelete: Cascade)
-  rooms     Int
-  area      Float
+  id           String          @id
+  sectionId    Int
+  section      Section         @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  rooms        Int
+  area         Float
   // вершини багатокутника квартири на зображенні плану
-  points    Json
-  units     ApartmentUnit[]
+  points       Json
+  // вершини на мобільній версії плану
+  mobilePoints Json?
+  units        ApartmentUnit[]
 
   @@index([sectionId])
 }

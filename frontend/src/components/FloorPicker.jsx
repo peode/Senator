@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-const FloorPicker = ({ floors, current, freeCount, onSelect }) => {
+const FloorPicker = ({ floors, current, freeCount, onSelect, className }) => {
   const navRef = useRef(null);
 
   // на телефоні список прокручується вбік: обраний поверх має бути видно
@@ -14,7 +14,7 @@ const FloorPicker = ({ floors, current, freeCount, onSelect }) => {
     <nav
       ref={navRef}
       aria-label="Вибір поверху"
-      className="relative flex shrink-0 gap-2 overflow-x-auto pb-1 md:max-h-[560px] md:w-32 md:flex-col md:overflow-x-visible md:overflow-y-auto md:pb-0"
+      className={`relative flex shrink-0 gap-2 overflow-x-auto pb-1 md:max-h-[560px] md:w-32 md:flex-col md:overflow-x-visible md:overflow-y-auto md:pb-0 ${className ?? ""}`}
     >
       {floors.map((floor) => {
         const free = freeCount(floor);

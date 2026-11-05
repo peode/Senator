@@ -5,7 +5,14 @@ import { listSections, updateSectionPlan } from "./sectionsService.js";
 vi.mock("../repositories/sectionsRepository.js");
 
 const updatedAt = new Date(1000);
-const section = { id: 4, status: "SELLING", updatedAt, planWidth: 800, planHeight: 600, apartments: [] };
+const section = {
+  id: 4,
+  status: "SELLING",
+  updatedAt,
+  planWidth: 800,
+  planHeight: 600,
+  apartments: [],
+};
 
 describe("listSections", () => {
   it("віддає адресу плану з версією замість службових полів", async () => {
@@ -24,6 +31,20 @@ describe("listSections", () => {
     const [result] = await listSections();
 
     expect(result.plan).toBeNull();
+  });
+
+  it("віддає адресу та розмір мобільного плану, якщо він завантажений", async () => {
+    vi.mocked(sectionsRepository.findAll).mockResolvedValue([
+      { ...section, mobilePlanWidth: 400, mobilePlanHeight: 900 },
+    ]);
+
+    const [result] = await listSections();
+
+    expect(result.mobilePlan).toEqual({
+      src: "/api/sections/4/mobile-plan?v=1000",
+      width: 400,
+      height: 900,
+    });
   });
 
   it("сортує квартири за номером, а не як рядки", async () => {
@@ -55,6 +76,40 @@ describe("updateSectionPlan", () => {
 
     await updateSectionPlan(4, { apartments: [] });
 
-    expect(sectionsRepository.updatePlan).toHaveBeenCalledWith(4, { plan: undefined, apartments: [] });
+    expect(sectionsRepository.updatePlan).toHaveBeenCalledWith(4, {
+      plan: undefined,
+      mobilePlan: undefined,
+      apartments: [],
+    });
+  });
+
+  it("декодує нове зображення мобільного плану", async () => {
+    vi.mocked(sectionsRepository.updatePlan).mockResolvedValue(section);
+    const image = `data:image/jpeg;base64,${Buffer.from("мобільний план").toString("base64")}`;
+
+    await updateSectionPlan(4, {
+      mobilePlan: { image, width: 400, height: 900 },
+      apartments: [
+        {
+          id: "4-1",
+          rooms: 2,
+          area: 54.5,
+          points: [
+            [0, 0],
+            [1, 0],
+            [0, 1],
+          ],
+          mobilePoints: [
+            [0, 0],
+            [1, 0],
+            [0, 1],
+          ],
+        },
+      ],
+    });
+
+    const [, { mobilePlan, apartments }] = sectionsRepository.updatePlan.mock.calls.at(-1);
+    expect(mobilePlan.image.toString()).toBe("мобільний план");
+    expect(apartments[0].mobilePoints).toEqual([[0, 0], [1, 0], [0, 1]]);
   });
 });

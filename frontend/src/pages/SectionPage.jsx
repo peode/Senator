@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 
@@ -17,7 +17,7 @@ import { useLeadModalStore } from "@/stores/leadModalStore";
 import { useSections } from "@/stores/sectionsStore";
 import {
   mapClass,
-  mapImageClass,
+  mapContainedPoint,
   mapPointer,
   mapPolygonCenter,
   mapSvgClass,
@@ -42,6 +42,7 @@ const Section = () => {
   const mapRef = useRef(null);
   const infoRef = useRef(null);
   const [hovered, setHovered] = useState(null);
+  const [mapSize, setMapSize] = useState({ width: 0, height: 0 });
   // квартира й поверх в адресі: посиланням можна поділитися
   const [selectedId, setSelectedId] = useState(() => searchParams.get("apt"));
   const [cursor, setCursor] = useState({ x: 0, y: 0, width: 0, height: 0 });
@@ -52,6 +53,17 @@ const Section = () => {
 
   const section = sections.find(({ id }) => String(id) === sectionId);
   const plan = section?.plan;
+
+  useEffect(() => {
+    const element = mapRef.current;
+    if (!element) return undefined;
+
+    const observer = new ResizeObserver(([entry]) => {
+      setMapSize({ width: entry.contentRect.width, height: entry.contentRect.height });
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [plan]);
 
   if (loading) {
     return (
@@ -144,6 +156,89 @@ const Section = () => {
     `${roomsLabel(apartment)} квартира, ${apartment.area} м², ${
       isSold(apartment) ? "продана" : `${formatPrice(apartment.area * price)} $`
     }`;
+
+  const renderPlanLayer = (layout, mobile = false) => {
+    const pointsOf = (apartment) =>
+      mobile && section.mobilePlan ? apartment.mobilePoints ?? [] : apartment.points;
+    const className = mobile ? "md:hidden" : "hidden md:block";
+    return (
+      <div key={mobile ? "mobile-plan" : "desktop-plan"} className={`absolute inset-0 ${className}`}>
+        <img
+          src={layout.src}
+          alt={`Планування секції №${sectionId}`}
+          fetchPriority="high"
+          width={layout.width}
+          height={layout.height}
+          className="absolute inset-0 size-full select-none object-contain"
+          draggable="false"
+        />
+        <svg
+          className={mapSvgClass}
+          viewBox={`0 0 ${layout.width} ${layout.height}`}
+          role="group"
+          aria-label="Квартири"
+        >
+          {apartments.map((apartment) => {
+            const sold = isSold(apartment);
+            const match = isMatch(apartment);
+            const points = pointsOf(apartment);
+            if (points.length < 3) return null;
+
+            return (
+              <MapZone
+                key={apartment.id}
+                label={zoneLabel(apartment)}
+                points={points}
+                pressed={chosen?.id === apartment.id}
+                className={mapZoneClass({
+                  active: active?.id === apartment.id,
+                  tint: sold
+                    ? "fill-black/55"
+                    : match
+                      ? "stroke-status-selling-strong"
+                      : "fill-white/70",
+                  disabled: !match && !sold,
+                  sold,
+                })}
+                onSelect={match || sold ? () => selectApartment(apartment) : undefined}
+                onPreview={(event) => {
+                  updateCursor(event);
+                  setHovered(apartment);
+                }}
+                onPreviewEnd={() => setHovered(null)}
+              />
+            );
+          })}
+        </svg>
+
+        {mapSize.width > 0 &&
+          mapSize.height > 0 &&
+          apartments.filter((apartment) => isSold(apartment) && pointsOf(apartment).length >= 3).map((apartment) => {
+            const point = mapContainedPoint(
+              mapPolygonCenter(pointsOf(apartment)),
+              layout,
+              mapSize,
+            );
+
+            return (
+              <span
+                key={apartment.id}
+                aria-hidden="true"
+                className="pointer-events-none absolute z-1 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-status-sold-strong px-1.5 py-0.5 text-[10px] leading-none font-bold text-white shadow-card md:text-xs"
+                style={{
+                  left: `${point.x}%`,
+                  top: `${point.y}%`,
+                }}
+              >
+                Продано
+              </span>
+            );
+          })}
+      </div>
+    );
+  };
+
+  const mobilePlan = section.mobilePlan ?? plan;
 
   return (
     <>
@@ -239,100 +334,42 @@ const Section = () => {
               />
             )}
           </div>
+        </div>
 
-          <div className="flex flex-col gap-4 md:flex-row md:items-start">
-            {status === "SELLING" && (
-              <FloorPicker
-                floors={floorNumbers}
-                current={floor}
-                freeCount={freeCount}
-                onSelect={selectFloor}
-              />
-            )}
+        <div
+          className={cn(mapClass, "-ml-[3.5vw] h-dvh w-[calc(100%+7vw)] bg-surface")}
+          ref={mapRef}
+          onPointerMove={updateCursor}
+          onPointerLeave={() => setHovered(null)}
+        >
+          {renderPlanLayer(plan)}
+          {renderPlanLayer(mobilePlan, true)}
 
-            <div
-              className={cn(mapClass, "min-w-0 flex-1")}
-              ref={mapRef}
-              onPointerMove={updateCursor}
-              onPointerLeave={() => setHovered(null)}
-            >
-              <img
-                src={plan.src}
-                alt={`Планування секції №${sectionId}`}
-                fetchPriority="high"
-                width={plan.width}
-                height={plan.height}
-                className={mapImageClass}
-                draggable="false"
-              />
+          {status === "SELLING" && (
+            <FloorPicker
+              floors={floorNumbers}
+              current={floor}
+              freeCount={freeCount}
+              onSelect={selectFloor}
+              className="absolute top-[84px] right-2 left-2 z-10 rounded-xl bg-white/95 p-2 shadow-card md:top-1/2 md:right-auto md:left-3 md:w-32 md:-translate-y-1/2 md:p-1"
+            />
+          )}
 
-              <svg
-                className={mapSvgClass}
-                viewBox={`0 0 ${plan.width} ${plan.height}`}
-                role="group"
-                aria-label="Квартири"
-              >
-                {apartments.map((apartment) => {
-                  const sold = isSold(apartment);
-                  const match = isMatch(apartment);
-
-                  return (
-                    <MapZone
-                      key={apartment.id}
-                      label={zoneLabel(apartment)}
-                      points={apartment.points}
-                      pressed={chosen?.id === apartment.id}
-                      className={mapZoneClass({
-                        active: active?.id === apartment.id,
-                        tint: sold
-                          ? "fill-black/55"
-                          : match
-                            ? "stroke-status-selling-strong"
-                            : "fill-white/70",
-                        disabled: !match && !sold,
-                        sold,
-                      })}
-                      onSelect={match || sold ? () => selectApartment(apartment) : undefined}
-                      onPreview={(event) => {
-                        updateCursor(event);
-                        setHovered(apartment);
-                      }}
-                      onPreviewEnd={() => setHovered(null)}
-                    />
-                  );
-                })}
-              </svg>
-
-              {apartments.filter(isSold).map((apartment) => {
-                const { x, y } = mapPolygonCenter(apartment.points);
-
-                return (
-                  <span
-                    key={apartment.id}
-                    aria-hidden="true"
-                    className="pointer-events-none absolute z-1 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-status-sold-strong px-1.5 py-0.5 text-[10px] leading-none font-bold text-white shadow-card md:text-xs"
-                    style={{ left: `${(x / plan.width) * 100}%`, top: `${(y / plan.height) * 100}%` }}
-                  >
-                    Продано
-                  </span>
-                );
-              })}
-
-              {hovered && (
-                <div className={mapTooltipClass} style={mapTooltipStyle(cursor)}>
-                  <strong>{roomsLabel(hovered)} квартира</strong>
-                  <p>Поверх: {floor}</p>
-                  <p>Площа: {hovered.area} м²</p>
-                  {isSold(hovered) ? (
-                    <p>Продано</p>
-                  ) : (
-                    <p>Вартість: {formatPrice(hovered.area * price)} $</p>
-                  )}
-                </div>
+          {hovered && (
+            <div className={mapTooltipClass} style={mapTooltipStyle(cursor)}>
+              <strong>{roomsLabel(hovered)} квартира</strong>
+              <p>Поверх: {floor}</p>
+              <p>Площа: {hovered.area} м²</p>
+              {isSold(hovered) ? (
+                <p>Продано</p>
+              ) : (
+                <p>Вартість: {formatPrice(hovered.area * price)} $</p>
               )}
             </div>
-          </div>
+          )}
+        </div>
 
+        <div className="mx-auto max-w-[1100px]">
           <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[13px] text-slate-700">
             {legend.map(({ label, className }) => (
               <li key={label} className="flex items-center gap-2">

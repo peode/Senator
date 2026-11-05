@@ -14,6 +14,7 @@ const PlanCanvas = ({
   alt = "План секції",
   zoneName = "Квартира",
   zones,
+  pointsKey = "points",
   selectedId,
   drawing,
   onSelect,
@@ -23,7 +24,10 @@ const PlanCanvas = ({
 }) => {
   const canvasRef = useRef(null);
   const [cursor, setCursor] = useState(null);
-  const selected = zones.find((zone) => zone.id === selectedId);
+  const visibleZones = zones
+    .map((zone) => ({ ...zone, points: zone[pointsKey] ?? [] }))
+    .filter((zone) => zone.points.length > 0);
+  const selected = visibleZones.find((zone) => zone.id === selectedId);
 
   const toPlanPoint = (event) => {
     const rect = canvasRef.current.getBoundingClientRect();
@@ -56,7 +60,7 @@ const PlanCanvas = ({
       />
 
       <svg className="absolute inset-0 size-full" viewBox={`0 0 ${plan.width} ${plan.height}`}>
-        {zones.map((zone, index) => (
+        {visibleZones.map((zone, index) => (
           <polygon
             key={zone.id}
             aria-label={`${zoneName} ${zone.label ?? index + 1}`}
@@ -83,7 +87,7 @@ const PlanCanvas = ({
         )}
       </svg>
 
-      {zones.map((zone, index) => (
+      {visibleZones.map((zone, index) => (
         <span
           key={zone.id}
           style={place(centerOf(zone.points))}

@@ -4,7 +4,7 @@ import { prisma } from "../lib/db.js";
 
 // Зображення плану віддається окремим запитом: у списку секцій воно зайве
 const withApartments = {
-  omit: { planImage: true },
+  omit: { planImage: true, mobilePlanImage: true },
   include: {
     apartments: {
       orderBy: { id: "asc" },
@@ -20,6 +20,9 @@ export const findAll = () => prisma.section.findMany({ orderBy: { id: "asc" }, .
 
 export const findPlanImage = (id) =>
   prisma.section.findUniqueOrThrow({ where: { id }, select: { planImage: true } });
+
+export const findMobilePlanImage = (id) =>
+  prisma.section.findUniqueOrThrow({ where: { id }, select: { mobilePlanImage: true } });
 
 // Квартири мають відповідати кількості поверхів: зайві видаляємо, нові додаємо в наявності
 export const update = (id, data) =>
@@ -43,7 +46,7 @@ export const update = (id, data) =>
 
 // План зберігається цілком: чого немає в списку — видаляємо, id не з цієї секції — нові квартири.
 // Наявні квартири лишаються зі своїм статусом продажу
-export const updatePlan = (id, { plan, apartments }) =>
+export const updatePlan = (id, { plan, mobilePlan, apartments }) =>
   prisma.$transaction(
     async (tx) => {
       const section = await tx.section.findUniqueOrThrow({
@@ -60,11 +63,29 @@ export const updatePlan = (id, { plan, apartments }) =>
           data: { planImage: plan.image, planWidth: plan.width, planHeight: plan.height },
         });
       }
+      if (mobilePlan) {
+        await tx.section.update({
+          where: { id },
+          data: {
+            mobilePlanImage: mobilePlan.image,
+            mobilePlanWidth: mobilePlan.width,
+            mobilePlanHeight: mobilePlan.height,
+          },
+        });
+      }
       await tx.apartment.deleteMany({
         where: { sectionId: id, id: { notIn: kept.map((apartment) => apartment.id) } },
       });
       for (const { id: apartmentId, ...data } of kept) {
-        await tx.apartment.update({ where: { id: apartmentId }, data });
+        await tx.apartment.update({
+          where: { id: apartmentId },
+          data: {
+            ...data,
+            ...(data.mobilePoints !== undefined && {
+              mobilePoints: data.mobilePoints.length ? data.mobilePoints : Prisma.DbNull,
+            }),
+          },
+        });
       }
 
       const lastNumber = Math.max(0, ...kept.map((apartment) => Number(apartment.id.split("-")[1])));
@@ -72,6 +93,7 @@ export const updatePlan = (id, { plan, apartments }) =>
         ...data,
         id: `${id}-${lastNumber + index + 1}`,
         sectionId: id,
+        mobilePoints: data.mobilePoints?.length ? data.mobilePoints : Prisma.DbNull,
       }));
       await tx.apartment.createMany({ data: created });
       await tx.apartmentUnit.createMany({

@@ -16,6 +16,12 @@ export const planImage = async (req, res) => {
   res.set("Cache-Control", "public, max-age=31536000, immutable").type("jpeg").send(image);
 };
 
+export const mobilePlanImage = async (req, res) => {
+  const image = await sectionsService.getMobilePlanImage(idSchema.parse(req.params.id));
+  if (!image) return res.status(404).json({ error: "Запис не знайдено" });
+  res.set("Cache-Control", "public, max-age=31536000, immutable").type("jpeg").send(image);
+};
+
 export const updatePlan = async (req, res) => {
   const id = idSchema.parse(req.params.id);
   res.json(await sectionsService.updateSectionPlan(id, sectionPlanSchema.parse(req.body)));

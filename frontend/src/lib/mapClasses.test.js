@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { mapPointer, mapPolygonCenter, mapTooltipStyle, mapZoneClass } from "./mapClasses";
+import {
+  mapContainedPoint,
+  mapPointer,
+  mapPolygonCenter,
+  mapTooltipStyle,
+  mapZoneClass,
+} from "./mapClasses";
 
 const size = { width: 100, height: 100 };
 
@@ -11,6 +17,13 @@ it("mapPointer рахує координати відносно елемента
 
 it("mapPolygonCenter знаходить центр контуру для підпису на плані", () => {
   expect(mapPolygonCenter([[0, 0], [6, 0], [0, 6]])).toEqual({ x: 2, y: 2 });
+});
+
+it("mapContainedPoint враховує поля довкола плану під час вписування у viewport", () => {
+  expect(mapContainedPoint({ x: 0, y: 0 }, { width: 400, height: 800 }, { width: 800, height: 400 })).toEqual({
+    x: 37.5,
+    y: 0,
+  });
 });
 
 describe("mapTooltipStyle", () => {

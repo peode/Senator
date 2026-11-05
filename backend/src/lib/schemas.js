@@ -73,6 +73,7 @@ const planPoint = z.tuple([z.number("Невірний контур кварти�
 export const sectionPlanSchema = z.object({
   // лише коли завантажили новий план
   plan: jpegImage.optional(),
+  mobilePlan: jpegImage.optional(),
   apartments: z
     .array(
       z.object({
@@ -80,9 +81,13 @@ export const sectionPlanSchema = z.object({
         rooms: z.number("Вкажіть кількість кімнат").int("Вкажіть кількість кімнат").min(1, "Вкажіть кількість кімнат").max(20, "Вкажіть кількість кімнат"),
         area: z.number("Вкажіть площу").positive("Вкажіть площу").max(10_000, "Вкажіть площу"),
         points: z.array(planPoint).min(3, "Контур квартири має щонайменше 3 точки").max(200, "Забагато точок у контурі"),
+        mobilePoints: z.array(planPoint).max(200, "Забагато точок у контурі").optional(),
       }),
     )
     .max(200, "Забагато квартир на плані"),
+}).refine(({ mobilePlan, apartments }) => !mobilePlan || apartments.every(({ mobilePoints }) => mobilePoints?.length >= 3), {
+  path: ["apartments"],
+  error: "Обведіть квартири на мобільному плані",
 });
 
 export const complexMapSchema = z.object({

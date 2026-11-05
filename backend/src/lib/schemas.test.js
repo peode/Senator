@@ -101,6 +101,19 @@ describe("контури на планах", () => {
 
     expect(sectionPlanSchema.safeParse({ apartments: [{ ...apartment, points }] }).success).toBe(false);
   });
+
+  it("вимагає мобільні контури для всіх квартир, якщо додається вертикальний план", () => {
+    const image = "data:image/jpeg;base64,AAAA";
+    const mobilePlan = { image, width: 400, height: 900 };
+
+    expect(sectionPlanSchema.safeParse({ mobilePlan, apartments: [apartment] }).success).toBe(false);
+    expect(
+      sectionPlanSchema.safeParse({
+        mobilePlan,
+        apartments: [{ ...apartment, mobilePoints: triangle }],
+      }).success,
+    ).toBe(true);
+  });
 });
 
 describe("siteImageKeySchema", () => {
