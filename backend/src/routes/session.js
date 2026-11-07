@@ -1,7 +1,6 @@
 import express, { Router } from "express";
 import { rateLimit } from "express-rate-limit";
-import { checkPassword, clearSession, isAuthenticated, setSession } from "../lib/auth.js";
-import { loginSchema } from "../lib/schemas.js";
+import * as sessionController from "../controllers/sessionController.js";
 
 // Сесія адміністратора як ресурс: GET — поточна, POST — увійти, DELETE — вийти
 const router = Router();
@@ -14,18 +13,8 @@ const loginLimiter = rateLimit({
   message: { error: "Забагато спроб входу. Спробуйте пізніше." },
 });
 
-router.get("/", (req, res) => res.json({ authenticated: isAuthenticated(req) }));
-
-router.post("/", loginLimiter, express.json({ limit: "1kb" }), (req, res) => {
-  const { password } = loginSchema.parse(req.body);
-  if (!checkPassword(password)) return res.status(401).json({ error: "Невірний пароль" });
-  setSession(res);
-  res.status(201).json({ authenticated: true });
-});
-
-router.delete("/", (req, res) => {
-  clearSession(res);
-  res.status(204).end();
-});
+router.get("/", sessionController.current);
+router.post("/", loginLimiter, express.json({ limit: "1kb" }), sessionController.login);
+router.delete("/", sessionController.logout);
 
 export default router;

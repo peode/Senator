@@ -1,5 +1,6 @@
 import express from "express";
 import { ZodError } from "zod";
+import { corsMiddleware } from "./middleware/cors.js";
 import newsRouter from "./routes/news.js";
 import leadsRouter from "./routes/leads.js";
 import sessionRouter from "./routes/session.js";
@@ -11,6 +12,7 @@ app.disable("x-powered-by");
 // TRUST_PROXY — кількість проксі перед сервером
 if (process.env.NODE_ENV === "production") app.set("trust proxy", Number(process.env.TRUST_PROXY) || 1);
 
+app.use("/api", corsMiddleware);
 app.use("/api/news", newsRouter);
 app.use("/api/leads", leadsRouter);
 app.use("/api/session", sessionRouter);

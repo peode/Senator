@@ -8,7 +8,7 @@
 | Частина | Стек |
 |---|---|
 | `frontend/` | React 19, Vite, React Router, Zustand, Tailwind CSS 4, shadcn/ui |
-| `backend/` | Node.js, Express 5, Prisma 7, PostgreSQL, Zod |
+| `backend/` | Node.js, Express 5, Prisma 7, PostgreSQL, Zod, cors |
 | Інше | npm workspaces, ESLint, Telegram Bot API (сповіщення про заявки) |
 
 ## Структура проєкту
@@ -30,9 +30,15 @@ Senator/
     └── src/
         ├── index.js        # точка входу сервера
         ├── app.js
-        ├── routes/         # /api/news, /api/leads, /api/session
-        └── lib/
+        ├── routes/         # шляхи /api/news, /api/leads, /api/session і їхні middleware
+        ├── controllers/    # HTTP: валідація запиту, статуси й відповіді
+        ├── services/       # бізнес-логіка: приманка для ботів, Telegram, підпис сесій
+        ├── repositories/   # робота з базою: лише тут використовується Prisma
+        ├── middleware/     # cors, requireAdmin
+        └── lib/            # Prisma Client, схеми Zod, cookie сесії
 ```
+
+Запит проходить шари в одному напрямку: `routes → controllers → services → repositories`.
 
 ---
 
@@ -106,6 +112,7 @@ cp backend/.env.example backend/.env
 | `SESSION_SECRET` | ні (рекомендовано) | Довгий випадковий рядок для підпису cookie сесії. Якщо порожній — використовується `ADMIN_PASSWORD` |
 | `PORT` | ні | Порт API, за замовчуванням `3001` (Vite проксює саме на 3001) |
 | `TRUST_PROXY` | ні | Кількість проксі перед сервером у продакшені (Vercel + хостинг = `2`) |
+| `CORS_ORIGIN` | ні | Домени, яким дозволено звертатися до API напряму, через кому. Порожньо — лише той самий домен (достатньо для роботи через проксі Vite і Vercel) |
 | `TELEGRAM_BOT_TOKEN` | ні | Токен Telegram-бота для сповіщень про нові заявки |
 | `TELEGRAM_CHAT_ID` | ні | ID чату, куди бот надсилає заявки |
 
@@ -276,4 +283,4 @@ npm run dev                             # термінал 2
 2. На Vercel: Root Directory — `frontend`, Framework — Vite (решта за замовчуванням).
 
 Vercel проксює `/api/*` на бекенд, тож для браузера це один домен:
-CORS не потрібен, cookie адмінки працюють як є.
+`CORS_ORIGIN` можна лишити порожнім, cookie адмінки працюють як є.
