@@ -30,7 +30,7 @@ Senator/
     └── src/
         ├── index.js        # точка входу сервера
         ├── app.js
-        ├── routes/         # шляхи /api/news, /api/leads, /api/session і їхні middleware
+        ├── routes/         # шляхи /api/* і їхні middleware
         ├── controllers/    # HTTP: валідація запиту, статуси й відповіді
         ├── services/       # бізнес-логіка: приманка для ботів, Telegram, підпис сесій
         ├── repositories/   # робота з базою: лише тут використовується Prisma
@@ -151,10 +151,11 @@ TELEGRAM_CHAT_ID=
 # 1. Згенерувати Prisma Client (вже зроблено під час npm install, але можна повторити)
 npm exec -w backend -- prisma generate
 
-# 2. Застосувати міграції — створює таблиці News і Lead
+# 2. Застосувати міграції — створює таблиці новин, заявок, секцій, квартир і налаштувань
 npm run db:deploy
 
-# 3. Заповнити базу стартовими новинами (додає лише в порожню таблицю)
+# 3. Заповнити базу стартовими даними: новини, секції, квартири, контакти ЖК.
+#    Безпечно запускати повторно: змінене в адмінці не затирається
 npm run db:seed
 ```
 
@@ -220,7 +221,7 @@ npm run dev                             # термінал 2
 | `npm start` | Продакшн-запуск API (`NODE_ENV=production`) |
 | `npm run lint` | ESLint для обох частин |
 | `npm run db:deploy` | Застосувати міграції Prisma (`prisma migrate deploy`) |
-| `npm run db:seed` | Заповнити базу стартовими новинами (`prisma db seed`) |
+| `npm run db:seed` | Заповнити базу стартовими даними: новини, секції, квартири, контакти (`prisma db seed`) |
 
 Скрипт конкретної частини: `npm run <script> -w frontend` або `npm run <script> -w backend`
 (наприклад, `npm run preview -w frontend` — переглянути продакшн-збірку локально).
@@ -242,13 +243,25 @@ npm run dev                             # термінал 2
 | GET | `/api/session` | всі | Чи авторизований адмін |
 | POST | `/api/session` | всі | Вхід в адмінку (`{ "password": "..." }`) |
 | DELETE | `/api/session` | всі | Вихід |
+| GET | `/api/sections` | всі | Секції зі статусом, ціною за м² і квартирами |
+| PATCH | `/api/sections/:id` | адмін | Змінити статус і ціну секції (`{ "status": "SOLD", "price": 1350 }`) |
+| GET | `/api/apartments` | всі | Квартири в продажу. Фільтри в query: `rooms`, `areaFrom`, `areaTo`, `budgetTo` |
+| GET | `/api/settings` | всі | Контакти ЖК |
+| PUT | `/api/settings` | адмін | Зберегти контакти ЖК |
+
+Статуси секцій: `SELLING` (у продажу, ціна обов'язкова), `PLANNED`, `SOLD`, `COMING_SOON`.
+Приклад: `GET /api/apartments?rooms=2&areaFrom=60&budgetTo=90000`.
+
+Статус і ціну секцій, а також контакти адмін змінює в `/admin` (вкладки «Секції» і «Налаштування»).
+Зображення планів і розташування будинків на карті лишаються у фронтенді (`frontend/src/data/sections.js`).
 
 ## Можливі проблеми
 
 | Симптом | Рішення |
 |---|---|
 | `Cannot find module '.prisma/client'` / `@prisma/client did not initialize yet` | Виконати `npm exec -w backend -- prisma generate` |
-| `The table "public.News" does not exist` | Не застосовані міграції — `npm run db:deploy` |
+| `The table "public.News" does not exist` (або `Section`, `Apartment`, `SiteSettings`) | Не застосовані міграції — `npm run db:deploy` |
+| Порожній каталог квартир і карта без статусів | База не заповнена — `npm run db:seed` |
 | `P1001: Can't reach database server` | Перевірити `DATABASE_URL`, що Postgres запущений (`docker ps`) |
 | Міграція зависає на Neon | Використовується pooled-рядок — потрібен хост без `-pooler` або `DATABASE_URL_UNPOOLED` |
 | На сайті «Немає зв'язку із сервером» | Не запущений бекенд (`npm run dev:server`) або він не на порту 3001 |
@@ -274,7 +287,7 @@ npm run dev                             # термінал 2
 
 Змінні середовища — з `backend/.env.example` (`DATABASE_URL`, `ADMIN_PASSWORD`,
 `SESSION_SECRET`, `TELEGRAM_*`, `TRUST_PROXY=2`). `PORT` зазвичай задає сам хостинг.
-Після першого деплою один раз виконати `npm run db:seed` (або додати новини через адмінку).
+Після першого деплою і після міграцій із новими стартовими даними один раз виконати `npm run db:seed`.
 Перевірка: `https://<адреса-бекенда>/api/news` повертає JSON.
 
 ### 2. Фронтенд — Vercel

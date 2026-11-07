@@ -4,6 +4,9 @@ import { corsMiddleware } from "./middleware/cors.js";
 import newsRouter from "./routes/news.js";
 import leadsRouter from "./routes/leads.js";
 import sessionRouter from "./routes/session.js";
+import sectionsRouter from "./routes/sections.js";
+import apartmentsRouter from "./routes/apartments.js";
+import settingsRouter from "./routes/settings.js";
 
 const app = express();
 
@@ -16,6 +19,9 @@ app.use("/api", corsMiddleware);
 app.use("/api/news", newsRouter);
 app.use("/api/leads", leadsRouter);
 app.use("/api/session", sessionRouter);
+app.use("/api/sections", sectionsRouter);
+app.use("/api/apartments", apartmentsRouter);
+app.use("/api/settings", settingsRouter);
 app.use("/api", (req, res) => res.status(404).json({ error: "Не знайдено" }));
 
 app.use((err, req, res, next) => {

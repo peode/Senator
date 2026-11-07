@@ -1,4 +1,5 @@
 import { createPrisma } from "../src/lib/db.js";
+import { defaultApartments, defaultSections, defaultSettings } from "./catalog.js";
 import { defaultNews } from "./news.js";
 
 try {
@@ -18,5 +19,11 @@ if ((await prisma.news.count()) === 0) {
 } else {
   console.log("Новини вже є — пропускаю");
 }
+
+// skipDuplicates і upsert без update: повторний запуск не затирає змінене в адмінці
+await prisma.section.createMany({ data: defaultSections, skipDuplicates: true });
+await prisma.apartment.createMany({ data: defaultApartments, skipDuplicates: true });
+await prisma.siteSettings.upsert({ where: { id: 1 }, create: defaultSettings, update: {} });
+console.log(`Каталог: ${defaultSections.length} секцій, ${defaultApartments.length} квартир`);
 
 await prisma.$disconnect();

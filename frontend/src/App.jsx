@@ -13,10 +13,16 @@ import AboutDeveloper from "./pages/AboutDeveloperPage";
 import Admin from "./pages/AdminPage";
 import Footer from "./components/Footer";
 import LeadModal from "./components/LeadModal";
+import { useSettingsStore } from "./stores/settingsStore";
 
 const Layout = () => {
   const { pathname } = useLocation();
   const isAdmin = pathname.startsWith("/admin");
+  const fetchSettings = useSettingsStore((state) => state.fetchSettings);
+
+  useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
 
   useEffect(() => {
     window.scrollTo(0, 0);

@@ -4,12 +4,11 @@ import { Link, useParams } from "react-router-dom";
 import ApartmentFilters from "@/components/ApartmentFilters";
 import PageBanner from "@/components/PageBanner";
 import { Button } from "@/components/ui/button";
-import { formatPrice, getSection } from "@/data/sections";
-import { matchesFilters, useApartmentFiltersStore } from "@/stores/apartmentFiltersStore";
+import { formatPrice, leadComment, plans, roomsLabel, sectionStatuses } from "@/data/sections";
+import { useApartments } from "@/stores/apartmentsStore";
 import { useLeadModalStore } from "@/stores/leadModalStore";
+import { useSections } from "@/stores/sectionsStore";
 import "@/components/HouseMap.css";
-
-const rooms = (apartment) => `${apartment.rooms}-кімнатна`;
 
 const Section = () => {
   const { sectionId } = useParams();
@@ -17,12 +16,16 @@ const Section = () => {
   const [hovered, setHovered] = useState(null);
   const [selected, setSelected] = useState(null);
   const [cursor, setCursor] = useState({ x: 0, y: 0 });
-  const filters = useApartmentFiltersStore();
+  const { sections, loading } = useSections();
+  const { apartments: matching, loaded } = useApartments();
   const openLeadModal = useLeadModalStore((state) => state.open);
 
-  const section = getSection(sectionId);
+  const section = sections.find(({ id }) => String(id) === sectionId);
+  const plan = plans[sectionId];
 
-  if (!section) {
+  if (loading) return <PageBanner title={`Секція №${sectionId}`} />;
+
+  if (!section || !plan) {
     return (
       <>
         <PageBanner title={`Секція №${sectionId}`} />
@@ -36,10 +39,13 @@ const Section = () => {
     );
   }
 
-  const { plan, apartments, price } = section;
-  const chosen = selected && matchesFilters(selected, filters) ? selected : null;
+  const { apartments, price, status } = section;
+  // поки каталог не завантажився, не затемнюємо план
+  const isMatch = (apartment) =>
+    status === "SELLING" && (!loaded || matching.some(({ id }) => id === apartment.id));
+  const chosen = selected && isMatch(selected) ? selected : null;
   const active = hovered ?? chosen;
-  const hasMatches = apartments.some((apartment) => matchesFilters(apartment, filters));
+  const hasMatches = apartments.some(isMatch);
 
   const updateCursor = (event) => {
     const rect = mapRef.current.getBoundingClientRect();
@@ -64,7 +70,7 @@ const Section = () => {
           <div className="mb-6 rounded-md bg-surface p-5">
             {chosen ? (
               <>
-                <h2 className="text-lg font-bold">{rooms(chosen)} квартира</h2>
+                <h2 className="text-lg font-bold">{roomsLabel(chosen)} квартира</h2>
                 <p className="mt-1">Площа: {chosen.area} м²</p>
                 <p>
                   Вартість: <strong>{formatPrice(chosen.area * price)} $</strong> (
@@ -74,13 +80,13 @@ const Section = () => {
                   variant="gold"
                   size="xl"
                   className="mt-4"
-                  onClick={() =>
-                    openLeadModal(`Секція №${sectionId}, ${rooms(chosen)} квартира, ${chosen.area} м²`)
-                  }
+                  onClick={() => openLeadModal(leadComment(sectionId, chosen))}
                 >
                   Залишити заявку на цю квартиру
                 </Button>
               </>
+            ) : status !== "SELLING" ? (
+              <p>Статус секції: {sectionStatuses[status].label}.</p>
             ) : !hasMatches ? (
               <p>У цій секції немає квартир за обраними фільтрами.</p>
             ) : (
@@ -113,7 +119,7 @@ const Section = () => {
                 <polygon
                   key={apartment.id}
                   className={`house-zone ${active?.id === apartment.id ? "house-zone-active" : ""} ${
-                    matchesFilters(apartment, filters) ? "" : "house-zone-dimmed house-zone-disabled"
+                    isMatch(apartment) ? "" : "house-zone-dimmed house-zone-disabled"
                   }`}
                   points={apartment.points.map((point) => point.join(",")).join(" ")}
                   onPointerEnter={(event) => {
@@ -128,7 +134,7 @@ const Section = () => {
 
             {hovered && (
               <div className="house-tooltip" style={{ left: cursor.x, top: cursor.y }}>
-                <strong>{rooms(hovered)} квартира</strong>
+                <strong>{roomsLabel(hovered)} квартира</strong>
                 <p>Площа: {hovered.area} м²</p>
                 <p>Вартість: {formatPrice(hovered.area * price)} $</p>
               </div>

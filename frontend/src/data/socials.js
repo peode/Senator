@@ -1,4 +1,4 @@
-// Замінити реальними посиланнями (або змінити в адмін-панелі: /admin)
+// Значення до відповіді сервера; реальні посилання задаються в адмін-панелі (/admin)
 export const defaultSocials = {
   facebook: "https://www.facebook.com/",
   instagram: "https://www.instagram.com/",

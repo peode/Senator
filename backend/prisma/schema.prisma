@@ -36,3 +36,41 @@ model Lead {
 
   @@index([createdAt(sort: Desc)])
 }
+
+enum SectionStatus {
+  SELLING
+  PLANNED
+  SOLD
+  COMING_SOON
+}
+
+// id — номер секції на карті ЖК
+model Section {
+  id         Int           @id
+  status     SectionStatus @default(PLANNED)
+  price      Int?
+  apartments Apartment[]
+  updatedAt  DateTime      @updatedAt
+}
+
+model Apartment {
+  id        String  @id
+  sectionId Int
+  section   Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  rooms     Int
+  area      Float
+  // вершини багатокутника квартири на зображенні плану
+  points    Json
+
+  @@index([sectionId])
+}
+
+// Один рядок (id = 1): контакти ЖК
+model SiteSettings {
+  id        Int      @id @default(1)
+  phone     String
+  address   String
+  hours     String
+  socials   Json
+  updatedAt DateTime @updatedAt
+}

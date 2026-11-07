@@ -8,12 +8,18 @@ const roomOptions = [
   { value: 3, label: "3" },
 ];
 
+const numberFields = [
+  { name: "areaFrom", label: "Площа від, м²" },
+  { name: "areaTo", label: "Площа до, м²" },
+  { name: "budgetTo", label: "Бюджет до, $" },
+];
+
 const inputClass =
-  "w-24 rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-brand focus:ring-3 focus:ring-brand/20";
+  "w-28 rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-brand focus:ring-3 focus:ring-brand/20";
 
 const ApartmentFilters = () => {
   const filters = useApartmentFiltersStore();
-  const { rooms, areaFrom, areaTo, setFilters, resetFilters } = filters;
+  const { rooms, setFilters, resetFilters } = filters;
 
   return (
     <div className="mb-6 flex flex-wrap items-end gap-x-6 gap-y-4 rounded-md bg-surface p-5 text-ink">
@@ -36,27 +42,18 @@ const ApartmentFilters = () => {
         </div>
       </div>
 
-      <label className="flex flex-col gap-1.5 text-sm font-medium text-slate-700">
-        Площа від, м²
-        <input
-          type="number"
-          min="0"
-          value={areaFrom}
-          onChange={(event) => setFilters({ areaFrom: event.target.value })}
-          className={inputClass}
-        />
-      </label>
-
-      <label className="flex flex-col gap-1.5 text-sm font-medium text-slate-700">
-        Площа до, м²
-        <input
-          type="number"
-          min="0"
-          value={areaTo}
-          onChange={(event) => setFilters({ areaTo: event.target.value })}
-          className={inputClass}
-        />
-      </label>
+      {numberFields.map(({ name, label }) => (
+        <label key={name} className="flex flex-col gap-1.5 text-sm font-medium text-slate-700">
+          {label}
+          <input
+            type="number"
+            min="0"
+            value={filters[name]}
+            onChange={(event) => setFilters({ [name]: event.target.value })}
+            className={inputClass}
+          />
+        </label>
+      ))}
 
       {hasActiveFilters(filters) && (
         <Button variant="outline" onClick={resetFilters}>

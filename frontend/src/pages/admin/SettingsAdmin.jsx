@@ -11,21 +11,30 @@ const Label = ({ title, children }) => (
   </label>
 );
 
-const SettingsAdmin = () => {
-  const settings = useSettings();
-  const setSettings = useSettingsStore((state) => state.setSettings);
+const SettingsForm = ({ settings }) => {
+  const saveSettings = useSettingsStore((state) => state.saveSettings);
   const [draft, setDraft] = useState(settings);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   const update = (patch) => {
     setSaved(false);
     setDraft((current) => ({ ...current, ...patch }));
   };
 
-  const submit = (event) => {
+  const submit = async (event) => {
     event.preventDefault();
-    setSettings(draft);
-    setSaved(true);
+    setSaving(true);
+    setError("");
+    try {
+      await saveSettings(draft);
+      setSaved(true);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -66,12 +75,29 @@ const SettingsAdmin = () => {
         </Label>
       ))}
 
+      {error && <p className="text-sm text-red-600">{error}</p>}
+
       <div className="flex items-center gap-4">
-        <Button type="submit" variant="gold" size="xl">Зберегти</Button>
+        <Button type="submit" variant="gold" size="xl" disabled={saving}>
+          {saving ? "Зберігаємо..." : "Зберегти"}
+        </Button>
         {saved && <span className="text-sm text-brand-dark">Збережено</span>}
       </div>
     </form>
   );
+};
+
+// Форма з'являється лише з даними сервера, інакше збереження затерло б їх значеннями за замовчуванням
+const SettingsAdmin = () => {
+  const settings = useSettings();
+  const loaded = useSettingsStore((state) => state.loaded);
+  const error = useSettingsStore((state) => state.error);
+
+  if (!loaded) {
+    return error ? <p className="text-sm text-red-600">Не вдалося завантажити налаштування.</p> : null;
+  }
+
+  return <SettingsForm settings={settings} />;
 };
 
 export default SettingsAdmin;

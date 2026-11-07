@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NewsAdmin from "./admin/NewsAdmin";
+import SectionsAdmin from "./admin/SectionsAdmin";
 import SettingsAdmin from "./admin/SettingsAdmin";
 import LeadsAdmin from "./admin/LeadsAdmin";
 import { useAuthStore } from "@/stores/authStore";
@@ -11,6 +12,7 @@ import { fieldClass } from "./admin/fields";
 const tabs = [
   { id: "leads", label: "Заявки" },
   { id: "news", label: "Новини" },
+  { id: "sections", label: "Секції" },
   { id: "settings", label: "Налаштування" },
 ];
 
@@ -100,6 +102,7 @@ const Admin = () => {
 
         {tab === "leads" && <LeadsAdmin />}
         {tab === "news" && <NewsAdmin />}
+        {tab === "sections" && <SectionsAdmin />}
         {tab === "settings" && <SettingsAdmin />}
       </div>
     </div>
