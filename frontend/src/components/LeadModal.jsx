@@ -120,7 +120,7 @@ const LeadModal = () => {
       onClick={(event) => event.target === dialogRef.current && close()}
       className="m-auto w-[calc(100%-32px)] max-w-[440px] rounded-2xl bg-white p-0 text-ink shadow-card backdrop:bg-ink/60"
     >
-      <div className="relative p-6 min-[521px]:p-8">
+      <div className="relative p-6 sm:p-8">
         <button
           type="button"
           onClick={close}

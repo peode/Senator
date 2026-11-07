@@ -8,7 +8,13 @@ import { formatPrice, leadComment, plans, roomsLabel, sectionStatuses } from "@/
 import { useApartments } from "@/stores/apartmentsStore";
 import { useLeadModalStore } from "@/stores/leadModalStore";
 import { useSections } from "@/stores/sectionsStore";
-import "@/components/HouseMap.css";
+import {
+  mapClass,
+  mapImageClass,
+  mapSvgClass,
+  mapTooltipClass,
+  mapZoneClass,
+} from "@/lib/mapClasses";
 
 const Section = () => {
   const { sectionId } = useParams();
@@ -16,7 +22,7 @@ const Section = () => {
   const [hovered, setHovered] = useState(null);
   const [selected, setSelected] = useState(null);
   const [cursor, setCursor] = useState({ x: 0, y: 0 });
-  const { sections, loading } = useSections();
+  const { sections, loading, error } = useSections();
   const { apartments: matching, loaded } = useApartments();
   const openLeadModal = useLeadModalStore((state) => state.open);
 
@@ -25,12 +31,16 @@ const Section = () => {
 
   if (loading) return <PageBanner title={`Секція №${sectionId}`} />;
 
-  if (!section || !plan) {
+  if (error || !section || !plan) {
     return (
       <>
         <PageBanner title={`Секція №${sectionId}`} />
         <div className="px-[5%] py-16 text-center text-ink">
-          <p className="mb-6">Планування цієї секції поки що недоступне.</p>
+          <p className="mb-6">
+            {error
+              ? "Не вдалося завантажити дані секції. Спробуйте пізніше."
+              : "Планування цієї секції поки що недоступне."}
+          </p>
           <Link className="font-semibold text-brand-dark underline" to="/apartments">
             ← До вибору секції
           </Link>
@@ -65,7 +75,7 @@ const Section = () => {
         </Link>
 
         <div className="mx-auto max-w-[1100px]">
-          <ApartmentFilters />
+          <ApartmentFilters className="mb-6" />
 
           <div className="mb-6 rounded-md bg-surface p-5">
             {chosen ? (
@@ -98,7 +108,7 @@ const Section = () => {
             </p>
           </div>
           <div
-            className="house-map"
+            className={mapClass}
             ref={mapRef}
             onPointerMove={updateCursor}
             onPointerLeave={() => setHovered(null)}
@@ -106,21 +116,23 @@ const Section = () => {
             <img
               src={plan.src}
               alt={`Планування секції №${sectionId}`}
-              className="house-map-image"
+              className={mapImageClass}
               draggable="false"
             />
 
             <svg
-              className="house-map-svg"
+              className={mapSvgClass}
               viewBox={`0 0 ${plan.width} ${plan.height}`}
               aria-label="Квартири"
             >
               {apartments.map((apartment) => (
                 <polygon
                   key={apartment.id}
-                  className={`house-zone ${active?.id === apartment.id ? "house-zone-active" : ""} ${
-                    isMatch(apartment) ? "" : "house-zone-dimmed house-zone-disabled"
-                  }`}
+                  className={mapZoneClass({
+                    active: active?.id === apartment.id,
+                    dimmed: !isMatch(apartment),
+                    disabled: !isMatch(apartment),
+                  })}
                   points={apartment.points.map((point) => point.join(",")).join(" ")}
                   onPointerEnter={(event) => {
                     updateCursor(event);
@@ -133,7 +145,7 @@ const Section = () => {
             </svg>
 
             {hovered && (
-              <div className="house-tooltip" style={{ left: cursor.x, top: cursor.y }}>
+              <div className={mapTooltipClass} style={{ left: cursor.x, top: cursor.y }}>
                 <strong>{roomsLabel(hovered)} квартира</strong>
                 <p>Площа: {hovered.area} м²</p>
                 <p>Вартість: {formatPrice(hovered.area * price)} $</p>

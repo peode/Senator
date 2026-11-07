@@ -1,8 +1,15 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./HouseMap.css";
 import ApartmentFilters from "@/components/ApartmentFilters";
 import { plans, sectionStatuses } from "@/data/sections";
+import {
+  mapClass,
+  mapImageClass,
+  mapSvgClass,
+  mapTooltipClass,
+  mapZoneClass,
+} from "@/lib/mapClasses";
+import { cn } from "@/lib/utils";
 import { hasActiveFilters, useApartmentFiltersStore } from "@/stores/apartmentFiltersStore";
 import { useApartments } from "@/stores/apartmentsStore";
 import { useSections } from "@/stores/sectionsStore";
@@ -40,7 +47,7 @@ const HouseMap = () => {
   const [activeHouse, setActiveHouse] = useState(null);
   const [cursor, setCursor] = useState({ x: 0, y: 0 });
   const filtering = useApartmentFiltersStore(hasActiveFilters);
-  const { sections } = useSections();
+  const { sections, error } = useSections();
   const { apartments, loaded } = useApartments();
 
   const matchCount = (house) =>
@@ -58,24 +65,30 @@ const HouseMap = () => {
   const activeStatus = activeSection && sectionStatuses[activeSection.status];
 
   return (
-    <section className="house-map-section">
-      <ApartmentFilters />
+    <section className="bg-white">
+      <div className="flex flex-wrap items-center justify-between gap-4 bg-white px-[3.5%] py-[22px] text-ink">
+        <ApartmentFilters />
 
-      <div className="house-map-footer">
-        <p>Оберіть будинок, щоб побачити його план та іншу інформацію</p>
+        <p className="text-[15px] font-medium">Оберіть будинок, щоб побачити його план та іншу інформацію</p>
 
-        <ul className="house-map-legend">
+        <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
           {Object.values(sectionStatuses).map((status) => (
-            <li key={status.label}>
-              <span className={`legend-dot ${status.className}`} />
+            <li key={status.label} className="flex items-center gap-2">
+              <span className={cn("inline-block size-[9px] rounded-full", status.dotClass)} />
               {status.label}
             </li>
           ))}
         </ul>
       </div>
 
+      {error && (
+        <p className="px-[3.5%] pb-5 text-sm text-red-600">
+          Не вдалося завантажити дані секцій, тому підказки й плани тимчасово недоступні.
+        </p>
+      )}
+
       <div
-        className="house-map"
+        className={mapClass}
         ref={mapRef}
         onPointerMove={updateCursor}
         onPointerLeave={() => setActiveHouse(null)}
@@ -83,21 +96,22 @@ const HouseMap = () => {
         <img
           src={topView}
           alt="Вигляд ЖК Senator зверху"
-          className="house-map-image"
+          className={mapImageClass}
           draggable="false"
         />
 
         <svg
-          className="house-map-svg"
+          className={mapSvgClass}
           viewBox={`0 0 ${IMAGE_WIDTH} ${IMAGE_HEIGHT}`}
           aria-label="Карта будинків"
         >
           {houses.map((house) => (
             <rect
               key={house.id}
-              className={`house-zone ${
-                activeHouse?.id === house.id ? "house-zone-active" : ""
-              } ${filtering && loaded && matchCount(house) === 0 ? "house-zone-dimmed" : ""}`}
+              className={mapZoneClass({
+                active: activeHouse?.id === house.id,
+                dimmed: filtering && loaded && matchCount(house) === 0,
+              })}
               x={house.x}
               y={house.y}
               width={house.w}
@@ -120,11 +134,16 @@ const HouseMap = () => {
 
         {activeStatus && (
           <div
-            className="house-tooltip"
+            className={mapTooltipClass}
             style={{ left: cursor.x, top: cursor.y }}
           >
             <strong>Секція №{activeHouse.id}</strong>
-            <span className={`house-status ${activeStatus.className}`}>
+            <span
+              className={cn(
+                "inline-flex items-center gap-[7px] text-xs font-semibold before:inline-block before:size-[9px] before:rounded-full before:bg-current",
+                activeStatus.textClass,
+              )}
+            >
               {activeStatus.label}
             </span>
             {activeSection.status === "SELLING" && (

@@ -21,9 +21,9 @@ const Header = () => {
 
   return (
     <header
-      className={`inset-x-0 top-0 z-100 flex items-center justify-between gap-2.5 px-[5%] text-white min-[521px]:px-[3.5%] min-[1051px]:gap-7 ${
+      className={`inset-x-0 top-0 z-100 flex items-center justify-between gap-2.5 px-[5%] text-white sm:px-[3.5%] lg:gap-7 ${
         isHome
-          ? "absolute min-h-[75px] bg-linear-to-b from-ink/55 to-transparent py-4 min-[521px]:min-h-[85px] min-[521px]:py-[22px] min-[1051px]:min-h-[100px]"
+          ? "absolute min-h-[75px] bg-linear-to-b from-ink/55 to-transparent py-4 sm:min-h-[85px] sm:py-[22px] lg:min-h-[100px]"
           : "relative h-[100px] bg-ink"
       }`}
     >
@@ -32,45 +32,45 @@ const Header = () => {
         <img
           src={Logo}
           alt="Senator"
-          className="block h-auto w-[130px] mix-blend-screen brightness-140 grayscale invert min-[521px]:w-[170px]"
+          className="block h-auto w-[130px] mix-blend-screen brightness-140 grayscale invert sm:w-[170px]"
         />
       </Link>
 
       <nav
         className={`${
           menuOpen ? "flex" : "hidden"
-        } absolute top-full left-0 w-full flex-col items-start bg-ink px-[5%] py-5 min-[1051px]:static min-[1051px]:flex min-[1051px]:w-auto min-[1051px]:flex-row min-[1051px]:items-center min-[1051px]:justify-center min-[1051px]:gap-3 min-[1051px]:bg-transparent min-[1051px]:p-0 min-[1251px]:gap-5`}
+        } absolute top-full left-0 w-full flex-col items-start bg-ink px-[5%] py-5 lg:static lg:flex lg:w-auto lg:flex-row lg:items-center lg:justify-center lg:gap-3 lg:bg-transparent lg:p-0 xl:gap-5`}
       >
         {navLinks.map(({ href, label }) => (
           <Link
             key={href}
             to={href}
             onClick={() => setMenuOpen(false)}
-            className="group relative w-full border-b border-white/10 py-3 text-sm font-medium whitespace-normal transition-colors hover:text-brand min-[1051px]:w-auto min-[1051px]:border-0 min-[1051px]:py-1.5 min-[1051px]:text-xs min-[1051px]:whitespace-nowrap min-[1251px]:text-[13px]"
+            className="group relative w-full border-b border-white/10 py-3 text-sm font-medium whitespace-normal transition-colors hover:text-brand lg:w-auto lg:border-0 lg:py-1.5 lg:text-xs lg:whitespace-nowrap xl:text-[13px]"
           >
             {label}
-            <span className="absolute inset-x-0 bottom-0 hidden h-0.5 origin-left scale-x-0 rounded-full bg-brand transition-transform group-hover:scale-x-100 min-[1051px]:block" />
+            <span className="absolute inset-x-0 bottom-0 hidden h-0.5 origin-left scale-x-0 rounded-full bg-brand transition-transform group-hover:scale-x-100 lg:block" />
           </Link>
         ))}
       </nav>
 
-      <div className="ml-auto flex shrink-0 items-center gap-4 min-[1051px]:ml-0">
+      <div className="ml-auto flex shrink-0 items-center gap-4 lg:ml-0">
         <Button
           variant="gold"
-          className="h-auto px-3 py-2.5 text-[10px] min-[521px]:px-5 min-[521px]:py-3.5 min-[521px]:text-[13px]"
+          className="h-auto px-3 py-2.5 text-[10px] sm:px-5 sm:py-3.5 sm:text-[13px]"
           onClick={() => {
             setMenuOpen(false);
             openLeadModal();
           }}
         >
-          <span className="min-[521px]:hidden">Заявка на дзвінок</span>
-          <span className="hidden min-[521px]:inline">Залишити заявку на дзвінок</span>
+          <span className="sm:hidden">Заявка на дзвінок</span>
+          <span className="hidden sm:inline">Залишити заявку на дзвінок</span>
         </Button>
       </div>
 
       <button
         type="button"
-        className="flex shrink-0 cursor-pointer items-center justify-center text-white min-[1051px]:hidden"
+        className="flex shrink-0 cursor-pointer items-center justify-center text-white lg:hidden"
         onClick={() => setMenuOpen(!menuOpen)}
         aria-label={menuOpen ? "Закрити меню" : "Відкрити меню"}
       >

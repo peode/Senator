@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+// найбільше значення INTEGER у PostgreSQL: більше число база не прийме
+const MAX_INT = 2_147_483_647;
+
 const text = (max) => z.string().trim().min(1, "Обов'язкове поле").max(max, "Занадто довге значення");
 
 // ключ із бібліотеки сайту або власне фото (data:/http URL, стиснене в браузері)
@@ -42,7 +45,7 @@ export const newsSchema = z.object({
 export const sectionSchema = z
   .object({
     status: z.enum(["SELLING", "PLANNED", "SOLD", "COMING_SOON"], "Невірний статус"),
-    price: z.number("Невірна ціна").int("Невірна ціна").positive("Невірна ціна").nullable(),
+    price: z.number("Невірна ціна").int("Невірна ціна").positive("Невірна ціна").max(MAX_INT, "Невірна ціна").nullable(),
   })
   .refine(({ status, price }) => status !== "SELLING" || price !== null, {
     path: ["price"],
@@ -52,7 +55,7 @@ export const sectionSchema = z
 const filterNumber = z.coerce.number("Невірне значення фільтра").min(0, "Невірне значення фільтра").optional();
 
 export const apartmentFiltersSchema = z.object({
-  rooms: filterNumber,
+  rooms: z.coerce.number("Невірне значення фільтра").int("Невірне значення фільтра").min(0, "Невірне значення фільтра").max(MAX_INT, "Невірне значення фільтра").optional(),
   areaFrom: filterNumber,
   areaTo: filterNumber,
   budgetTo: filterNumber,
@@ -73,4 +76,4 @@ export const settingsSchema = z.object({
 
 export const loginSchema = z.object({ password: z.string().min(1).max(200) });
 
-export const idSchema = z.coerce.number().int().positive();
+export const idSchema = z.coerce.number().int().positive().max(MAX_INT);

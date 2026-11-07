@@ -30,19 +30,19 @@ const Footer = () => {
   const { phone, address, hours, socials } = useSettings();
 
   return (
-    <footer className="w-full bg-ink px-[6%] pt-11 pb-9 text-white/85 min-[851px]:px-[4.7%] min-[851px]:pt-[70px] min-[851px]:pb-[50px]">
-      <div className="mx-auto grid max-w-[1800px] grid-cols-2 items-start gap-x-6 gap-y-9 min-[851px]:gap-x-8 min-[1351px]:grid-cols-[1.1fr_1.4fr_1fr_1fr_1.4fr] min-[1351px]:gap-10 max-[1350px]:min-[851px]:grid-cols-[1fr_1.3fr_1fr_1fr]">
-        <div className="col-span-2 min-[851px]:col-span-1">
+    <footer className="w-full bg-ink px-[6%] pt-11 pb-9 text-white/85 md:px-[4.7%] md:pt-[70px] md:pb-[50px]">
+      <div className="mx-auto grid max-w-[1800px] grid-cols-2 items-start gap-x-6 gap-y-9 md:gap-x-8 xl:grid-cols-[1.1fr_1.4fr_1fr_1fr_1.4fr] xl:gap-10 md:max-xl:grid-cols-[1fr_1.3fr_1fr_1fr]">
+        <div className="col-span-2 md:col-span-1">
           <Link to="/" className="block w-fit">
             <img
               src={Logo}
               alt="Senator"
-              className="block h-auto w-[140px] mix-blend-screen brightness-140 grayscale invert min-[851px]:w-[170px]"
+              className="block h-auto w-[140px] mix-blend-screen brightness-140 grayscale invert md:w-[170px]"
             />
           </Link>
         </div>
 
-        <div className="col-span-2 flex flex-col items-start gap-4 min-[851px]:col-span-1">
+        <div className="col-span-2 flex flex-col items-start gap-4 md:col-span-1">
           <h3 className="text-base font-medium tracking-wide text-white">Відділ Продажу</h3>
 
           <a
@@ -85,7 +85,7 @@ const Footer = () => {
           ))}
         </nav>
 
-        <div className="col-span-2 flex flex-col items-start gap-5 min-[1351px]:col-span-1 max-[1350px]:min-[851px]:col-start-2 max-[1350px]:min-[851px]:col-end-[-1]">
+        <div className="col-span-2 flex flex-col items-start gap-5 xl:col-span-1 md:max-xl:col-start-2 md:max-xl:col-end-[-1]">
           <p className="text-base font-medium tracking-wide text-white">
             Ми в соцмережах
           </p>

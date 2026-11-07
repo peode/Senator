@@ -16,8 +16,17 @@
     --color-ink: #17252c;
     --color-surface: #f5f7f8;
 
+    /* Статуси секцій: світлі — на темній підказці, насичені — на білому */
+    --color-status-selling: #6fd18b;
+    --color-status-selling-strong: #3fae63;
+    --color-status-sold: #ff7b7b;
+    --color-status-sold-strong: #e64040;
+    --color-status-planned: #ffb52e;
+    --color-status-soon: #00aaff;
+
     --shadow-card: 0 6px 24px rgb(12 27 34 / 7%);
     --shadow-card-hover: 0 14px 34px rgb(12 27 34 / 13%);
+    --shadow-tooltip: 0 8px 24px rgb(0 0 0 / 30%);
 }
 
 @theme inline {

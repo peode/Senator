@@ -32,18 +32,18 @@ const Hero = () => {
 
       <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgb(12_27_34/78%)_0%,rgb(12_27_34/48%)_48%,rgb(12_27_34/12%)_100%),linear-gradient(0deg,rgb(12_27_34/30%)_0%,transparent_45%)]" />
 
-      <section className="relative z-10 max-w-[850px] px-[5%] pt-[135px] pb-[120px] min-[421px]:pt-[155px] md:px-[3.5%] md:pt-[clamp(170px,21vh,230px)] md:pb-[150px]">
-        <p className="mb-4 text-[10px] font-bold tracking-[2px] text-brand min-[421px]:text-xs min-[421px]:tracking-[3px]">
+      <section className="relative z-10 max-w-[850px] px-[5%] pt-[135px] pb-[120px] sm:pt-[155px] md:px-[3.5%] md:pt-[clamp(170px,21vh,230px)] md:pb-[150px]">
+        <p className="mb-4 text-[10px] font-bold tracking-[2px] text-brand sm:text-xs sm:tracking-[3px]">
           НОВИЙ РІВЕНЬ КОМФОРТУ
         </p>
 
-        <h1 className="text-[38px] leading-[1.1] font-bold tracking-[-1.5px] min-[421px]:text-[clamp(39px,9vw,60px)] md:text-[clamp(42px,5.5vw,76px)]">
+        <h1 className="text-[38px] leading-[1.1] font-bold tracking-[-1.5px] sm:text-[clamp(39px,9vw,60px)] md:text-[clamp(42px,5.5vw,76px)]">
           ЖК «Senator»
           <br />
           <span className="text-gold">Будинок високого рангу</span>
         </h1>
 
-        <p className="mt-6 mb-[30px] max-w-[410px] text-[13px] leading-[1.7] text-white/85 min-[421px]:text-sm md:max-w-[480px] md:text-base">
+        <p className="mt-6 mb-[30px] max-w-[410px] text-[13px] leading-[1.7] text-white/85 sm:text-sm md:max-w-[480px] md:text-base">
           Сучасна архітектура, продумані планування
           та комфорт для всієї родини.
         </p>
@@ -69,7 +69,7 @@ const Hero = () => {
             <Play size={20} fill="currentColor" />
           </Button>
 
-          <span className="text-[9px] font-semibold tracking-[1.2px] min-[421px]:text-[10px]">
+          <span className="text-[9px] font-semibold tracking-[1.2px] sm:text-[10px]">
             ПЕРЕГЛЯНУТИ ВІДЕО
           </span>
         </div>

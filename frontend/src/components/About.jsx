@@ -89,7 +89,7 @@ const About = () => {
                 onClick={() => setActiveAmenity(amenity)}
                 aria-pressed={isActive}
                 className={cn(
-                  "relative flex min-h-[110px] min-w-0 cursor-pointer flex-col items-start justify-center gap-3.5 rounded-2xl p-3.5 text-left text-neutral-900 transition-colors min-[421px]:min-h-[120px] min-[421px]:p-[18px] lg:min-h-[155px] lg:gap-6 lg:px-6 lg:py-[25px]",
+                  "relative flex min-h-[110px] min-w-0 cursor-pointer flex-col items-start justify-center gap-3.5 rounded-2xl p-3.5 text-left text-neutral-900 transition-colors sm:min-h-[120px] sm:p-[18px] lg:min-h-[155px] lg:gap-6 lg:px-6 lg:py-[25px]",
                   isActive ? "bg-gold-active" : "bg-gold-soft hover:bg-amber-200"
                 )}
               >
@@ -98,14 +98,14 @@ const About = () => {
                   className="size-8 shrink-0 lg:size-[39px]"
                 />
 
-                <span className="max-w-[150px] text-[13px] leading-[1.4] font-bold min-[421px]:text-sm lg:text-base">
+                <span className="max-w-[150px] text-[13px] leading-[1.4] font-bold sm:text-sm lg:text-base">
                   {amenity.title}
                 </span>
 
                 {isActive && (
                   <ArrowRight
                     size={22}
-                    className="absolute right-2 bottom-2.5 w-[17px] min-[421px]:right-4 min-[421px]:bottom-[22px] min-[421px]:w-auto"
+                    className="absolute right-2 bottom-2.5 w-[17px] sm:right-4 sm:bottom-[22px] sm:w-auto"
                   />
                 )}
               </button>
@@ -121,8 +121,8 @@ const About = () => {
             className="block size-full max-h-[430px] min-h-[300px] animate-in object-cover fade-in duration-300 md:max-h-none md:min-h-[400px] lg:min-h-[465px]"
           />
 
-          <div className="absolute inset-x-0 bottom-0 bg-linear-to-b from-transparent to-black/70 px-[18px] pt-10 pb-[18px] text-white min-[421px]:px-[30px] min-[421px]:pt-[50px] min-[421px]:pb-[25px]">
-            <span className="text-[19px] font-bold min-[421px]:text-[22px]">
+          <div className="absolute inset-x-0 bottom-0 bg-linear-to-b from-transparent to-black/70 px-[18px] pt-10 pb-[18px] text-white sm:px-[30px] sm:pt-[50px] sm:pb-[25px]">
+            <span className="text-[19px] font-bold sm:text-[22px]">
               {activeAmenity.title}
             </span>
             <p className="mt-2 text-sm leading-normal">
