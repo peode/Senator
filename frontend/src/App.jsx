@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 import Header from "./components/Header";
@@ -11,9 +12,15 @@ import Contacts from "./pages/ContactsPage";
 import AboutDeveloper from "./pages/AboutDeveloperPage";
 import Admin from "./pages/AdminPage";
 import Footer from "./components/Footer";
+import LeadModal from "./components/LeadModal";
 
 const Layout = () => {
-  const isAdmin = useLocation().pathname.startsWith("/admin");
+  const { pathname } = useLocation();
+  const isAdmin = pathname.startsWith("/admin");
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
   return (
     <>
@@ -30,6 +37,7 @@ const Layout = () => {
         <Route path="/admin" element={<Admin />} />
       </Routes>
       {!isAdmin && <Footer />}
+      {!isAdmin && <LeadModal />}
     </>
   );
 };

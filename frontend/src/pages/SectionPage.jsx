@@ -1,8 +1,12 @@
 import { useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
+import ApartmentFilters from "@/components/ApartmentFilters";
 import PageBanner from "@/components/PageBanner";
+import { Button } from "@/components/ui/button";
 import { formatPrice, getSection } from "@/data/sections";
+import { matchesFilters, useApartmentFiltersStore } from "@/stores/apartmentFiltersStore";
+import { useLeadModalStore } from "@/stores/leadModalStore";
 import "@/components/HouseMap.css";
 
 const rooms = (apartment) => `${apartment.rooms}-кімнатна`;
@@ -13,6 +17,8 @@ const Section = () => {
   const [hovered, setHovered] = useState(null);
   const [selected, setSelected] = useState(null);
   const [cursor, setCursor] = useState({ x: 0, y: 0 });
+  const filters = useApartmentFiltersStore();
+  const openLeadModal = useLeadModalStore((state) => state.open);
 
   const section = getSection(sectionId);
 
@@ -31,7 +37,9 @@ const Section = () => {
   }
 
   const { plan, apartments, price } = section;
-  const active = hovered ?? selected;
+  const chosen = selected && matchesFilters(selected, filters) ? selected : null;
+  const active = hovered ?? chosen;
+  const hasMatches = apartments.some((apartment) => matchesFilters(apartment, filters));
 
   const updateCursor = (event) => {
     const rect = mapRef.current.getBoundingClientRect();
@@ -51,16 +59,30 @@ const Section = () => {
         </Link>
 
         <div className="mx-auto max-w-[1100px]">
+          <ApartmentFilters />
+
           <div className="mb-6 rounded-md bg-surface p-5">
-            {selected ? (
+            {chosen ? (
               <>
-                <h2 className="text-lg font-bold">{rooms(selected)} квартира</h2>
-                <p className="mt-1">Площа: {selected.area} м²</p>
+                <h2 className="text-lg font-bold">{rooms(chosen)} квартира</h2>
+                <p className="mt-1">Площа: {chosen.area} м²</p>
                 <p>
-                  Вартість: <strong>{formatPrice(selected.area * price)} $</strong> (
+                  Вартість: <strong>{formatPrice(chosen.area * price)} $</strong> (
                   {formatPrice(price)} $/м²)
                 </p>
+                <Button
+                  variant="gold"
+                  size="xl"
+                  className="mt-4"
+                  onClick={() =>
+                    openLeadModal(`Секція №${sectionId}, ${rooms(chosen)} квартира, ${chosen.area} м²`)
+                  }
+                >
+                  Залишити заявку на цю квартиру
+                </Button>
               </>
+            ) : !hasMatches ? (
+              <p>У цій секції немає квартир за обраними фільтрами.</p>
             ) : (
               <p>Наведіть або оберіть квартиру на плані, щоб побачити площу та вартість.</p>
             )}
@@ -90,7 +112,9 @@ const Section = () => {
               {apartments.map((apartment) => (
                 <polygon
                   key={apartment.id}
-                  className={`house-zone ${active?.id === apartment.id ? "house-zone-active" : ""}`}
+                  className={`house-zone ${active?.id === apartment.id ? "house-zone-active" : ""} ${
+                    matchesFilters(apartment, filters) ? "" : "house-zone-dimmed house-zone-disabled"
+                  }`}
                   points={apartment.points.map((point) => point.join(",")).join(" ")}
                   onPointerEnter={(event) => {
                     updateCursor(event);

@@ -1,7 +1,13 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./HouseMap.css";
+import ApartmentFilters from "@/components/ApartmentFilters";
 import { getSection } from "@/data/sections";
+import {
+  hasActiveFilters,
+  matchesFilters,
+  useApartmentFiltersStore,
+} from "@/stores/apartmentFiltersStore";
 
 import topView from "@/assets/images/complex-top-view.jpg";
 
@@ -42,6 +48,11 @@ const HouseMap = () => {
   const mapRef = useRef(null);
   const [activeHouse, setActiveHouse] = useState(null);
   const [cursor, setCursor] = useState({ x: 0, y: 0 });
+  const filters = useApartmentFiltersStore();
+  const filtering = hasActiveFilters(filters);
+
+  const matchCount = (house) =>
+    getSection(house.id)?.apartments.filter((apartment) => matchesFilters(apartment, filters)).length ?? 0;
 
   const updateCursor = (event) => {
     const rect = mapRef.current.getBoundingClientRect();
@@ -55,6 +66,7 @@ const HouseMap = () => {
 
   return (
     <section className="house-map-section">
+      <ApartmentFilters />
 
       <div className="house-map-footer">
         <p>Оберіть будинок, щоб побачити його план та іншу інформацію</p>
@@ -92,7 +104,7 @@ const HouseMap = () => {
               key={house.id}
               className={`house-zone ${
                 activeHouse?.id === house.id ? "house-zone-active" : ""
-              }`}
+              } ${filtering && matchCount(house) === 0 ? "house-zone-dimmed" : ""}`}
               x={house.x}
               y={house.y}
               width={house.w}
@@ -124,6 +136,9 @@ const HouseMap = () => {
             </span>
             {activeHouse.price && (
               <p>від {formatPrice(activeHouse.price)} $/м²</p>
+            )}
+            {filtering && getSection(activeHouse.id) && (
+              <p>Підходить квартир: {matchCount(activeHouse)}</p>
             )}
           </div>
         )}

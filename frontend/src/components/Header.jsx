@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import LeadModal from "@/components/LeadModal";
+import { useLeadModalStore } from "@/stores/leadModalStore";
 import Logo from "@/assets/icons/SenatorLogo.jpg";
 
 const navLinks = [
@@ -16,7 +16,7 @@ const navLinks = [
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [leadOpen, setLeadOpen] = useState(false);
+  const openLeadModal = useLeadModalStore((state) => state.open);
   const isHome = useLocation().pathname === "/";
 
   return (
@@ -27,14 +27,14 @@ const Header = () => {
           : "relative h-[100px] bg-ink"
       }`}
     >
-      <a href="/" className="flex shrink-0 items-center">
+      <Link to="/" className="flex shrink-0 items-center">
         {/* темний логотип на білому фоні -> білий на прозорому */}
         <img
           src={Logo}
           alt="Senator"
           className="block h-auto w-[130px] mix-blend-screen brightness-140 grayscale invert min-[521px]:w-[170px]"
         />
-      </a>
+      </Link>
 
       <nav
         className={`${
@@ -42,15 +42,15 @@ const Header = () => {
         } absolute top-full left-0 w-full flex-col items-start bg-ink px-[5%] py-5 min-[1051px]:static min-[1051px]:flex min-[1051px]:w-auto min-[1051px]:flex-row min-[1051px]:items-center min-[1051px]:justify-center min-[1051px]:gap-3 min-[1051px]:bg-transparent min-[1051px]:p-0 min-[1251px]:gap-5`}
       >
         {navLinks.map(({ href, label }) => (
-          <a
+          <Link
             key={href}
-            href={href}
+            to={href}
             onClick={() => setMenuOpen(false)}
             className="group relative w-full border-b border-white/10 py-3 text-sm font-medium whitespace-normal transition-colors hover:text-brand min-[1051px]:w-auto min-[1051px]:border-0 min-[1051px]:py-1.5 min-[1051px]:text-xs min-[1051px]:whitespace-nowrap min-[1251px]:text-[13px]"
           >
             {label}
             <span className="absolute inset-x-0 bottom-0 hidden h-0.5 origin-left scale-x-0 rounded-full bg-brand transition-transform group-hover:scale-x-100 min-[1051px]:block" />
-          </a>
+          </Link>
         ))}
       </nav>
 
@@ -60,7 +60,7 @@ const Header = () => {
           className="h-auto px-3 py-2.5 text-[10px] min-[521px]:px-5 min-[521px]:py-3.5 min-[521px]:text-[13px]"
           onClick={() => {
             setMenuOpen(false);
-            setLeadOpen(true);
+            openLeadModal();
           }}
         >
           <span className="min-[521px]:hidden">Заявка на дзвінок</span>
@@ -76,8 +76,6 @@ const Header = () => {
       >
         {menuOpen ? <X size={26} /> : <Menu size={26} />}
       </button>
-
-      <LeadModal open={leadOpen} onClose={() => setLeadOpen(false)} />
     </header>
   );
 };

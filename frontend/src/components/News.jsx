@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import NewsCard from "@/components/NewsCard";
 import { Section, SectionHeading } from "@/components/Section";
-import { useNews } from "@/lib/content";
+import { useNews } from "@/stores/newsStore";
 
 const News = () => {
   const latestNews = useNews().news.slice(0, 3);

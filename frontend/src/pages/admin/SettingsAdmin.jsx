@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { socialLabels } from "@/data/socials";
-import { settingsStore, useSettings } from "@/lib/content";
+import { useSettings, useSettingsStore } from "@/stores/settingsStore";
 import { fieldClass } from "./fields";
 
 const Label = ({ title, children }) => (
@@ -13,6 +13,7 @@ const Label = ({ title, children }) => (
 
 const SettingsAdmin = () => {
   const settings = useSettings();
+  const setSettings = useSettingsStore((state) => state.setSettings);
   const [draft, setDraft] = useState(settings);
   const [saved, setSaved] = useState(false);
 
@@ -23,7 +24,7 @@ const SettingsAdmin = () => {
 
   const submit = (event) => {
     event.preventDefault();
-    settingsStore.set(draft);
+    setSettings(draft);
     setSaved(true);
   };
 

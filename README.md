@@ -7,7 +7,7 @@
 
 | Частина | Стек |
 |---|---|
-| `frontend/` | React 19, Vite, React Router, Tailwind CSS 4, shadcn/ui |
+| `frontend/` | React 19, Vite, React Router, Zustand, Tailwind CSS 4, shadcn/ui |
 | `backend/` | Node.js, Express 5, Prisma 7, PostgreSQL, Zod |
 | Інше | npm workspaces, ESLint, Telegram Bot API (сповіщення про заявки) |
 

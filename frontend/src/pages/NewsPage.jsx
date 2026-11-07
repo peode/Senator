@@ -1,7 +1,7 @@
 import PageBanner from "@/components/PageBanner";
 import NewsCard from "@/components/NewsCard";
 import { Section } from "@/components/Section";
-import { useNews } from "@/lib/content";
+import { useNews } from "@/stores/newsStore";
 
 const News = () => {
   const { news, loading, error } = useNews();

@@ -3,7 +3,8 @@ import { ArrowLeft } from "lucide-react";
 import PageBanner from "@/components/PageBanner";
 import { Section } from "@/components/Section";
 import { Button } from "@/components/ui/button";
-import { useNews, formatDate } from "@/lib/content";
+import { formatDate } from "@/lib/content";
+import { useNews } from "@/stores/newsStore";
 import { resolveImage } from "@/data/images";
 
 const NewsArticle = () => {

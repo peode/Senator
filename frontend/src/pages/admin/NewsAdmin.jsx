@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/content";
-import { api } from "@/lib/api";
+import { useNewsStore } from "@/stores/newsStore";
 import ImagePicker from "./ImagePicker";
 import { fieldClass } from "./fields";
 
@@ -123,29 +123,26 @@ const NewsEditor = ({ article, onSave, onCancel, error, saving }) => {
 };
 
 const NewsAdmin = () => {
-  const [news, setNews] = useState([]);
+  const news = useNewsStore((state) => state.news);
+  const loading = useNewsStore((state) => state.loading);
+  const loadFailed = useNewsStore((state) => state.error);
+  const fetchNews = useNewsStore((state) => state.fetchNews);
+  const saveArticle = useNewsStore((state) => state.saveArticle);
+  const removeArticle = useNewsStore((state) => state.removeArticle);
   const [editing, setEditing] = useState(null);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const load = () =>
-    api("/news")
-      .then(setNews)
-      .catch((err) => setError(err.message));
-
+  // в адмінці завжди свіжі дані, а не кеш
   useEffect(() => {
-    load();
-  }, []);
+    fetchNews({ force: true });
+  }, [fetchNews]);
 
-  const save = async ({ id, ...article }) => {
+  const save = async (article) => {
     setSaving(true);
     setError("");
     try {
-      await api(id ? `/news/${id}` : "/news", {
-        method: id ? "PUT" : "POST",
-        body: article,
-      });
-      await load();
+      await saveArticle(article);
       setEditing(null);
     } catch (err) {
       setError(err.message);
@@ -157,8 +154,7 @@ const NewsAdmin = () => {
   const remove = async (article) => {
     if (!window.confirm(`Видалити новину «${article.title}»?`)) return;
     try {
-      await api(`/news/${article.id}`, { method: "DELETE" });
-      await load();
+      await removeArticle(article.id);
     } catch (err) {
       setError(err.message);
     }
@@ -193,8 +189,11 @@ const NewsAdmin = () => {
       </Button>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
+      {loadFailed && <p className="text-sm text-red-600">Не вдалося завантажити новини.</p>}
 
-      {news.length === 0 && <p className="text-slate-500">Новин поки немає.</p>}
+      {!loading && !loadFailed && news.length === 0 && (
+        <p className="text-slate-500">Новин поки немає.</p>
+      )}
 
       {news.map((article) => (
         <div

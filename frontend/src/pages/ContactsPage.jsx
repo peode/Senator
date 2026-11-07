@@ -9,7 +9,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { socialLabels } from "@/data/socials";
-import { phoneHref, useSettings } from "@/lib/content";
+import { phoneHref } from "@/lib/content";
+import { useSettings } from "@/stores/settingsStore";
 
 const ContactCard = ({ icon: Icon, title, children, href }) => {
   const content = (

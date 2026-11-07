@@ -146,3 +146,11 @@
   }
 }
 
+
+.house-zone-dimmed {
+  fill: rgb(0 0 0 / 45%);
+}
+
+.house-zone-disabled {
+  pointer-events: none;
+}

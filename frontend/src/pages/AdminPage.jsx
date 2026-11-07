@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import NewsAdmin from "./admin/NewsAdmin";
 import SettingsAdmin from "./admin/SettingsAdmin";
 import LeadsAdmin from "./admin/LeadsAdmin";
-import { api } from "@/lib/api";
+import { useAuthStore } from "@/stores/authStore";
 import { fieldClass } from "./admin/fields";
 
 const tabs = [
@@ -14,18 +14,15 @@ const tabs = [
   { id: "settings", label: "Налаштування" },
 ];
 
-const Login = ({ onLogin }) => {
+const Login = () => {
+  const login = useAuthStore((state) => state.login);
   const [error, setError] = useState("");
 
   const submit = async (event) => {
     event.preventDefault();
     setError("");
     try {
-      await api("/session", {
-        method: "POST",
-        body: { password: new FormData(event.currentTarget).get("password") },
-      });
-      onLogin();
+      await login(new FormData(event.currentTarget).get("password"));
     } catch (err) {
       setError(err.message);
     }
@@ -54,22 +51,21 @@ const Login = ({ onLogin }) => {
 };
 
 const Admin = () => {
-  // null — ще перевіряємо сесію на сервері
-  const [loggedIn, setLoggedIn] = useState(null);
+  const loggedIn = useAuthStore((state) => state.loggedIn);
+  const checkSession = useAuthStore((state) => state.checkSession);
+  const logout = useAuthStore((state) => state.logout);
   const [tab, setTab] = useState("leads");
   const navigate = useNavigate();
 
   useEffect(() => {
-    api("/session")
-      .then(({ authenticated }) => setLoggedIn(authenticated))
-      .catch(() => setLoggedIn(false));
-  }, []);
+    checkSession();
+  }, [checkSession]);
 
   if (loggedIn === null) return null;
-  if (!loggedIn) return <Login onLogin={() => setLoggedIn(true)} />;
+  if (!loggedIn) return <Login />;
 
-  const logout = async () => {
-    await api("/session", { method: "DELETE" }).catch(() => {});
+  const handleLogout = async () => {
+    await logout();
     navigate("/");
   };
 
@@ -79,7 +75,7 @@ const Admin = () => {
         <a href="/" className="text-lg font-medium">
           ЖК «Senator» · Адмін-панель
         </a>
-        <Button variant="ghost" className="text-white hover:bg-white/10 hover:text-white" onClick={logout}>
+        <Button variant="ghost" className="text-white hover:bg-white/10 hover:text-white" onClick={handleLogout}>
           <LogOut size={16} /> Вийти
         </Button>
       </header>

@@ -15,7 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import courtyard from "@/assets/images/courtyard.png";
 import { SocialIcon } from "@/components/SocialIcons";
 import { socialLabels } from "@/data/socials";
-import { useSettings } from "@/lib/content";
+import { useSettings } from "@/stores/settingsStore";
 
 // Тимчасові тексти — замінити реальною інформацією про забудовника
 const values = [
