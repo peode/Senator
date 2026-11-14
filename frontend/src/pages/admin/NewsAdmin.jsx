@@ -3,6 +3,7 @@ import { Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/content";
 import { useNewsStore } from "@/stores/newsStore";
+import AdminListSkeleton from "./AdminListSkeleton";
 import ImagePicker from "./ImagePicker";
 import { fieldClass } from "./fields";
 
@@ -190,6 +191,8 @@ const NewsAdmin = () => {
 
       {error && <p className="text-sm text-red-600">{error}</p>}
       {loadFailed && <p className="text-sm text-red-600">Не вдалося завантажити новини.</p>}
+
+      {loading && <AdminListSkeleton />}
 
       {!loading && !loadFailed && news.length === 0 && (
         <p className="text-slate-500">Новин поки немає.</p>

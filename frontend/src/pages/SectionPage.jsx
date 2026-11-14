@@ -4,6 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import ApartmentFilters from "@/components/ApartmentFilters";
 import PageBanner from "@/components/PageBanner";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { formatPrice, leadComment, plans, roomsLabel, sectionStatuses } from "@/data/sections";
 import { useApartments } from "@/stores/apartmentsStore";
 import { useLeadModalStore } from "@/stores/leadModalStore";
@@ -29,7 +30,17 @@ const Section = () => {
   const section = sections.find(({ id }) => String(id) === sectionId);
   const plan = plans[sectionId];
 
-  if (loading) return <PageBanner title={`Секція №${sectionId}`} />;
+  if (loading) {
+    return (
+      <>
+        <PageBanner title={`Секція №${sectionId}`} />
+        <div className="mx-auto max-w-[1100px] px-[3.5%] py-8">
+          <Skeleton className="mb-6 h-24 w-full" />
+          <Skeleton className="aspect-[3/2] w-full" />
+        </div>
+      </>
+    );
+  }
 
   if (error || !section || !plan) {
     return (

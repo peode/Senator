@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { create } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import { api } from "@/lib/api";
@@ -64,4 +64,28 @@ export const useNews = () => {
   }, [fetchNews]);
 
   return state;
+};
+
+// Стаття завжди береться з GET /api/news/:id, а кеш списку показуємо, поки вона вантажиться
+export const useArticle = (id) => {
+  const cached = useNewsStore((state) => state.news.find((item) => String(item.id) === id));
+  const [result, setResult] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+    api(`/news/${id}`)
+      .then((article) => active && setResult({ id, article, error: false }))
+      .catch((err) => active && setResult({ id, article: null, error: err.status !== 404 }));
+    return () => {
+      active = false;
+    };
+  }, [id]);
+
+  const current = result?.id === id ? result : null;
+
+  return {
+    article: !current || current.error ? (cached ?? null) : current.article,
+    loading: !current && !cached,
+    error: Boolean(current?.error),
+  };
 };

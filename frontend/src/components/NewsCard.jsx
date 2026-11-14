@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/content";
 import { resolveImage } from "@/data/images";
 
@@ -55,6 +56,18 @@ const NewsCard = ({ item }) => (
         Читати далі
       </Button>
     </CardContent>
+  </Card>
+);
+
+export const NewsCardSkeleton = () => (
+  <Card className="h-full gap-0 rounded-2xl py-0 shadow-card ring-0">
+    <Skeleton className="aspect-[16/10] rounded-none" />
+    <div className="flex flex-col gap-3 p-6">
+      <Skeleton className="h-4 w-24" />
+      <Skeleton className="h-6 w-4/5" />
+      <Skeleton className="h-4 w-full" />
+      <Skeleton className="h-4 w-2/3" />
+    </div>
   </Card>
 );
 

@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { Link } from "react-router-dom";
 import { Play, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import courtyard from "@/assets/images/courtyard.png";
+import courtyard from "@/assets/images/courtyard.webp";
 
 const Hero = () => {
   const [videoOpen, setVideoOpen] = useState(false);
@@ -53,7 +54,7 @@ const Hero = () => {
             variant="gold"
             size="xl"
             className="h-[50px] px-[25px] font-bold"
-            render={<a href="/apartments" />}
+            render={<Link to="/apartments" />}
             nativeButton={false}
           >
             Обрати квартиру

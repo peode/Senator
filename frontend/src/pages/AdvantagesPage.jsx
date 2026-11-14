@@ -1,11 +1,11 @@
 import PageBanner from "@/components/PageBanner";
 import { Section } from "@/components/Section";
-import courtyard from "@/assets/images/courtyard.png";
+import courtyard from "@/assets/images/courtyard.webp";
 import topView from "@/assets/images/complex-top-view.jpg";
-import supermarket from "@/assets/images/supermarket.png";
-import walkingZone from "@/assets/images/walking-zone.png";
-import playground from "@/assets/images/playground.png";
-import cafe from "@/assets/images/cafe.png";
+import supermarket from "@/assets/images/supermarket.webp";
+import walkingZone from "@/assets/images/walking-zone.webp";
+import playground from "@/assets/images/playground.webp";
+import cafe from "@/assets/images/cafe.webp";
 
 const advantages = [
   {

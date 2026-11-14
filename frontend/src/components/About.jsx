@@ -15,12 +15,12 @@ import {
   SectionSubtitle,
 } from "@/components/Section";
 
-import playground from "@/assets/images/playground.png";
-import cafe from "@/assets/images/cafe.png";
-import supermarket from "@/assets/images/supermarket.png";
-import walkingZone from "@/assets/images/walking-zone.png";
-import postOffice from "@/assets/images/post-office.png";
-import beautySalon from "@/assets/images/beauty-salon.png";
+import playground from "@/assets/images/playground.webp";
+import cafe from "@/assets/images/cafe.webp";
+import supermarket from "@/assets/images/supermarket.webp";
+import walkingZone from "@/assets/images/walking-zone.webp";
+import postOffice from "@/assets/images/post-office.webp";
+import beautySalon from "@/assets/images/beauty-salon.webp";
 
 const amenities = [
   {

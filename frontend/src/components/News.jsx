@@ -1,12 +1,13 @@
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import NewsCard from "@/components/NewsCard";
+import NewsCard, { NewsCardSkeleton } from "@/components/NewsCard";
 import { Section, SectionHeading } from "@/components/Section";
 import { useNews } from "@/stores/newsStore";
 
 const News = () => {
-  const latestNews = useNews().news.slice(0, 3);
+  const { news, loading } = useNews();
+  const latestNews = news.slice(0, 3);
 
   return (
     <Section id="news" className="bg-surface">
@@ -22,9 +23,9 @@ const News = () => {
       </SectionHeading>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {latestNews.map((item) => (
-          <NewsCard key={item.id} item={item} />
-        ))}
+        {loading
+          ? [1, 2, 3].map((key) => <NewsCardSkeleton key={key} />)
+          : latestNews.map((item) => <NewsCard key={item.id} item={item} />)}
       </div>
     </Section>
   );

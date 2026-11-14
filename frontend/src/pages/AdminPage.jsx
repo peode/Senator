@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { LogOut } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Loader2, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NewsAdmin from "./admin/NewsAdmin";
 import SectionsAdmin from "./admin/SectionsAdmin";
@@ -63,7 +63,13 @@ const Admin = () => {
     checkSession();
   }, [checkSession]);
 
-  if (loggedIn === null) return null;
+  if (loggedIn === null) {
+    return (
+      <div role="status" aria-label="Завантаження" className="flex min-h-svh items-center justify-center bg-surface">
+        <Loader2 size={32} className="animate-spin text-brand" />
+      </div>
+    );
+  }
   if (!loggedIn) return <Login />;
 
   const handleLogout = async () => {
@@ -74,9 +80,9 @@ const Admin = () => {
   return (
     <div className="min-h-svh bg-surface">
       <header className="flex items-center justify-between bg-ink px-[5%] py-5 text-white">
-        <a href="/" className="text-lg font-medium">
+        <Link to="/" className="text-lg font-medium">
           ЖК «Senator» · Адмін-панель
-        </a>
+        </Link>
         <Button variant="ghost" className="text-white hover:bg-white/10 hover:text-white" onClick={handleLogout}>
           <LogOut size={16} /> Вийти
         </Button>

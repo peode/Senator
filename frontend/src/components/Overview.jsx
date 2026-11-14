@@ -5,7 +5,7 @@ import {
   SectionHeading,
   SectionSubtitle,
 } from "@/components/Section";
-import courtyard from "@/assets/images/courtyard.png";
+import courtyard from "@/assets/images/courtyard.webp";
 
 const stats = [
   { icon: Building2, value: "10", label: "поверхів у будинках" },

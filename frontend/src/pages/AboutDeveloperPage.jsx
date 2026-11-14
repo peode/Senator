@@ -12,7 +12,7 @@ import {
   SectionSubtitle,
 } from "@/components/Section";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import courtyard from "@/assets/images/courtyard.png";
+import courtyard from "@/assets/images/courtyard.webp";
 import { SocialIcon } from "@/components/SocialIcons";
 import { socialLabels } from "@/data/socials";
 import { useSettings } from "@/stores/settingsStore";

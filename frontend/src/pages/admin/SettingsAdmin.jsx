@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { socialLabels } from "@/data/socials";
 import { useSettings, useSettingsStore } from "@/stores/settingsStore";
 import { fieldClass } from "./fields";
@@ -94,7 +95,11 @@ const SettingsAdmin = () => {
   const error = useSettingsStore((state) => state.error);
 
   if (!loaded) {
-    return error ? <p className="text-sm text-red-600">Не вдалося завантажити налаштування.</p> : null;
+    return error ? (
+      <p className="text-sm text-red-600">Не вдалося завантажити налаштування.</p>
+    ) : (
+      <Skeleton className="h-[480px] max-w-[640px] rounded-2xl" />
+    );
   }
 
   return <SettingsForm settings={settings} />;

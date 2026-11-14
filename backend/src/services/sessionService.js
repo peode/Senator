@@ -2,7 +2,7 @@ import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 
 export const SESSION_MAX_AGE_MS = 1000 * 60 * 60 * 12;
 
-const secret = () => process.env.SESSION_SECRET || process.env.ADMIN_PASSWORD || "";
+const secret = () => process.env.SESSION_SECRET;
 
 const sign = (payload) => createHmac("sha256", secret()).update(payload).digest("hex");
 
@@ -11,8 +11,9 @@ const safeEqual = (a, b) => {
   return timingSafeEqual(hash(a), hash(b));
 };
 
+// Без SESSION_SECRET вхід вимкнено: сесію нічим підписати
 export const checkPassword = (password) =>
-  Boolean(process.env.ADMIN_PASSWORD) && safeEqual(password, process.env.ADMIN_PASSWORD);
+  Boolean(process.env.ADMIN_PASSWORD && secret()) && safeEqual(password, process.env.ADMIN_PASSWORD);
 
 export const createSessionToken = () => {
   const expires = String(Date.now() + SESSION_MAX_AGE_MS);

@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { formatPrice, leadComment, roomsLabel } from "@/data/sections";
 import { useApartments } from "@/stores/apartmentsStore";
 import { useLeadModalStore } from "@/stores/leadModalStore";
@@ -16,7 +17,13 @@ const ApartmentCatalog = () => {
 
       {error ? (
         <p className="text-slate-600">Не вдалося завантажити квартири. Перевірте значення фільтрів.</p>
-      ) : loaded && apartments.length === 0 ? (
+      ) : !loaded ? (
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map((key) => (
+            <Skeleton key={key} className="h-44 rounded-2xl" />
+          ))}
+        </div>
+      ) : apartments.length === 0 ? (
         <p className="text-slate-600">Немає квартир за обраними фільтрами.</p>
       ) : (
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">

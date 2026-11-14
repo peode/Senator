@@ -1,11 +1,11 @@
-import courtyard from "@/assets/images/courtyard.png";
-import walkingZone from "@/assets/images/walking-zone.png";
-import playground from "@/assets/images/playground.png";
+import courtyard from "@/assets/images/courtyard.webp";
+import walkingZone from "@/assets/images/walking-zone.webp";
+import playground from "@/assets/images/playground.webp";
 import topView from "@/assets/images/complex-top-view.jpg";
-import cafe from "@/assets/images/cafe.png";
-import supermarket from "@/assets/images/supermarket.png";
-import postOffice from "@/assets/images/post-office.png";
-import beautySalon from "@/assets/images/beauty-salon.png";
+import cafe from "@/assets/images/cafe.webp";
+import supermarket from "@/assets/images/supermarket.webp";
+import postOffice from "@/assets/images/post-office.webp";
+import beautySalon from "@/assets/images/beauty-salon.webp";
 
 // Зображення з бібліотеки сайту: у сховищі зберігається ключ, а не хешований URL
 export const imageLibrary = {

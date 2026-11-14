@@ -3,21 +3,41 @@ import { ArrowLeft } from "lucide-react";
 import PageBanner from "@/components/PageBanner";
 import { Section } from "@/components/Section";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/content";
-import { useNews } from "@/stores/newsStore";
+import { useArticle } from "@/stores/newsStore";
 import { resolveImage } from "@/data/images";
+
+const ArticleSkeleton = () => (
+  <div className="mx-auto max-w-[900px]">
+    <Skeleton className="mb-8 aspect-[16/9] w-full rounded-2xl" />
+    <div className="space-y-3">
+      <Skeleton className="h-5 w-full" />
+      <Skeleton className="h-5 w-full" />
+      <Skeleton className="h-5 w-2/3" />
+    </div>
+  </div>
+);
 
 const NewsArticle = () => {
   const { id } = useParams();
-  const { news, loading } = useNews();
-  const article = news.find((item) => String(item.id) === id);
+  const { article, loading, error } = useArticle(id);
 
-  if (loading) return <PageBanner title="Завантаження..." />;
+  if (loading) {
+    return (
+      <>
+        <PageBanner title="Новини" />
+        <Section>
+          <ArticleSkeleton />
+        </Section>
+      </>
+    );
+  }
 
   if (!article) {
     return (
       <>
-        <PageBanner title="Новину не знайдено" />
+        <PageBanner title={error ? "Не вдалося завантажити новину" : "Новину не знайдено"} />
         <Section>
           <Button
             variant="link"

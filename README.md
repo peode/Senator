@@ -109,7 +109,7 @@ cp backend/.env.example backend/.env
 | `DATABASE_URL` | **так** | Рядок підключення до PostgreSQL |
 | `DATABASE_URL_UNPOOLED` | ні | Окремий прямий рядок для міграцій (якщо не задано — береться `DATABASE_URL` без `-pooler`) |
 | `ADMIN_PASSWORD` | **так** | Пароль для входу в адмін-панель `/admin`. Без нього вхід неможливий |
-| `SESSION_SECRET` | ні (рекомендовано) | Довгий випадковий рядок для підпису cookie сесії. Якщо порожній — використовується `ADMIN_PASSWORD` |
+| `SESSION_SECRET` | **так** | Довгий випадковий рядок для підпису cookie сесії. Без нього вхід в адмін-панель вимкнено |
 | `PORT` | ні | Порт API, за замовчуванням `3001` (Vite проксює саме на 3001) |
 | `TRUST_PROXY` | ні | Кількість проксі перед сервером у продакшені (Vercel + хостинг = `2`) |
 | `CORS_ORIGIN` | ні | Домени, яким дозволено звертатися до API напряму, через кому. Порожньо — лише той самий домен (достатньо для роботи через проксі Vite і Vercel) |
@@ -127,7 +127,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```env
 DATABASE_URL=postgresql://senator:senator@localhost:5432/senator
 ADMIN_PASSWORD=admin123
-SESSION_SECRET=3f9c1a7e5b2d4f8a9c0e6b1d2a3f4e5c6b7a8d9e0f1a2b3c4d5e6f7a8b9c0d1e
+SESSION_SECRET=вставте-сюди-згенероване-значення
 PORT=3001
 TRUST_PROXY=2
 TELEGRAM_BOT_TOKEN=
@@ -201,7 +201,7 @@ npm run dev
 ```bash
 git clone <URL-репозиторію> Senator && cd Senator
 npm install
-cp backend/.env.example backend/.env    # заповнити DATABASE_URL і ADMIN_PASSWORD
+cp backend/.env.example backend/.env    # заповнити DATABASE_URL, ADMIN_PASSWORD і SESSION_SECRET
 npm run db:deploy
 npm run db:seed
 npm run dev:server                      # термінал 1
@@ -265,7 +265,7 @@ npm run dev                             # термінал 2
 | `P1001: Can't reach database server` | Перевірити `DATABASE_URL`, що Postgres запущений (`docker ps`) |
 | Міграція зависає на Neon | Використовується pooled-рядок — потрібен хост без `-pooler` або `DATABASE_URL_UNPOOLED` |
 | На сайті «Немає зв'язку із сервером» | Не запущений бекенд (`npm run dev:server`) або він не на порту 3001 |
-| Не вдається увійти в `/admin` | Не заданий `ADMIN_PASSWORD` у `backend/.env`; після зміни `.env` перезапустити бекенд |
+| Не вдається увійти в `/admin` | Не заданий `ADMIN_PASSWORD` або `SESSION_SECRET` у `backend/.env`; після зміни `.env` перезапустити бекенд |
 | `--env-file-if-exists` / синтаксичні помилки при старті | Застара Node.js — потрібна 22.9+ |
 | Порт 3001 або 5173 зайнятий | Зупинити інший процес або змінити `PORT` (тоді й проксі у `frontend/vite.config.js`) |
 

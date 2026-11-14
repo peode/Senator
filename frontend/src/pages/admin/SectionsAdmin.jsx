@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { sectionStatuses } from "@/data/sections";
 import { useSections, useSectionsStore } from "@/stores/sectionsStore";
+import AdminListSkeleton from "./AdminListSkeleton";
 import { fieldClass } from "./fields";
 
 const SectionRow = ({ section }) => {
@@ -82,7 +83,7 @@ const SectionRow = ({ section }) => {
 const SectionsAdmin = () => {
   const { sections, loading, error } = useSections();
 
-  if (loading) return null;
+  if (loading) return <AdminListSkeleton />;
   if (error) return <p className="text-sm text-red-600">Не вдалося завантажити секції.</p>;
 
   return (

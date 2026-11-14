@@ -1,4 +1,4 @@
-import courtyard from "@/assets/images/courtyard.png";
+import courtyard from "@/assets/images/courtyard.webp";
 
 const PageBanner = ({ title, subtitle }) => (
   <div

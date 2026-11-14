@@ -3,6 +3,7 @@ import { Phone, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { phoneHref } from "@/lib/content";
 import { api } from "@/lib/api";
+import AdminListSkeleton from "./AdminListSkeleton";
 import { fieldClass } from "./fields";
 
 const statuses = {
@@ -43,7 +44,7 @@ const LeadsAdmin = () => {
     }
   };
 
-  if (!leads) return error ? <p className="text-sm text-red-600">{error}</p> : null;
+  if (!leads) return error ? <p className="text-sm text-red-600">{error}</p> : <AdminListSkeleton />;
 
   return (
     <div className="flex flex-col gap-4">

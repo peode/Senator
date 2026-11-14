@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLeadModalStore } from "@/stores/leadModalStore";
@@ -42,15 +42,28 @@ const Header = () => {
         } absolute top-full left-0 w-full flex-col items-start bg-ink px-[5%] py-5 lg:static lg:flex lg:w-auto lg:flex-row lg:items-center lg:justify-center lg:gap-3 lg:bg-transparent lg:p-0 xl:gap-5`}
       >
         {navLinks.map(({ href, label }) => (
-          <Link
+          <NavLink
             key={href}
             to={href}
+            end={href === "/"}
             onClick={() => setMenuOpen(false)}
-            className="group relative w-full border-b border-white/10 py-3 text-sm font-medium whitespace-normal transition-colors hover:text-brand lg:w-auto lg:border-0 lg:py-1.5 lg:text-xs lg:whitespace-nowrap xl:text-[13px]"
+            className={({ isActive }) =>
+              `group relative w-full border-b border-white/10 py-3 text-sm font-medium whitespace-normal transition-colors hover:text-brand lg:w-auto lg:border-0 lg:py-1.5 lg:text-xs lg:whitespace-nowrap xl:text-[13px] ${
+                isActive ? "text-brand" : ""
+              }`
+            }
           >
-            {label}
-            <span className="absolute inset-x-0 bottom-0 hidden h-0.5 origin-left scale-x-0 rounded-full bg-brand transition-transform group-hover:scale-x-100 lg:block" />
-          </Link>
+            {({ isActive }) => (
+              <>
+                {label}
+                <span
+                  className={`absolute inset-x-0 bottom-0 hidden h-0.5 origin-left rounded-full bg-brand transition-transform group-hover:scale-x-100 lg:block ${
+                    isActive ? "scale-x-100" : "scale-x-0"
+                  }`}
+                />
+              </>
+            )}
+          </NavLink>
         ))}
       </nav>
 
