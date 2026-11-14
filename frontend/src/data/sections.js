@@ -27,5 +27,5 @@ export const formatPrice = (value) => Math.round(value).toLocaleString("uk-UA");
 
 export const roomsLabel = (apartment) => `${apartment.rooms}-кімнатна`;
 
-export const leadComment = (sectionId, apartment) =>
-  `Секція №${sectionId}, ${roomsLabel(apartment)} квартира, ${apartment.area} м²`;
+export const leadComment = (sectionId, floor, apartment) =>
+  `Секція №${sectionId}, поверх ${floor}, ${roomsLabel(apartment)} квартира, ${apartment.area} м²`;

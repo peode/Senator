@@ -243,9 +243,10 @@ npm run dev                             # термінал 2
 | GET | `/api/session` | всі | Чи авторизований адмін |
 | POST | `/api/session` | всі | Вхід в адмінку (`{ "password": "..." }`) |
 | DELETE | `/api/session` | всі | Вихід |
-| GET | `/api/sections` | всі | Секції зі статусом, ціною за м² і квартирами |
-| PATCH | `/api/sections/:id` | адмін | Змінити статус і ціну секції (`{ "status": "SOLD", "price": 1350 }`) |
-| GET | `/api/apartments` | всі | Квартири в продажу. Фільтри в query: `rooms`, `areaFrom`, `areaTo`, `budgetTo` |
+| GET | `/api/sections` | всі | Секції зі статусом, ціною за м², кількістю поверхів, плануваннями та квартирами на кожному поверсі |
+| PATCH | `/api/sections/:id` | адмін | Змінити статус, ціну й кількість поверхів (`{ "status": "SOLD", "price": 1350, "floors": 9 }`) |
+| GET | `/api/apartments` | всі | Вільні квартири в продажу. Фільтри в query: `rooms`, `areaFrom`, `areaTo`, `budgetTo` |
+| PATCH | `/api/apartments/:id` | адмін | Змінити наявність квартири (`{ "available": false }`) |
 | GET | `/api/settings` | всі | Контакти ЖК |
 | PUT | `/api/settings` | адмін | Зберегти контакти ЖК |
 

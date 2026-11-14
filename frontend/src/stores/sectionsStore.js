@@ -30,6 +30,20 @@ export const useSectionsStore = create((set, get) => ({
     // статус і ціна впливають на каталог квартир
     await useApartmentsStore.getState().fetchApartments({ force: true });
   },
+
+  setUnitAvailable: async (unitId, available) => {
+    const updated = await api(`/apartments/${unitId}`, { method: "PATCH", body: { available } });
+    set({
+      sections: get().sections.map((section) => ({
+        ...section,
+        apartments: section.apartments.map((apartment) => ({
+          ...apartment,
+          units: apartment.units.map((unit) => (unit.id === unitId ? updated : unit)),
+        })),
+      })),
+    });
+    await useApartmentsStore.getState().fetchApartments({ force: true });
+  },
 }));
 
 export const useSections = () => {

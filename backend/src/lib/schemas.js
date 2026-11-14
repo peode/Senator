@@ -46,11 +46,14 @@ export const sectionSchema = z
   .object({
     status: z.enum(["SELLING", "PLANNED", "SOLD", "COMING_SOON"], "Невірний статус"),
     price: z.number("Невірна ціна").int("Невірна ціна").positive("Невірна ціна").max(MAX_INT, "Невірна ціна").nullable(),
+    floors: z.number("Невірна кількість поверхів").int("Невірна кількість поверхів").min(1, "Невірна кількість поверхів").max(50, "Невірна кількість поверхів"),
   })
   .refine(({ status, price }) => status !== "SELLING" || price !== null, {
     path: ["price"],
     error: "Для секції у продажу вкажіть ціну",
   });
+
+export const apartmentUnitSchema = z.object({ available: z.boolean("Невірний статус") });
 
 const filterNumber = z.coerce.number("Невірне значення фільтра").min(0, "Невірне значення фільтра").optional();
 

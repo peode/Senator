@@ -1,8 +1,10 @@
 import * as apartmentsRepository from "../repositories/apartmentsRepository.js";
 
-const serializeApartment = ({ id, sectionId, rooms, area, section }) => ({
+const serializeUnit = ({ id, floor, apartment: { id: apartmentId, sectionId, rooms, area, section } }) => ({
   id,
+  apartmentId,
   sectionId,
+  floor,
   rooms,
   area,
   pricePerMeter: section.price,
@@ -11,8 +13,10 @@ const serializeApartment = ({ id, sectionId, rooms, area, section }) => ({
 
 // Вартість — похідна (площа × ціна секції), тому бюджет перевіряємо вже після запиту до бази
 export const listApartmentsForSale = async ({ budgetTo, ...filters }) => {
-  const apartments = (await apartmentsRepository.findForSale(filters)).map(serializeApartment);
+  const apartments = (await apartmentsRepository.findForSale(filters)).map(serializeUnit);
   return budgetTo === undefined
     ? apartments
     : apartments.filter(({ totalPrice }) => totalPrice <= budgetTo);
 };
+
+export const updateApartmentUnit = (id, data) => apartmentsRepository.updateUnit(id, data);

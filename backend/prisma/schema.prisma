@@ -49,20 +49,34 @@ model Section {
   id         Int           @id
   status     SectionStatus @default(PLANNED)
   price      Int?
+  floors     Int           @default(9)
   apartments Apartment[]
   updatedAt  DateTime      @updatedAt
 }
 
+// Планування: одне на всі поверхи секції
 model Apartment {
-  id        String  @id
+  id        String          @id
   sectionId Int
-  section   Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  section   Section         @relation(fields: [sectionId], references: [id], onDelete: Cascade)
   rooms     Int
   area      Float
   // вершини багатокутника квартири на зображенні плану
   points    Json
+  units     ApartmentUnit[]
 
   @@index([sectionId])
+}
+
+// Конкретна квартира: планування на певному поверсі
+model ApartmentUnit {
+  id          Int       @id @default(autoincrement())
+  apartmentId String
+  apartment   Apartment @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  floor       Int
+  available   Boolean   @default(true)
+
+  @@unique([apartmentId, floor])
 }
 
 // Один рядок (id = 1): контакти ЖК

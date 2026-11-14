@@ -23,7 +23,16 @@ if ((await prisma.news.count()) === 0) {
 // skipDuplicates і upsert без update: повторний запуск не затирає змінене в адмінці
 await prisma.section.createMany({ data: defaultSections, skipDuplicates: true });
 await prisma.apartment.createMany({ data: defaultApartments, skipDuplicates: true });
+const sections = await prisma.section.findMany({ include: { apartments: true } });
+await prisma.apartmentUnit.createMany({
+  data: sections.flatMap(({ apartments, floors }) =>
+    apartments.flatMap(({ id }) =>
+      Array.from({ length: floors }, (_, index) => ({ apartmentId: id, floor: index + 1 })),
+    ),
+  ),
+  skipDuplicates: true,
+});
 await prisma.siteSettings.upsert({ where: { id: 1 }, create: defaultSettings, update: {} });
-console.log(`Каталог: ${defaultSections.length} секцій, ${defaultApartments.length} квартир`);
+console.log(`Каталог: ${defaultSections.length} секцій, ${defaultApartments.length} планувань`);
 
 await prisma.$disconnect();

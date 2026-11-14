@@ -2,7 +2,10 @@ import * as sectionsRepository from "../repositories/sectionsRepository.js";
 
 const serializeSection = ({ updatedAt, apartments, ...rest }) => ({
   ...rest,
-  apartments: apartments.map(({ sectionId, ...apartment }) => apartment),
+  apartments: apartments.map(({ sectionId, units, ...apartment }) => ({
+    ...apartment,
+    units: units.map(({ apartmentId, ...unit }) => unit),
+  })),
 });
 
 export const listSections = async () => (await sectionsRepository.findAll()).map(serializeSection);
