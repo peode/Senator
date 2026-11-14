@@ -16,6 +16,5 @@ export const mapZoneClass = ({ active = false, dimmed = false, disabled = false,
     active && "fill-white/50 stroke-white",
     dimmed && "fill-black/45",
     disabled && "pointer-events-none",
-    sold && "cursor-not-allowed",
     sold && active && "fill-slate-400/75 stroke-slate-300",
   );

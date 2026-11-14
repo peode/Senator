@@ -1,9 +1,9 @@
 import {
   ArrowUpRight,
   Building2,
-  HardHat,
+  Layers,
   ShieldCheck,
-  Handshake,
+  SquareParking,
 } from "lucide-react";
 import PageBanner from "@/components/PageBanner";
 import {
@@ -17,27 +17,33 @@ import { SocialIcon } from "@/components/SocialIcons";
 import { socialLabels } from "@/data/socials";
 import { useSettings } from "@/stores/settingsStore";
 
-// Тимчасові тексти — замінити реальною інформацією про забудовника
-const values = [
+const companyFacts = [
+  { label: "Компанія", value: "ТОВ «Буковинський квартал»" },
+  { label: "Зареєстрована", value: "у 2016 році" },
+  { label: "Діяльність", value: "Будівництво житлових і нежитлових будівель" },
+  { label: "ЄДРПОУ", value: "40676338" },
+];
+
+const projectFacts = [
   {
     icon: Building2,
-    title: "Сучасні комплекси",
-    text: "Будуємо житло в Чернівцях із продуманими плануваннями та впорядкованими дворами.",
+    title: "16 будинків",
+    text: "ЖК «Senator» на вулиці Руській, 236Б будується чергами та об'єднує будинки в один квартал.",
   },
   {
-    icon: HardHat,
-    title: "Якість будівництва",
-    text: "Контролюємо кожен етап: від фундаменту до оздоблення, використовуючи перевірені матеріали.",
+    icon: Layers,
+    title: "Монолітний каркас",
+    text: "Будинки зводяться за монолітно-каркасною технологією, стіни — з керамоблоку.",
   },
   {
     icon: ShieldCheck,
-    title: "Надійність",
-    text: "Працюємо прозоро й відповідально, дотримуючись домовленостей із покупцями.",
+    title: "Закрита територія",
+    text: "Територія комплексу закрита для стороннього транспорту та відвідувачів.",
   },
   {
-    icon: Handshake,
-    title: "Турбота про мешканців",
-    text: "Створюємо комфортне середовище: безпечні двори, паркінг та інфраструктуру поруч.",
+    icon: SquareParking,
+    title: "Підземний паркінг",
+    text: "У комплексі передбачено дворівневий підземний паркінг.",
   },
 ];
 
@@ -52,26 +58,33 @@ const AboutDeveloper = () => {
 
   return (
     <>
-      <PageBanner title="Про забудовника" subtitle="Смеречина — Чернівці" />
+      <PageBanner title="Про забудовника" subtitle="Буковинський квартал — Чернівці" />
 
       <Section>
-        <SectionHeading title="СМЕРЕЧИНА" />
+        <SectionHeading title="БУКОВИНСЬКИЙ КВАРТАЛ" />
 
         <div className="grid items-center gap-8 md:gap-[60px] lg:grid-cols-2">
           <div className="space-y-5 text-base leading-[1.8] text-slate-700 md:text-[17px]">
             <p className="text-[clamp(19px,1.7vw,24px)] leading-normal font-semibold text-neutral-950">
-              Смеречина — забудовник із Чернівців, який створює житло для тих,
-              хто цінує комфорт, безпеку та якість.
+              «Буковинський квартал» — чернівецька будівельна компанія, яка
+              зводить житловий комплекс «Senator».
             </p>
             <p>
-              ЖК «Senator» на вулиці Руській — наш проєкт, у якому поєднано
-              сучасну архітектуру, продумані планування та закриту територію
-              без автомобілів.
+              Компанію зареєстровано в Чернівцях у 2016 році, її основна
+              діяльність — будівництво житлових і нежитлових будівель.
+              ЖК «Senator» на вулиці Руській, 236Б — її головний проєкт:
+              квартал із 16 будинків, закритою територією та підземним
+              паркінгом.
             </p>
-            <p>
-              Ми будуємо так, щоб мешканці відчували, що вони вдома, з першого
-              дня: з інфраструктурою, паркінгом і зеленими просторами поруч.
-            </p>
+
+            <dl className="grid gap-x-8 gap-y-4 border-t border-slate-200 pt-5 sm:grid-cols-2">
+              {companyFacts.map(({ label, value }) => (
+                <div key={label}>
+                  <dt className="text-sm text-slate-500">{label}</dt>
+                  <dd className="text-base font-semibold text-neutral-950">{value}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
 
           <img
@@ -83,10 +96,10 @@ const AboutDeveloper = () => {
       </Section>
 
       <Section className="bg-surface">
-        <SectionHeading title="НАШІ ПРИНЦИПИ" />
+        <SectionHeading title="ЩО МИ БУДУЄМО" />
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {values.map(({ icon: Icon, title, text }) => (
+          {projectFacts.map(({ icon: Icon, title, text }) => (
             <Card
               key={title}
               className="gap-0 rounded-2xl py-8 shadow-card ring-0"

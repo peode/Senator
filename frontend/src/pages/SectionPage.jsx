@@ -84,9 +84,16 @@ const Section = () => {
     return status === "SELLING" && Boolean(unit) && matchesCatalog(unit);
   };
   const isSold = (apartment) => unitOf(apartment)?.available === false;
-  const chosen = selected && isMatch(selected) ? selected : null;
+  const chosen = selected && (isMatch(selected) || isSold(selected)) ? selected : null;
+  // куди запропонувати перейти, якщо обрана квартира продана
+  const freeFloors =
+    status === "SELLING" && chosen
+      ? chosen.units.filter(matchesCatalog).map((unit) => unit.floor)
+      : [];
   const active = hovered ?? chosen;
   const hasMatches = apartments.some(isMatch);
+
+  const selectFloor = (value) => setSearchParams({ floor: value }, { replace: true });
 
   const updateCursor = (event) => {
     const rect = mapRef.current.getBoundingClientRect();
@@ -109,7 +116,32 @@ const Section = () => {
           <ApartmentFilters className="mb-6" />
 
           <div className="mb-6 rounded-md bg-surface p-5">
-            {chosen ? (
+            {chosen && isSold(chosen) ? (
+              <>
+                <div className="flex flex-wrap items-center gap-3">
+                  <h2 className="text-lg font-bold">{roomsLabel(chosen)} квартира</h2>
+                  <span className="rounded-full bg-slate-200 px-3 py-1 text-xs font-bold text-slate-700">
+                    Продано
+                  </span>
+                </div>
+                <p className="mt-1">Поверх: {floor}</p>
+                <p>Площа: {chosen.area} м²</p>
+                {freeFloors.length > 0 ? (
+                  <div className="mt-3">
+                    <p>Ця квартира вже продана, але таке саме планування вільне на поверхах:</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {freeFloors.map((value) => (
+                        <Button key={value} variant="outline" onClick={() => selectFloor(value)}>
+                          {value} поверх
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="mt-3">Ця квартира вже продана. Вільних квартир із таким плануванням немає.</p>
+                )}
+              </>
+            ) : chosen ? (
               <>
                 <h2 className="text-lg font-bold">{roomsLabel(chosen)} квартира</h2>
                 <p className="mt-1">Поверх: {floor}</p>
@@ -146,7 +178,7 @@ const Section = () => {
                 floors={floorNumbers}
                 current={floor}
                 freeCount={freeCount}
-                onSelect={(value) => setSearchParams({ floor: value }, { replace: true })}
+                onSelect={selectFloor}
               />
             )}
 
@@ -183,7 +215,7 @@ const Section = () => {
                       setHovered(apartment);
                     }}
                     onPointerLeave={() => setHovered(null)}
-                    onClick={() => isMatch(apartment) && setSelected(apartment)}
+                    onClick={() => setSelected(apartment)}
                   />
                 ))}
               </svg>
