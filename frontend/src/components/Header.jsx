@@ -3,7 +3,8 @@ import { Link, NavLink, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLeadModalStore } from "@/stores/leadModalStore";
-import Logo from "@/assets/icons/SenatorLogo.jpg";
+import { logoClass } from "@/data/siteImages";
+import { useSiteImage } from "@/stores/siteImagesStore";
 
 const navLinks = [
   { href: "/", label: "Про проект" },
@@ -17,6 +18,7 @@ const navLinks = [
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const openLeadModal = useLeadModalStore((state) => state.open);
+  const siteImage = useSiteImage();
   const isHome = useLocation().pathname === "/";
 
   return (
@@ -28,11 +30,10 @@ const Header = () => {
       }`}
     >
       <Link to="/" className="flex shrink-0 items-center">
-        {/* темний логотип на білому фоні -> білий на прозорому */}
         <img
-          src={Logo}
+          src={siteImage("logo")}
           alt="Senator"
-          className="block h-auto w-[130px] mix-blend-screen brightness-140 grayscale invert sm:w-[170px]"
+          className={`block h-auto w-[130px] sm:w-[170px] ${logoClass}`}
         />
       </Link>
 

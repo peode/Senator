@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import { api } from "@/lib/api";
 import { useApartmentsStore } from "@/stores/apartmentsStore";
+import { useSiteImagesStore } from "@/stores/siteImagesStore";
 
 let pendingRequest = null;
 
@@ -37,6 +38,11 @@ export const useSectionsStore = create((set, get) => ({
     // квартири могли змінитися: каталог має це побачити
     await useApartmentsStore.getState().fetchApartments({ force: true });
     return updated;
+  },
+
+  saveMap: async (map) => {
+    set({ sections: await api("/sections/map", { method: "PUT", body: map }) });
+    await useSiteImagesStore.getState().fetchImages();
   },
 
   setUnitAvailable: async (unitId, available) => {

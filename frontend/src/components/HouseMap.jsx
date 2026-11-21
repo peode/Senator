@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ApartmentFilters from "@/components/ApartmentFilters";
+import { Skeleton } from "@/components/ui/skeleton";
 import { sectionStatuses } from "@/data/sections";
 import {
   mapClass,
@@ -10,34 +10,9 @@ import {
   mapZoneClass,
 } from "@/lib/mapClasses";
 import { cn } from "@/lib/utils";
-import { hasActiveFilters, useApartmentFiltersStore } from "@/stores/apartmentFiltersStore";
-import { useApartments } from "@/stores/apartmentsStore";
 import { useSections } from "@/stores/sectionsStore";
-
-import topView from "@/assets/images/complex-top-view.jpg";
-
-const IMAGE_WIDTH = 1262;
-const IMAGE_HEIGHT = 1246;
-
-// x, y, width, height — у координатах зображення; статус і ціна секції приходять з API
-const houses = [
-  { id: 1, x: 303, y: 143, w: 110, h: 130 },
-  { id: 2, x: 411, y: 143, w: 108, h: 130 },
-  { id: 3, x: 517, y: 143, w: 110, h: 130 },
-  { id: 4, x: 516, y: 356, w: 126, h: 126 },
-  { id: 5, x: 640, y: 356, w: 124, h: 126 },
-  { id: 6, x: 703, y: 451, w: 92, h: 146 },
-  { id: 7, x: 703, y: 598, w: 92, h: 152 },
-  { id: 8, x: 661, y: 748, w: 133, h: 114 },
-  { id: 9, x: 535, y: 748, w: 128, h: 114 },
-  { id: 10, x: 193, y: 319, w: 94, h: 148 },
-  { id: 11, x: 196, y: 467, w: 90, h: 150 },
-  { id: 12, x: 196, y: 614, w: 92, h: 148 },
-  { id: 13, x: 196, y: 759, w: 92, h: 148 },
-  { id: 14, x: 198, y: 903, w: 96, h: 184 },
-  { id: 15, x: 293, y: 958, w: 187, h: 130 },
-  { id: 16, x: 173, y: 220, w: 120, h: 120 },
-];
+import { useComplexMap } from "@/stores/siteImagesStore";
+import { useSiteText } from "@/stores/siteTextsStore";
 
 const formatPrice = (value) => value.toLocaleString("uk-UA");
 
@@ -46,12 +21,10 @@ const HouseMap = () => {
   const mapRef = useRef(null);
   const [activeHouse, setActiveHouse] = useState(null);
   const [cursor, setCursor] = useState({ x: 0, y: 0 });
-  const filtering = useApartmentFiltersStore(hasActiveFilters);
   const { sections, error } = useSections();
-  const { apartments, loaded } = useApartments();
-
-  const matchCount = (house) =>
-    apartments.filter((apartment) => apartment.sectionId === house.id).length;
+  const complexMap = useComplexMap();
+  const t = useSiteText();
+  const houses = sections.filter(({ mapPoints }) => mapPoints);
 
   const updateCursor = (event) => {
     const rect = mapRef.current.getBoundingClientRect();
@@ -61,21 +34,31 @@ const HouseMap = () => {
     });
   };
 
-  const activeSection = sections.find((section) => section.id === activeHouse?.id);
-  const activeStatus = activeSection && sectionStatuses[activeSection.status];
+  const activeStatus = activeHouse && sectionStatuses[activeHouse.status];
 
   return (
     <section className="bg-white">
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-white px-[3.5%] py-[22px] text-ink">
-        <ApartmentFilters />
+      <div className="flex flex-col gap-4 bg-ink px-[5%] pt-2 pb-5 text-white md:flex-row md:items-center md:justify-between md:gap-8 md:px-[3.5%] md:pb-7">
+        <div>
+          <h1 className="text-[clamp(24px,2.6vw,36px)] leading-tight font-extrabold">{t("apartments.title")}</h1>
+          <p className="mt-1 text-sm text-white/70 md:text-[15px]">
+            {t("apartments.hint")}
+          </p>
+        </div>
 
-        <p className="text-[15px] font-medium">Оберіть будинок, щоб побачити його план та іншу інформацію</p>
-
-        <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-          {Object.values(sectionStatuses).map((status) => (
-            <li key={status.label} className="flex items-center gap-2">
+        <ul className="flex flex-wrap gap-2">
+          {Object.entries(sectionStatuses).map(([key, status]) => (
+            <li
+              key={key}
+              className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-2 text-[13px] font-medium whitespace-nowrap"
+            >
               <span className={cn("inline-block size-[9px] rounded-full", status.dotClass)} />
               {status.label}
+              {houses.length > 0 && (
+                <span className="font-bold text-white/60">
+                  {houses.filter((house) => house.status === key).length}
+                </span>
+              )}
             </li>
           ))}
         </ul>
@@ -93,44 +76,46 @@ const HouseMap = () => {
         onPointerMove={updateCursor}
         onPointerLeave={() => setActiveHouse(null)}
       >
-        <img
-          src={topView}
-          alt="Вигляд ЖК Senator зверху"
-          className={mapImageClass}
-          draggable="false"
-        />
-
-        <svg
-          className={mapSvgClass}
-          viewBox={`0 0 ${IMAGE_WIDTH} ${IMAGE_HEIGHT}`}
-          aria-label="Карта будинків"
-        >
-          {houses.map((house) => (
-            <rect
-              key={house.id}
-              className={mapZoneClass({
-                active: activeHouse?.id === house.id,
-                dimmed: filtering && loaded && matchCount(house) === 0,
-              })}
-              x={house.x}
-              y={house.y}
-              width={house.w}
-              height={house.h}
-              onPointerEnter={(event) => {
-                updateCursor(event);
-                setActiveHouse(house);
-              }}
-              onPointerLeave={() => setActiveHouse(null)}
-              onPointerDown={(event) => {
-                updateCursor(event);
-                setActiveHouse(house);
-              }}
-              onClick={() => {
-                if (sections.find(({ id }) => id === house.id)?.plan) navigate(`/apartments/${house.id}`);
-              }}
+        {complexMap ? (
+          <>
+            <img
+              src={complexMap.src}
+              alt="Вигляд ЖК Senator зверху"
+              width={complexMap.width}
+              height={complexMap.height}
+              className={mapImageClass}
+              draggable="false"
             />
-          ))}
-        </svg>
+
+            <svg
+              className={mapSvgClass}
+              viewBox={`0 0 ${complexMap.width} ${complexMap.height}`}
+              aria-label="Карта будинків"
+            >
+              {houses.map((house) => (
+                <polygon
+                  key={house.id}
+                  className={mapZoneClass({ active: activeHouse?.id === house.id })}
+                  points={house.mapPoints.map((point) => point.join(",")).join(" ")}
+                  onPointerEnter={(event) => {
+                    updateCursor(event);
+                    setActiveHouse(house);
+                  }}
+                  onPointerLeave={() => setActiveHouse(null)}
+                  onPointerDown={(event) => {
+                    updateCursor(event);
+                    setActiveHouse(house);
+                  }}
+                  onClick={() => {
+                    if (house.plan) navigate(`/apartments/${house.id}`);
+                  }}
+                />
+              ))}
+            </svg>
+          </>
+        ) : (
+          <Skeleton className="aspect-square w-full rounded-none" />
+        )}
 
         {activeStatus && (
           <div
@@ -146,11 +131,8 @@ const HouseMap = () => {
             >
               {activeStatus.label}
             </span>
-            {activeSection.status === "SELLING" && (
-              <p>від {formatPrice(activeSection.price)} $/м²</p>
-            )}
-            {filtering && activeSection.status === "SELLING" && (
-              <p>Підходить квартир: {matchCount(activeHouse)}</p>
+            {activeHouse.status === "SELLING" && (
+              <p>від {formatPrice(activeHouse.price)} $/м²</p>
             )}
           </div>
         )}

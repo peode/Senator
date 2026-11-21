@@ -50,6 +50,8 @@ model Section {
   status     SectionStatus @default(PLANNED)
   price      Int?
   floors     Int           @default(9)
+  // вершини багатокутника секції на карті ЖК; без них секції на карті немає
+  mapPoints  Json?
   // зображення плану (JPEG); координати квартир задані в його розмірах
   planImage  Bytes?
   planWidth  Int?
@@ -90,5 +92,39 @@ model SiteSettings {
   address   String
   hours     String
   socials   Json
+  updatedAt DateTime @updatedAt
+}
+
+enum AdvantagePlacement {
+  HOME
+  PAGE
+}
+
+// HOME — блок на головній (з іконкою), PAGE — сторінка «Переваги» (з фото)
+model Advantage {
+  id        Int                @id @default(autoincrement())
+  placement AdvantagePlacement
+  position  Int                @default(0)
+  title     String
+  text      String
+  icon      String?
+  image     String?
+
+  @@index([placement, position])
+}
+
+// Замінене в адмінці зображення сайту; без рядка показується стандартне
+model SiteImage {
+  key       String   @id
+  image     Bytes
+  width     Int
+  height    Int
+  updatedAt DateTime @updatedAt
+}
+
+// Змінений в адмінці текст сайту; без рядка показується стандартний
+model SiteText {
+  key       String   @id
+  value     String
   updatedAt DateTime @updatedAt
 }

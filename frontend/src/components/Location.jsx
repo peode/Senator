@@ -1,29 +1,33 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   Ambulance,
+  Check,
   Drama,
+  MapPin,
+  MousePointerClick,
   School,
   ShoppingBag,
   ShoppingBasket,
+  X,
 } from "lucide-react";
-import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import {
   Section,
   SectionHeading,
   SectionSubtitle,
 } from "@/components/Section";
+import { useSiteText } from "@/stores/siteTextsStore";
 
 const ADDRESS = "Чернівці, вулиця Руська, 236Б";
 
 // query — що шукати на карті поруч із ЖК, mode: "w" — пішки, "d" — авто,
 // destination — точні координати, якщо пошук за назвою знаходить не ту точку
 const places = [
-  { id: "school", icon: School, title: "Школи №42", distance: "≈ 10 хв пішки", mode: "w", query: "Загальноосвітня школа №42" },
-  { id: "mall", icon: ShoppingBag, title: "ТРЦ «Екватор»", distance: "≈ 10 хв пішки", mode: "w", query: "Велмарт" },
-  { id: "hospital", icon: Ambulance, title: "Чернівецька лікарня швидкої медичної допомоги", distance: "≈ 5 хв авто", mode: "d", query: "Чернівецька лікарня швидкої медичної допомоги" },
-  { id: "atb", icon: ShoppingBasket, title: "АТБ-Маркет", distance: "≈ 5 хв авто", mode: "d", query: "АТБ-Маркет", destination: "48.2683082,26.0017738" },
-  { id: "center", icon: Drama, title: "Центр міста", distance: "≈ 15 хв авто", mode: "d", query: "Чернівецький академічний обласний український музично-драматичний театр ім. Ольги Кобилянської" },
+  { id: "school", icon: School, mode: "w", query: "Загальноосвітня школа №42" },
+  { id: "mall", icon: ShoppingBag, mode: "w", query: "Велмарт" },
+  { id: "hospital", icon: Ambulance, mode: "d", query: "Чернівецька лікарня швидкої медичної допомоги" },
+  { id: "atb", icon: ShoppingBasket, mode: "d", query: "АТБ-Маркет", destination: "48.2683082,26.0017738" },
+  { id: "center", icon: Drama, mode: "d", query: "Чернівецький академічний обласний український музично-драматичний театр ім. Ольги Кобилянської" },
 ];
 
 // З вибраним місцем показуємо маршрут від ЖК — так на карті видно обидві точки
@@ -44,54 +48,124 @@ const getMapSrc = (place) => {
 
 const Location = () => {
   const [activePlace, setActivePlace] = useState(null);
+  const mapRef = useRef(null);
+  const t = useSiteText();
+  const activeTitle = activePlace && t(`location.${activePlace.id}.title`);
+
+  const selectPlace = (place) => {
+    setActivePlace(place);
+
+    // На телефоні карта під списком, тож показуємо її, щоб було видно результат натискання
+    const map = mapRef.current;
+    if (map.getBoundingClientRect().bottom > window.innerHeight) {
+      map.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  };
 
   return (
     <Section id="location">
-      <SectionHeading title="РОЗТАШУВАННЯ">
-        <SectionSubtitle>м. Чернівці, вул. Руська, 236Б</SectionSubtitle>
+      <SectionHeading title={t("location.title")}>
+        <SectionSubtitle>{t("location.subtitle")}</SectionSubtitle>
       </SectionHeading>
 
-      <div className="grid gap-[30px] lg:grid-cols-[minmax(300px,0.8fr)_minmax(0,1.4fr)]">
-        <ul className="flex flex-col gap-3">
-          {places.map((place) => {
-            const { id, icon: Icon, title, distance } = place;
-            const isActive = activePlace?.id === id;
+      <div className="grid gap-[30px] lg:grid-cols-[minmax(380px,0.8fr)_minmax(0,1.4fr)]">
+        <div>
+          <p className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-600">
+            <MousePointerClick size={18} className="shrink-0 text-brand-dark" />
+            {t("location.hint")}
+          </p>
 
-            return (
-              <li key={id} className="contents">
-                <button
-                  type="button"
-                  aria-pressed={isActive}
-                  onClick={() => setActivePlace(isActive ? null : place)}
-                  className="cursor-pointer text-left"
-                >
-                  <Card
+          <ul className="flex flex-col gap-3">
+            {places.map((place) => {
+              const { id, icon: Icon } = place;
+              const isActive = activePlace?.id === id;
+
+              return (
+                <li key={id}>
+                  <button
+                    type="button"
+                    aria-pressed={isActive}
+                    onClick={() => selectPlace(isActive ? null : place)}
                     className={cn(
-                      "grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-0 rounded-xl px-5 py-[18px] ring-0 transition-colors",
-                      isActive ? "bg-brand/15 ring-2 ring-brand" : "bg-surface hover:bg-brand/10"
+                      "group grid w-full cursor-pointer grid-cols-[auto_1fr_auto] items-center gap-3 rounded-xl border p-3 text-left shadow-card transition-all outline-none focus-visible:ring-3 focus-visible:ring-brand/50 active:translate-y-px md:gap-4 md:p-3.5",
+                      isActive
+                        ? "border-ink bg-ink text-white"
+                        : "border-slate-200 bg-white hover:-translate-y-0.5 hover:border-brand hover:shadow-card-hover"
                     )}
                   >
-                    <Icon size={26} strokeWidth={1.5} className="row-span-2 text-brand" />
-                    <span className="text-base font-bold">{title}</span>
-                    <span className="text-sm text-slate-500">{distance}</span>
-                  </Card>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+                    <span
+                      className={cn(
+                        "flex size-11 items-center justify-center rounded-full",
+                        isActive ? "bg-white/10 text-gold" : "bg-brand/15 text-brand-dark"
+                      )}
+                    >
+                      <Icon size={22} strokeWidth={1.75} />
+                    </span>
 
-        <div className="min-h-[320px] overflow-hidden rounded-2xl bg-slate-200 md:min-h-[420px]">
+                    <span className="min-w-0">
+                      <span className="block text-[15px] leading-snug font-bold md:text-base">
+                        {t(`location.${id}.title`)}
+                      </span>
+                      <span
+                        className={cn(
+                          "mt-0.5 block text-sm",
+                          isActive ? "text-white/70" : "text-slate-500"
+                        )}
+                      >
+                        {t(`location.${id}.distance`)}
+                      </span>
+                    </span>
+
+                    <span
+                      className={cn(
+                        "inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-[13px] font-bold transition-colors",
+                        isActive
+                          ? "bg-white/10 text-white"
+                          : "bg-gold text-ink group-hover:bg-gold-hover"
+                      )}
+                    >
+                      {isActive ? <Check size={16} /> : <MapPin size={16} />}
+                      {t("location.button")}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+
+        <div
+          ref={mapRef}
+          className="flex min-h-[380px] flex-col overflow-hidden rounded-2xl bg-slate-200 shadow-card md:min-h-[480px]"
+        >
+          <div className="flex min-h-14 items-center gap-3 bg-ink px-4 py-2.5 text-sm text-white md:px-5">
+            <MapPin size={18} className="shrink-0 text-gold" />
+            <p className="min-w-0 flex-1 font-semibold">
+              {activePlace
+                ? `Маршрут: ${activeTitle}, ${t(`location.${activePlace.id}.distance`)}`
+                : "ЖК «Senator», вул. Руська, 236Б"}
+            </p>
+            {activePlace && (
+              <button
+                type="button"
+                onClick={() => setActivePlace(null)}
+                className="inline-flex shrink-0 cursor-pointer items-center gap-1 rounded-lg bg-white/10 px-2.5 py-1.5 font-semibold transition-colors outline-none hover:bg-white/20 focus-visible:ring-3 focus-visible:ring-brand/50"
+              >
+                <X size={15} /> Скинути
+              </button>
+            )}
+          </div>
+
           <iframe
             title={
               activePlace
-                ? `${activePlace.title} на карті`
+                ? `${activeTitle} на карті`
                 : "Розташування ЖК Senator на карті"
             }
             src={getMapSrc(activePlace)}
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
-            className="block size-full min-h-[320px] border-0 md:min-h-[420px]"
+            className="block min-h-[320px] w-full flex-1 border-0"
           />
         </div>
       </div>

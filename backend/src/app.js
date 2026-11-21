@@ -2,6 +2,9 @@ import express from "express";
 import { ZodError } from "zod";
 import { corsMiddleware } from "./middleware/cors.js";
 import newsRouter from "./routes/news.js";
+import advantagesRouter from "./routes/advantages.js";
+import imagesRouter from "./routes/images.js";
+import textsRouter from "./routes/texts.js";
 import leadsRouter from "./routes/leads.js";
 import sessionRouter from "./routes/session.js";
 import sectionsRouter from "./routes/sections.js";
@@ -17,6 +20,9 @@ if (process.env.NODE_ENV === "production") app.set("trust proxy", Number(process
 
 app.use("/api", corsMiddleware);
 app.use("/api/news", newsRouter);
+app.use("/api/advantages", advantagesRouter);
+app.use("/api/images", imagesRouter);
+app.use("/api/texts", textsRouter);
 app.use("/api/leads", leadsRouter);
 app.use("/api/session", sessionRouter);
 app.use("/api/sections", sectionsRouter);

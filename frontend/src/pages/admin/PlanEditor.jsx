@@ -246,7 +246,7 @@ const PlanEditor = ({ section, onDirtyChange, className }) => {
       {plan ? (
         <PlanCanvas
           plan={plan}
-          apartments={apartments}
+          zones={apartments}
           selectedId={selectedId}
           drawing={drawing}
           onSelect={setSelectedId}

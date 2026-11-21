@@ -1,3 +1,5 @@
+import { Prisma } from "@prisma/client";
+import { COMPLEX_MAP_KEY } from "../lib/imageData.js";
 import { prisma } from "../lib/db.js";
 
 // Зображення плану віддається окремим запитом: у списку секцій воно зайве
@@ -79,5 +81,28 @@ export const updatePlan = (id, { plan, apartments }) =>
       return tx.section.findUniqueOrThrow({ where: { id }, ...withApartments });
     },
     // кожна квартира — окремий запит, а до бази в хмарі кожен іде довго
+    { timeout: 20_000 },
+  );
+
+// Секції, яких немає в списку, зникають з карти, але самі лишаються зі своїми квартирами
+export const updateMap = ({ map, zones }) =>
+  prisma.$transaction(
+    async (tx) => {
+      if (map) {
+        await tx.siteImage.upsert({
+          where: { key: COMPLEX_MAP_KEY },
+          create: { key: COMPLEX_MAP_KEY, ...map },
+          update: map,
+        });
+      }
+      await tx.section.updateMany({
+        where: { id: { notIn: zones.map((zone) => zone.id) } },
+        data: { mapPoints: Prisma.DbNull },
+      });
+      for (const { id, points } of zones) {
+        await tx.section.update({ where: { id }, data: { mapPoints: points } });
+      }
+    },
+    // кожна секція — окремий запит, а до бази в хмарі кожен іде довго
     { timeout: 20_000 },
   );

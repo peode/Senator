@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { Loader2, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NewsAdmin from "./admin/NewsAdmin";
+import AdvantagesAdmin from "./admin/AdvantagesAdmin";
+import PagesAdmin from "./admin/PagesAdmin";
 import SectionsAdmin from "./admin/SectionsAdmin";
 import SettingsAdmin from "./admin/SettingsAdmin";
 import LeadsAdmin from "./admin/LeadsAdmin";
@@ -12,6 +14,8 @@ import { fieldClass } from "./admin/fields";
 const tabs = [
   { id: "leads", label: "Заявки" },
   { id: "news", label: "Новини" },
+  { id: "advantages", label: "Переваги" },
+  { id: "pages", label: "Сторінки" },
   { id: "sections", label: "Секції" },
   { id: "settings", label: "Налаштування" },
 ];
@@ -108,6 +112,8 @@ const Admin = () => {
 
         {tab === "leads" && <LeadsAdmin />}
         {tab === "news" && <NewsAdmin />}
+        {tab === "advantages" && <AdvantagesAdmin />}
+        {tab === "pages" && <PagesAdmin />}
         {/* лишається змонтованою: незбережений план не зникає при переході на іншу вкладку */}
         <div hidden={tab !== "sections"}>
           <SectionsAdmin />

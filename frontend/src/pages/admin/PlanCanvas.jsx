@@ -9,10 +9,21 @@ const centerOf = (points) =>
 
 // Контури малюються в SVG у координатах плану, а точки й номери — окремими елементами
 // поверх нього: так вони не змінюють розмір разом із зображенням
-const PlanCanvas = ({ plan, apartments, selectedId, drawing, onSelect, onAddPoint, onClosePath, onMovePoint }) => {
+const PlanCanvas = ({
+  plan,
+  alt = "План секції",
+  zoneName = "Квартира",
+  zones,
+  selectedId,
+  drawing,
+  onSelect,
+  onAddPoint,
+  onClosePath,
+  onMovePoint,
+}) => {
   const canvasRef = useRef(null);
   const [cursor, setCursor] = useState(null);
-  const selected = apartments.find((apartment) => apartment.id === selectedId);
+  const selected = zones.find((zone) => zone.id === selectedId);
 
   const toPlanPoint = (event) => {
     const rect = canvasRef.current.getBoundingClientRect();
@@ -37,7 +48,7 @@ const PlanCanvas = ({ plan, apartments, selectedId, drawing, onSelect, onAddPoin
     >
       <img
         src={plan.src}
-        alt="План секції"
+        alt={alt}
         width={plan.width}
         height={plan.height}
         className="block h-auto w-full"
@@ -45,21 +56,21 @@ const PlanCanvas = ({ plan, apartments, selectedId, drawing, onSelect, onAddPoin
       />
 
       <svg className="absolute inset-0 size-full" viewBox={`0 0 ${plan.width} ${plan.height}`}>
-        {apartments.map((apartment) => (
+        {zones.map((zone, index) => (
           <polygon
-            key={apartment.id}
-            aria-label={`Квартира ${apartments.indexOf(apartment) + 1}`}
-            points={toPoints(apartment.points)}
+            key={zone.id}
+            aria-label={`${zoneName} ${zone.label ?? index + 1}`}
+            points={toPoints(zone.points)}
             className={cn(
               "cursor-pointer stroke-2 transition-[fill] [vector-effect:non-scaling-stroke]",
-              apartment.id === selectedId
+              zone.id === selectedId
                 ? "fill-gold/45 stroke-ink"
                 : "fill-brand/20 stroke-brand-dark hover:fill-brand/40",
               drawing && "pointer-events-none",
             )}
             onClick={(event) => {
               event.stopPropagation();
-              onSelect(apartment.id);
+              onSelect(zone.id);
             }}
           />
         ))}
@@ -72,13 +83,13 @@ const PlanCanvas = ({ plan, apartments, selectedId, drawing, onSelect, onAddPoin
         )}
       </svg>
 
-      {apartments.map((apartment, index) => (
+      {zones.map((zone, index) => (
         <span
-          key={apartment.id}
-          style={place(centerOf(apartment.points))}
+          key={zone.id}
+          style={place(centerOf(zone.points))}
           className="pointer-events-none absolute flex size-6 -translate-1/2 items-center justify-center rounded-full bg-ink text-xs font-semibold text-white"
         >
-          {index + 1}
+          {zone.label ?? index + 1}
         </span>
       ))}
 

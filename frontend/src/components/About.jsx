@@ -1,12 +1,14 @@
 import { useState } from "react";
 import {
   Baby,
+  ChevronLeft,
+  ChevronRight,
   Coffee,
+  MousePointerClick,
   ShoppingBasket,
   Trees,
   Mail,
   Scissors,
-  ArrowRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -14,123 +16,115 @@ import {
   SectionHeading,
   SectionSubtitle,
 } from "@/components/Section";
-
-import playground from "@/assets/images/playground.webp";
-import cafe from "@/assets/images/cafe.webp";
-import supermarket from "@/assets/images/supermarket.webp";
-import walkingZone from "@/assets/images/walking-zone.webp";
-import postOffice from "@/assets/images/post-office.webp";
-import beautySalon from "@/assets/images/beauty-salon.webp";
+import { useSiteImage } from "@/stores/siteImagesStore";
+import { useSiteText } from "@/stores/siteTextsStore";
 
 const amenities = [
-  {
-    id: "playground",
-    title: "Дитячий майданчик",
-    icon: Baby,
-    image: playground,
-    description: "Простір для ігор та дитячих пригод.",
-  },
-  {
-    id: "cafe",
-    title: "Кав'ярня",
-    icon: Coffee,
-    image: cafe,
-    description: "Улюблена кава зовсім поруч із домом.",
-  },
-  {
-    id: "supermarket",
-    title: "Супермаркет",
-    icon: ShoppingBasket,
-    image: supermarket,
-    description: "Усе необхідне для щоденних покупок.",
-  },
-  {
-    id: "walking",
-    title: "Прогулянкова зона",
-    icon: Trees,
-    image: walkingZone,
-    description: "Зелений простір для відпочинку на свіжому повітрі.",
-  },
-  {
-    id: "post",
-    title: "Поштове відділення",
-    icon: Mail,
-    image: postOffice,
-    description: "Зручно отримувати та відправляти посилки.",
-  },
-  {
-    id: "beauty",
-    title: "Салон краси",
-    icon: Scissors,
-    image: beautySalon,
-    description: "Турбота про себе неподалік від дому.",
-  },
+  { id: "playground", icon: Baby, image: "playground" },
+  { id: "cafe", icon: Coffee, image: "cafe" },
+  { id: "supermarket", icon: ShoppingBasket, image: "supermarket" },
+  { id: "walking", icon: Trees, image: "walkingZone" },
+  { id: "post", icon: Mail, image: "postOffice" },
+  { id: "beauty", icon: Scissors, image: "beautySalon" },
 ];
 
+const ARROW_BUTTON =
+  "flex size-11 cursor-pointer items-center justify-center rounded-full bg-white text-ink shadow-card transition-colors outline-none hover:bg-gold focus-visible:ring-3 focus-visible:ring-gold/60";
+
 const About = () => {
-  const [activeAmenity, setActiveAmenity] = useState(amenities[0]);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const siteImage = useSiteImage();
+  const t = useSiteText();
+  const activeAmenity = amenities[activeIndex];
+  const activeTitle = t(`amenity.${activeAmenity.id}.title`);
+
+  const step = (delta) =>
+    setActiveIndex((index) => (index + delta + amenities.length) % amenities.length);
 
   return (
-    <Section id="about">
-      <SectionHeading title="ТУТ ПЕРЕДБАЧЕНО">
-        <SectionSubtitle>Все, що потрібне для комфортного життя!</SectionSubtitle>
+    <Section id="about" className="bg-ink text-white">
+      <SectionHeading title={t("amenities.title")}>
+        <SectionSubtitle className="text-white/70">
+          {t("amenities.subtitle")}
+        </SectionSubtitle>
       </SectionHeading>
 
-      <div className="grid items-stretch gap-5 md:grid-cols-[minmax(280px,0.85fr)_minmax(0,1.5fr)] lg:grid-cols-[minmax(340px,0.72fr)_minmax(0,2fr)]">
-        <div className="grid grid-cols-2 grid-rows-3 gap-2.5">
-          {amenities.map((amenity) => {
-            const Icon = amenity.icon;
-            const isActive = activeAmenity.id === amenity.id;
+      <div className="relative h-[300px] overflow-hidden rounded-2xl bg-white/5 sm:h-[380px] lg:h-[520px]">
+        <img
+          src={siteImage(activeAmenity.image)}
+          alt={activeTitle}
+          className="absolute inset-0 size-full object-cover"
+        />
 
-            return (
-              <button
-                key={amenity.id}
-                type="button"
-                onClick={() => setActiveAmenity(amenity)}
-                aria-pressed={isActive}
-                className={cn(
-                  "relative flex min-h-[110px] min-w-0 cursor-pointer flex-col items-start justify-center gap-3.5 rounded-2xl p-3.5 text-left text-neutral-900 transition-colors sm:min-h-[120px] sm:p-[18px] lg:min-h-[155px] lg:gap-6 lg:px-6 lg:py-[25px]",
-                  isActive ? "bg-gold-active" : "bg-gold-soft hover:bg-amber-200"
-                )}
-              >
-                <Icon
-                  strokeWidth={1.5}
-                  className="size-8 shrink-0 lg:size-[39px]"
-                />
-
-                <span className="max-w-[150px] text-[13px] leading-[1.4] font-bold sm:text-sm lg:text-base">
-                  {amenity.title}
-                </span>
-
-                {isActive && (
-                  <ArrowRight
-                    size={22}
-                    className="absolute right-2 bottom-2.5 w-[17px] sm:right-4 sm:bottom-[22px] sm:w-auto"
-                  />
-                )}
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="relative min-h-[300px] min-w-0 overflow-hidden rounded-2xl bg-neutral-100 md:min-h-[400px] lg:min-h-[465px]">
-          <img
-            key={activeAmenity.id}
-            src={activeAmenity.image}
-            alt={activeAmenity.title}
-            className="block size-full max-h-[430px] min-h-[300px] animate-in object-cover fade-in duration-300 md:max-h-none md:min-h-[400px] lg:min-h-[465px]"
-          />
-
-          <div className="absolute inset-x-0 bottom-0 bg-linear-to-b from-transparent to-black/70 px-[18px] pt-10 pb-[18px] text-white sm:px-[30px] sm:pt-[50px] sm:pb-[25px]">
-            <span className="text-[19px] font-bold sm:text-[22px]">
-              {activeAmenity.title}
-            </span>
-            <p className="mt-2 text-sm leading-normal">
-              {activeAmenity.description}
+        <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 bg-linear-to-b from-transparent via-black/60 via-40% to-black/85 px-4 pt-16 pb-4 sm:px-7 sm:pb-6">
+          <div className="min-w-0">
+            <h3 className="text-[19px] leading-tight font-bold sm:text-2xl">
+              {activeTitle}
+            </h3>
+            <p className="mt-1.5 text-sm leading-normal text-white/85 sm:text-base">
+              {t(`amenity.${activeAmenity.id}.text`)}
             </p>
+          </div>
+
+          <div className="flex shrink-0 gap-2">
+            <button
+              type="button"
+              className={ARROW_BUTTON}
+              onClick={() => step(-1)}
+              aria-label="Попереднє фото"
+            >
+              <ChevronLeft size={22} />
+            </button>
+            <button
+              type="button"
+              className={ARROW_BUTTON}
+              onClick={() => step(1)}
+              aria-label="Наступне фото"
+            >
+              <ChevronRight size={22} />
+            </button>
           </div>
         </div>
       </div>
+
+      <p className="mt-6 mb-3 flex items-center gap-2 text-sm font-medium text-white/70 md:mt-8">
+        <MousePointerClick size={18} className="shrink-0 text-gold" />
+        {t("amenities.hint")}
+      </p>
+
+      <ul className="grid grid-cols-3 gap-2.5 md:gap-4 lg:grid-cols-6">
+        {amenities.map((amenity, index) => {
+          const Icon = amenity.icon;
+          const isActive = index === activeIndex;
+
+          return (
+            <li key={amenity.id}>
+              <button
+                type="button"
+                onClick={() => setActiveIndex(index)}
+                aria-pressed={isActive}
+                className={cn(
+                  "group flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-xl text-left text-ink transition-all outline-none focus-visible:ring-3 focus-visible:ring-gold/60 active:translate-y-px",
+                  isActive ? "bg-gold ring-3 ring-gold" : "bg-white hover:-translate-y-1 hover:bg-gold-soft"
+                )}
+              >
+                <span className="block aspect-[3/2] overflow-hidden">
+                  <img
+                    src={siteImage(amenity.image)}
+                    alt=""
+                    loading="lazy"
+                    className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </span>
+                <span className="flex flex-1 items-center gap-2 px-2 py-2 text-xs leading-tight font-bold sm:px-3 sm:py-2.5 sm:text-sm">
+                  <Icon size={18} strokeWidth={1.75} className="hidden shrink-0 sm:block" />
+                  {t(`amenity.${amenity.id}.title`)}
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
     </Section>
   );
 };

@@ -12,83 +12,52 @@ import {
   SectionSubtitle,
 } from "@/components/Section";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import courtyard from "@/assets/images/courtyard.webp";
+import { useSiteImage } from "@/stores/siteImagesStore";
+import { useSiteText } from "@/stores/siteTextsStore";
 import { SocialIcon } from "@/components/SocialIcons";
 import { socialLabels } from "@/data/socials";
 import { useSettings } from "@/stores/settingsStore";
 
-const companyFacts = [
-  { label: "Компанія", value: "ТОВ «Буковинський квартал»" },
-  { label: "Зареєстрована", value: "у 2016 році" },
-  { label: "Діяльність", value: "Будівництво житлових і нежитлових будівель" },
-  { label: "ЄДРПОУ", value: "40676338" },
-];
+const companyFacts = ["fact1", "fact2", "fact3", "fact4"];
 
 const projectFacts = [
-  {
-    icon: Building2,
-    title: "16 будинків",
-    text: "ЖК «Senator» на вулиці Руській, 236Б будується чергами та об'єднує будинки в один квартал.",
-  },
-  {
-    icon: Layers,
-    title: "Монолітний каркас",
-    text: "Будинки зводяться за монолітно-каркасною технологією, стіни — з керамоблоку.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Закрита територія",
-    text: "Територія комплексу закрита для стороннього транспорту та відвідувачів.",
-  },
-  {
-    icon: SquareParking,
-    title: "Підземний паркінг",
-    text: "У комплексі передбачено дворівневий підземний паркінг.",
-  },
+  { icon: Building2, key: "project1" },
+  { icon: Layers, key: "project2" },
+  { icon: ShieldCheck, key: "project3" },
+  { icon: SquareParking, key: "project4" },
 ];
 
-const socialHints = {
-  facebook: "Новини та анонси",
-  instagram: "Фото та відео з будівництва",
-  youtube: "Відео про комплекс",
-};
-
 const AboutDeveloper = () => {
+  const siteImage = useSiteImage();
+  const t = useSiteText();
   const { socials } = useSettings();
 
   return (
     <>
-      <PageBanner title="Про забудовника" subtitle="Буковинський квартал — Чернівці" />
+      <PageBanner title={t("developer.banner")} subtitle={t("developer.subtitle")} />
 
       <Section>
-        <SectionHeading title="БУКОВИНСЬКИЙ КВАРТАЛ" />
+        <SectionHeading title={t("developer.title")} />
 
         <div className="grid items-center gap-8 md:gap-[60px] lg:grid-cols-2">
           <div className="space-y-5 text-base leading-[1.8] text-slate-700 md:text-[17px]">
             <p className="text-[clamp(19px,1.7vw,24px)] leading-normal font-semibold text-neutral-950">
-              «Буковинський квартал» — чернівецька будівельна компанія, яка
-              зводить житловий комплекс «Senator».
+              {t("developer.lead")}
             </p>
-            <p>
-              Компанію зареєстровано в Чернівцях у 2016 році, її основна
-              діяльність — будівництво житлових і нежитлових будівель.
-              ЖК «Senator» на вулиці Руській, 236Б — її головний проєкт:
-              квартал із 16 будинків, закритою територією та підземним
-              паркінгом.
-            </p>
+            <p>{t("developer.text")}</p>
 
             <dl className="grid gap-x-8 gap-y-4 border-t border-slate-200 pt-5 sm:grid-cols-2">
-              {companyFacts.map(({ label, value }) => (
-                <div key={label}>
-                  <dt className="text-sm text-slate-500">{label}</dt>
-                  <dd className="text-base font-semibold text-neutral-950">{value}</dd>
+              {companyFacts.map((key) => (
+                <div key={key}>
+                  <dt className="text-sm text-slate-500">{t(`developer.${key}.label`)}</dt>
+                  <dd className="text-base font-semibold text-neutral-950">{t(`developer.${key}.value`)}</dd>
                 </div>
               ))}
             </dl>
           </div>
 
           <img
-            src={courtyard}
+            src={siteImage("developer")}
             alt="ЖК Senator"
             className="aspect-[4/3] w-full rounded-2xl object-cover"
           />
@@ -96,22 +65,22 @@ const AboutDeveloper = () => {
       </Section>
 
       <Section className="bg-surface">
-        <SectionHeading title="ЩО МИ БУДУЄМО" />
+        <SectionHeading title={t("developer.projectTitle")} />
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {projectFacts.map(({ icon: Icon, title, text }) => (
+          {projectFacts.map(({ icon: Icon, key }) => (
             <Card
-              key={title}
+              key={key}
               className="gap-0 rounded-2xl py-8 shadow-card ring-0"
             >
               <CardHeader className="gap-0">
                 <span className="mb-5 inline-flex size-[58px] items-center justify-center rounded-full bg-amber-100 text-amber-800">
                   <Icon size={28} strokeWidth={1.5} />
                 </span>
-                <CardTitle className="mb-2.5 text-xl font-bold">{title}</CardTitle>
+                <CardTitle className="mb-2.5 text-xl font-bold">{t(`developer.${key}.title`)}</CardTitle>
               </CardHeader>
               <CardContent className="text-[15px] leading-[1.65] text-slate-600">
-                {text}
+                {t(`developer.${key}.text`)}
               </CardContent>
             </Card>
           ))}
@@ -119,8 +88,8 @@ const AboutDeveloper = () => {
       </Section>
 
       <Section>
-        <SectionHeading title="МИ В СОЦМЕРЕЖАХ">
-          <SectionSubtitle>Слідкуйте за ходом будівництва</SectionSubtitle>
+        <SectionHeading title={t("developer.socialTitle")}>
+          <SectionSubtitle>{t("developer.socialSubtitle")}</SectionSubtitle>
         </SectionHeading>
 
         <ul className="grid gap-4 md:grid-cols-3 md:gap-6">
@@ -141,7 +110,7 @@ const AboutDeveloper = () => {
                     {socialLabels[key]}
                   </span>
                   <span className="block text-sm text-slate-500">
-                    {socialHints[key]}
+                    {t(`developer.social.${key}`)}
                   </span>
                 </span>
 

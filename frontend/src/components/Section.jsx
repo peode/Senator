@@ -1,3 +1,6 @@
+import { ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const Section = ({ className, children, ...props }) => (
@@ -25,10 +28,26 @@ const SectionHeading = ({ title, children }) => (
   </div>
 );
 
-const SectionSubtitle = ({ children }) => (
-  <p className="text-[15px] font-medium text-slate-600 md:text-right md:text-[clamp(15px,1.3vw,20px)]">
+const SectionSubtitle = ({ className, children }) => (
+  <p
+    className={cn(
+      "text-[15px] font-medium text-slate-600 md:text-right md:text-[clamp(15px,1.3vw,20px)]",
+      className
+    )}
+  >
     {children}
   </p>
 );
 
-export { Section, SectionHeading, SectionSubtitle };
+const SectionLink = ({ to, children }) => (
+  <Button
+    variant="link"
+    className="h-auto gap-2 p-0 text-base font-bold text-neutral-950 hover:text-brand hover:no-underline"
+    render={<Link to={to} />}
+    nativeButton={false}
+  >
+    {children} <ArrowRight size={18} />
+  </Button>
+);
+
+export { Section, SectionHeading, SectionSubtitle, SectionLink };

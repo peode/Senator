@@ -42,6 +42,13 @@ export const newsSchema = z.object({
   gallery: z.array(image).max(20),
 });
 
+const advantageFields = { title: text(200), text: text(1000) };
+
+export const advantageSchema = z.discriminatedUnion("placement", [
+  z.object({ ...advantageFields, placement: z.literal("HOME"), icon: text(50) }),
+  z.object({ ...advantageFields, placement: z.literal("PAGE"), image }),
+]);
+
 export const sectionSchema = z
   .object({
     status: z.enum(["SELLING", "PLANNED", "SOLD", "COMING_SOON"], "Невірний статус"),
@@ -55,17 +62,17 @@ export const sectionSchema = z
 
 const planSize = z.number("Невірний розмір плану").int("Невірний розмір плану").min(1, "Невірний розмір плану").max(10_000, "Невірний розмір плану");
 
+const jpegImage = z.object({
+  image: z.string().max(3_000_000, "Фото занадто велике").regex(/^data:image\/jpeg;base64,[A-Za-z0-9+/]+=*$/, "Невірний формат фото"),
+  width: planSize,
+  height: planSize,
+});
+
 const planPoint = z.tuple([z.number("Невірний контур квартири").min(0).max(10_000), z.number("Невірний контур квартири").min(0).max(10_000)], "Невірний контур квартири");
 
 export const sectionPlanSchema = z.object({
   // лише коли завантажили новий план
-  plan: z
-    .object({
-      image: z.string().max(3_000_000, "Фото занадто велике").regex(/^data:image\/jpeg;base64,[A-Za-z0-9+/]+=*$/, "Невірний формат фото"),
-      width: planSize,
-      height: planSize,
-    })
-    .optional(),
+  plan: jpegImage.optional(),
   apartments: z
     .array(
       z.object({
@@ -76,6 +83,37 @@ export const sectionPlanSchema = z.object({
       }),
     )
     .max(200, "Забагато квартир на плані"),
+});
+
+export const complexMapSchema = z.object({
+  // лише коли завантажили нову карту
+  map: jpegImage.optional(),
+  zones: z
+    .array(
+      z.object({
+        id: z.number("Невірна секція").int("Невірна секція").positive("Невірна секція").max(MAX_INT, "Невірна секція"),
+        points: z.array(planPoint).min(3, "Контур секції має щонайменше 3 точки").max(200, "Забагато точок у контурі"),
+      }),
+    )
+    .max(200, "Забагато секцій на карті"),
+});
+
+export const siteImageSchema = jpegImage;
+
+// complexMap тут немає: карта зберігається разом із контурами секцій
+export const siteImageKeySchema = z.enum(
+  ["hero", "banner", "overview", "developer", "logo", "playground", "cafe", "supermarket", "walkingZone", "postOffice", "beautySalon"],
+  "Невідоме зображення",
+);
+
+// null або порожній рядок — повернути стандартний текст
+export const siteTextsSchema = z.object({
+  texts: z
+    .record(
+      z.string().regex(/^[a-zA-Z0-9.]+$/, "Невірний ключ тексту").max(100, "Невірний ключ тексту"),
+      z.string().trim().max(5000, "Занадто довгий текст").nullable(),
+    )
+    .refine((texts) => Object.keys(texts).length <= 500, "Забагато текстів"),
 });
 
 export const apartmentUnitSchema = z.object({ available: z.boolean("Невірний статус") });
@@ -105,3 +143,5 @@ export const settingsSchema = z.object({
 export const loginSchema = z.object({ password: z.string().min(1).max(200) });
 
 export const idSchema = z.coerce.number().int().positive().max(MAX_INT);
+
+export const advantageOrderSchema = z.object({ ids: z.array(idSchema).min(1).max(200) });

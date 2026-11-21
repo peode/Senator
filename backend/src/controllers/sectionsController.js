@@ -1,4 +1,4 @@
-import { idSchema, sectionPlanSchema, sectionSchema } from "../lib/schemas.js";
+import { complexMapSchema, idSchema, sectionPlanSchema, sectionSchema } from "../lib/schemas.js";
 import * as sectionsService from "../services/sectionsService.js";
 
 export const list = async (req, res) => {
@@ -19,4 +19,8 @@ export const planImage = async (req, res) => {
 export const updatePlan = async (req, res) => {
   const id = idSchema.parse(req.params.id);
   res.json(await sectionsService.updateSectionPlan(id, sectionPlanSchema.parse(req.body)));
+};
+
+export const updateMap = async (req, res) => {
+  res.json(await sectionsService.updateComplexMap(complexMapSchema.parse(req.body)));
 };

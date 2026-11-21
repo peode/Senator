@@ -1,11 +1,11 @@
 // Стискає завантажене фото перед збереженням
-export const readImage = (file) =>
+export const readImage = (file, maxWidth = 1400) =>
   new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file);
     const img = new Image();
 
     img.onload = () => {
-      const scale = Math.min(1, 1400 / img.width);
+      const scale = Math.min(1, maxWidth / img.width);
       const canvas = document.createElement("canvas");
       canvas.width = Math.round(img.width * scale);
       canvas.height = Math.round(img.height * scale);

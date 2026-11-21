@@ -14,15 +14,21 @@ import Admin from "./pages/AdminPage";
 import Footer from "./components/Footer";
 import LeadModal from "./components/LeadModal";
 import { useSettingsStore } from "./stores/settingsStore";
+import { useSiteImagesStore } from "./stores/siteImagesStore";
+import { useSiteTextsStore } from "./stores/siteTextsStore";
 
 const Layout = () => {
   const { pathname } = useLocation();
   const isAdmin = pathname.startsWith("/admin");
   const fetchSettings = useSettingsStore((state) => state.fetchSettings);
+  const fetchImages = useSiteImagesStore((state) => state.fetchImages);
+  const fetchTexts = useSiteTextsStore((state) => state.fetchTexts);
 
   useEffect(() => {
     fetchSettings();
-  }, [fetchSettings]);
+    fetchImages();
+    fetchTexts();
+  }, [fetchSettings, fetchImages, fetchTexts]);
 
   useEffect(() => {
     window.scrollTo(0, 0);

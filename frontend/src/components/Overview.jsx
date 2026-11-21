@@ -1,68 +1,67 @@
-import { Building2, CarFront, Ruler, CalendarCheck } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Link } from "react-router-dom";
+import { ArrowRight, Building2, CarFront, Ruler, CalendarCheck } from "lucide-react";
 import {
   Section,
   SectionHeading,
   SectionSubtitle,
 } from "@/components/Section";
-import courtyard from "@/assets/images/courtyard.webp";
+import { useSiteImage } from "@/stores/siteImagesStore";
+import { useSiteText } from "@/stores/siteTextsStore";
 
 const stats = [
-  { icon: Building2, value: "10", label: "поверхів у будинках" },
-  { icon: CarFront, value: "2", label: "рівні підземного паркінгу" },
-  { icon: Ruler, value: "2,8 м", label: "висота стель" },
-  { icon: CalendarCheck, value: "2029", label: "завершення будівництва" },
+  { icon: Building2, key: "overview.stat1" },
+  { icon: CarFront, key: "overview.stat2" },
+  { icon: Ruler, key: "overview.stat3" },
+  { icon: CalendarCheck, key: "overview.stat4" },
 ];
 
 const Overview = () => {
+  const siteImage = useSiteImage();
+  const t = useSiteText();
+
   return (
     <Section id="overview">
-      <SectionHeading title="ПРО КОМПЛЕКС">
-        <SectionSubtitle>ЖК «Senator» — будинок високого рангу</SectionSubtitle>
+      <SectionHeading title={t("overview.title")}>
+        <SectionSubtitle>{t("overview.subtitle")}</SectionSubtitle>
       </SectionHeading>
 
       <div className="grid items-center gap-8 md:gap-[60px] lg:grid-cols-2">
         <div className="space-y-[18px] text-[15px] leading-[1.75] text-slate-700 md:text-[17px]">
           <p className="text-[clamp(19px,1.7vw,24px)] leading-normal font-semibold text-neutral-950">
-            «Senator» — сучасний житловий комплекс на вулиці Руській, 236Б
-            у Чернівцях, створений для тих, хто цінує комфорт, безпеку
-            та продумані рішення.
+            {t("overview.lead")}
           </p>
-          <p>
-            Монолітно-каркасна технологія, індивідуальне опалення в кожній
-            квартирі, закрита територія без автомобілів та власне укриття —
-            усе для спокійного життя. На перших поверхах розміщені
-            комерційні приміщення, тож щоденні потреби закриваються без
-            виїзду з комплексу.
-          </p>
-          <p>
-            Планування включають зручні квартири з панорамними вікнами,
-            лоджіями та гардеробними, а також дворівневі квартири
-            для найвибагливіших мешканців.
-          </p>
+          <p>{t("overview.text1")}</p>
+          <p>{t("overview.text2")}</p>
         </div>
 
-        <div className="overflow-hidden rounded-2xl shadow-[0_20px_45px_rgb(12_27_34/15%)]">
+        <Link
+          to="/apartments"
+          className="group relative block aspect-[4/3] overflow-hidden rounded-2xl shadow-card-hover outline-none focus-visible:ring-3 focus-visible:ring-brand/50"
+        >
           <img
-            src={courtyard}
-            alt="Двір ЖК Senator"
-            className="block max-h-[480px] min-h-[340px] w-full object-cover"
+            src={siteImage("overview")}
+            alt="Вигляд на ЖК Senator згори"
+            loading="lazy"
+            className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
-        </div>
+          <span className="absolute bottom-3 left-3 inline-flex items-center gap-2 rounded-lg bg-gold px-4 py-3 text-sm font-bold text-ink shadow-card transition-colors group-hover:bg-gold-hover md:bottom-5 md:left-5 md:px-5">
+            {t("overview.button")}
+            <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+          </span>
+        </Link>
       </div>
 
-      <ul className="mt-9 grid grid-cols-2 gap-3 md:mt-[60px] md:gap-5 lg:grid-cols-4">
-        {stats.map(({ icon: Icon, value, label }) => (
-          <li key={label} className="contents">
-            <Card className="gap-1.5 rounded-2xl border-0 px-4 py-[18px] shadow-card ring-0 md:px-6 md:py-[26px]">
-              <CardContent className="flex flex-col gap-1.5">
-                <Icon size={30} strokeWidth={1.5} className="mb-2 text-brand" />
-                <strong className="text-[clamp(30px,3vw,42px)] leading-[1.1] font-extrabold">
-                  {value}
-                </strong>
-                <span className="text-sm text-slate-500">{label}</span>
-              </CardContent>
-            </Card>
+      <ul className="mt-9 grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-white/10 md:mt-[60px] lg:grid-cols-4">
+        {stats.map(({ icon: Icon, key }) => (
+          <li
+            key={key}
+            className="flex flex-col gap-1 bg-ink px-4 py-5 text-white md:px-8 md:py-7"
+          >
+            <Icon size={26} strokeWidth={1.5} className="mb-2 text-gold" />
+            <strong className="text-[clamp(28px,3vw,42px)] leading-[1.1] font-extrabold">
+              {t(`${key}.value`)}
+            </strong>
+            <span className="text-sm text-white/70">{t(`${key}.label`)}</span>
           </li>
         ))}
       </ul>

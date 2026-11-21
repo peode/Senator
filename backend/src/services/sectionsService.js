@@ -1,3 +1,4 @@
+import { toImageData } from "../lib/imageData.js";
 import * as sectionsRepository from "../repositories/sectionsRepository.js";
 
 const byNumber = (a, b) => a.id.localeCompare(b.id, undefined, { numeric: true });
@@ -29,10 +30,12 @@ export const getPlanImage = async (id) => {
 export const updateSectionPlan = async (id, { plan, apartments }) =>
   serializeSection(
     await sectionsRepository.updatePlan(id, {
-      plan: plan && {
-        ...plan,
-        image: Buffer.from(plan.image.slice(plan.image.indexOf(",") + 1), "base64"),
-      },
+      plan: plan && toImageData(plan),
       apartments,
     }),
   );
+
+export const updateComplexMap = async ({ map, zones }) => {
+  await sectionsRepository.updateMap({ map: map && toImageData(map), zones });
+  return listSections();
+};

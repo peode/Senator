@@ -6,7 +6,9 @@ import { socialLabels } from "@/data/socials";
 import { phoneHref } from "@/lib/content";
 import { useLeadModalStore } from "@/stores/leadModalStore";
 import { useSettings } from "@/stores/settingsStore";
-import Logo from "@/assets/icons/SenatorLogo.jpg";
+import { logoClass } from "@/data/siteImages";
+import { useSiteImage } from "@/stores/siteImagesStore";
+import { useSiteText } from "@/stores/siteTextsStore";
 
 const primaryLinks = [
   { href: "/", label: "Про проект" },
@@ -28,6 +30,8 @@ const contactLinkClass =
 const Footer = () => {
   const openLeadModal = useLeadModalStore((state) => state.open);
   const { phone, address, hours, socials } = useSettings();
+  const siteImage = useSiteImage();
+  const t = useSiteText();
 
   return (
     <footer className="w-full bg-ink px-[6%] pt-11 pb-9 text-white/85 md:px-[4.7%] md:pt-[70px] md:pb-[50px]">
@@ -35,15 +39,15 @@ const Footer = () => {
         <div className="col-span-2 md:col-span-1">
           <Link to="/" className="block w-fit">
             <img
-              src={Logo}
+              src={siteImage("logo")}
               alt="Senator"
-              className="block h-auto w-[140px] mix-blend-screen brightness-140 grayscale invert md:w-[170px]"
+              className={`block h-auto w-[140px] md:w-[170px] ${logoClass}`}
             />
           </Link>
         </div>
 
         <div className="col-span-2 flex flex-col items-start gap-4 md:col-span-1">
-          <h3 className="text-base font-medium tracking-wide text-white">Відділ Продажу</h3>
+          <h3 className="text-base font-medium tracking-wide text-white">{t("footer.sales")}</h3>
 
           <a
             className={contactLinkClass}
@@ -87,7 +91,7 @@ const Footer = () => {
 
         <div className="col-span-2 flex flex-col items-start gap-5 xl:col-span-1 md:max-xl:col-start-2 md:max-xl:col-end-[-1]">
           <p className="text-base font-medium tracking-wide text-white">
-            Ми в соцмережах
+            {t("footer.socials")}
           </p>
 
           <div className="flex gap-3">
@@ -112,14 +116,14 @@ const Footer = () => {
             className="h-11 px-7 text-sm font-medium"
             onClick={() => openLeadModal()}
           >
-            Залишити заявку на дзвінок
+            {t("footer.button")}
           </Button>
         </div>
       </div>
 
       <Separator className="mx-auto mt-12 max-w-[1800px] bg-white/10" />
       <p className="mx-auto mt-6 max-w-[1800px] text-sm font-light text-white/50">
-        © {new Date().getFullYear()} ЖК «Senator». Усі права захищено.
+        © {new Date().getFullYear()} {t("footer.copyright")}
       </p>
     </footer>
   );

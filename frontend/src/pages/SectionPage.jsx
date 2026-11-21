@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 
 import ApartmentFilters from "@/components/ApartmentFilters";
@@ -23,6 +24,7 @@ const Section = () => {
   const { sectionId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const mapRef = useRef(null);
+  const infoRef = useRef(null);
   const [hovered, setHovered] = useState(null);
   const [selected, setSelected] = useState(null);
   const [cursor, setCursor] = useState({ x: 0, y: 0 });
@@ -93,6 +95,20 @@ const Section = () => {
   const active = hovered ?? chosen;
   const hasMatches = apartments.some(isMatch);
 
+  const selectApartment = (apartment) => {
+    // блок змінює висоту разом із квартирою, тому міряємо його вже з новим вмістом
+    flushSync(() => setSelected(apartment));
+
+    // інформація над планом: якщо її вже прокрутили, повертаємо до неї; вищий за екран блок — від його верху
+    const { top, height } = infoRef.current.getBoundingClientRect();
+    if (top < 0) {
+      infoRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: height < window.innerHeight ? "center" : "start",
+      });
+    }
+  };
+
   const selectFloor = (value) => setSearchParams({ floor: value }, { replace: true });
 
   const updateCursor = (event) => {
@@ -115,7 +131,7 @@ const Section = () => {
         <div className="mx-auto max-w-[1100px]">
           <ApartmentFilters className="mb-6" />
 
-          <div className="mb-6 rounded-md bg-surface p-5">
+          <div ref={infoRef} className="mb-6 scroll-mt-4 rounded-md bg-surface p-5">
             {chosen && isSold(chosen) ? (
               <>
                 <div className="flex flex-wrap items-center gap-3">
@@ -217,7 +233,7 @@ const Section = () => {
                       setHovered(apartment);
                     }}
                     onPointerLeave={() => setHovered(null)}
-                    onClick={() => setSelected(apartment)}
+                    onClick={() => selectApartment(apartment)}
                   />
                 ))}
               </svg>

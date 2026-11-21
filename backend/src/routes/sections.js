@@ -5,6 +5,7 @@ import { requireAdmin } from "../middleware/requireAdmin.js";
 const router = Router();
 
 router.get("/", sectionsController.list);
+router.put("/map", requireAdmin, express.json({ limit: "4mb" }), sectionsController.updateMap);
 router.patch("/:id", requireAdmin, express.json({ limit: "1kb" }), sectionsController.update);
 router.get("/:id/plan", sectionsController.planImage);
 router.put("/:id/plan", requireAdmin, express.json({ limit: "4mb" }), sectionsController.updatePlan);

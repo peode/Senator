@@ -3,10 +3,13 @@ import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { Play, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import courtyard from "@/assets/images/courtyard.webp";
+import { useSiteImage } from "@/stores/siteImagesStore";
+import { useSiteText } from "@/stores/siteTextsStore";
 
 const Hero = () => {
   const [videoOpen, setVideoOpen] = useState(false);
+  const hero = useSiteImage()("hero");
+  const t = useSiteText();
 
   useEffect(() => {
     if (!videoOpen) return;
@@ -28,25 +31,24 @@ const Hero = () => {
     <main className="relative isolate min-h-svh overflow-hidden bg-[#24343c] text-white">
       <div
         className="absolute inset-0 -z-20 scale-[1.01] bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${courtyard})` }}
+        style={hero && { backgroundImage: `url(${hero})` }}
       />
 
       <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgb(12_27_34/78%)_0%,rgb(12_27_34/48%)_48%,rgb(12_27_34/12%)_100%),linear-gradient(0deg,rgb(12_27_34/30%)_0%,transparent_45%)]" />
 
       <section className="relative z-10 max-w-[850px] px-[5%] pt-[135px] pb-[120px] sm:pt-[155px] md:px-[3.5%] md:pt-[clamp(170px,21vh,230px)] md:pb-[150px]">
         <p className="mb-4 text-[10px] font-bold tracking-[2px] text-brand sm:text-xs sm:tracking-[3px]">
-          НОВИЙ РІВЕНЬ КОМФОРТУ
+          {t("hero.eyebrow")}
         </p>
 
         <h1 className="text-[38px] leading-[1.1] font-bold tracking-[-1.5px] sm:text-[clamp(39px,9vw,60px)] md:text-[clamp(42px,5.5vw,76px)]">
-          ЖК «Senator»
+          {t("hero.title")}
           <br />
-          <span className="text-gold">Будинок високого рангу</span>
+          <span className="text-gold">{t("hero.accent")}</span>
         </h1>
 
         <p className="mt-6 mb-[30px] max-w-[410px] text-[13px] leading-[1.7] text-white/85 sm:text-sm md:max-w-[480px] md:text-base">
-          Сучасна архітектура, продумані планування
-          та комфорт для всієї родини.
+          {t("hero.text")}
         </p>
 
         <div className="flex flex-wrap items-center gap-4">
@@ -57,7 +59,7 @@ const Hero = () => {
             render={<Link to="/apartments" />}
             nativeButton={false}
           >
-            Обрати квартиру
+            {t("hero.button")}
           </Button>
 
           <Button
@@ -71,7 +73,7 @@ const Hero = () => {
           </Button>
 
           <span className="text-[9px] font-semibold tracking-[1.2px] sm:text-[10px]">
-            ПЕРЕГЛЯНУТИ ВІДЕО
+            {t("hero.video")}
           </span>
         </div>
       </section>

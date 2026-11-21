@@ -1,4 +1,26 @@
 // Стартові дані каталогу для seed. Далі статус і ціну секцій змінюють в адмін-панелі.
+// Контури на стандартній карті ЖК: x, y, ширина, висота
+const zones = {
+  1: [303, 143, 110, 130],
+  2: [411, 143, 108, 130],
+  3: [517, 143, 110, 130],
+  4: [516, 356, 126, 126],
+  5: [640, 356, 124, 126],
+  6: [703, 451, 92, 146],
+  7: [703, 598, 92, 152],
+  8: [661, 748, 133, 114],
+  9: [535, 748, 128, 114],
+  10: [193, 319, 94, 148],
+  11: [196, 467, 90, 150],
+  12: [196, 614, 92, 148],
+  13: [196, 759, 92, 148],
+  14: [198, 903, 96, 184],
+  15: [293, 958, 187, 130],
+  16: [173, 220, 120, 120],
+};
+
+const zonePoints = ([x, y, width, height]) => [[x, y], [x + width, y], [x + width, y + height], [x, y + height]];
+
 export const defaultSections = [
   { id: 1, status: "SOLD", price: null },
   { id: 2, status: "SOLD", price: null },
@@ -16,7 +38,7 @@ export const defaultSections = [
   { id: 14, status: "PLANNED", price: null },
   { id: 15, status: "PLANNED", price: null },
   { id: 16, status: "COMING_SOON", price: null },
-];
+].map((section) => ({ ...section, mapPoints: zonePoints(zones[section.id]) }));
 
 // Файли лежать у prisma/plans. Далі план секції змінюють в адмін-панелі
 export const defaultPlans = [

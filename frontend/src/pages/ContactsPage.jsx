@@ -11,6 +11,7 @@ import { Card } from "@/components/ui/card";
 import { socialLabels } from "@/data/socials";
 import { phoneHref } from "@/lib/content";
 import { useSettings } from "@/stores/settingsStore";
+import { useSiteText } from "@/stores/siteTextsStore";
 
 const ContactCard = ({ icon: Icon, title, children, href }) => {
   const content = (
@@ -32,15 +33,16 @@ const ContactCard = ({ icon: Icon, title, children, href }) => {
 
 const Contacts = () => {
   const { phone, address, hours, socials } = useSettings();
+  const t = useSiteText();
   const mapSrc = `https://www.google.com/maps?q=${encodeURIComponent(address)}&output=embed`;
   const routeHref = `https://maps.google.com/?q=${encodeURIComponent(address)}`;
 
   return (
     <>
-      <PageBanner title="Контакти" />
+      <PageBanner title={t("contacts.banner")} />
 
       <Section>
-        <SectionHeading title="ВІДДІЛ ПРОДАЖУ">
+        <SectionHeading title={t("contacts.title")}>
           <SectionSubtitle>{address}</SectionSubtitle>
         </SectionHeading>
 
@@ -64,7 +66,7 @@ const Contacts = () => {
                 render={<a href={routeHref} target="_blank" rel="noreferrer" />}
                 nativeButton={false}
               >
-                Прокласти маршрут
+                {t("contacts.route")}
               </Button>
 
               {Object.entries(socials).map(([key, href]) => (
