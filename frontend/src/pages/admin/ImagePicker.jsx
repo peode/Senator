@@ -1,26 +1,8 @@
 import { Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { imageLibrary, resolveImage } from "@/data/images";
+import { readImage } from "@/lib/readImage";
 import { fieldClass } from "./fields";
-
-// Стискає завантажене фото, щоб воно поміщалось у localStorage
-const readImage = (file) =>
-  new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file);
-    const img = new Image();
-
-    img.onload = () => {
-      const scale = Math.min(1, 1400 / img.width);
-      const canvas = document.createElement("canvas");
-      canvas.width = Math.round(img.width * scale);
-      canvas.height = Math.round(img.height * scale);
-      canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
-      URL.revokeObjectURL(url);
-      resolve(canvas.toDataURL("image/jpeg", 0.8));
-    };
-    img.onerror = reject;
-    img.src = url;
-  });
 
 const ImagePicker = ({ value, onChange, onRemove }) => {
   const isLibrary = value in imageLibrary;
@@ -28,7 +10,7 @@ const ImagePicker = ({ value, onChange, onRemove }) => {
   const onFile = async (event) => {
     const file = event.target.files?.[0];
     event.target.value = "";
-    if (file) onChange(await readImage(file));
+    if (file) onChange((await readImage(file)).src);
   };
 
   return (

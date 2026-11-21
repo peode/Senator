@@ -6,7 +6,7 @@ import FloorPicker from "@/components/FloorPicker";
 import PageBanner from "@/components/PageBanner";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatPrice, leadComment, plans, roomsLabel, sectionStatuses } from "@/data/sections";
+import { formatPrice, leadComment, roomsLabel, sectionStatuses } from "@/data/sections";
 import { useApartments } from "@/stores/apartmentsStore";
 import { useLeadModalStore } from "@/stores/leadModalStore";
 import { useSections } from "@/stores/sectionsStore";
@@ -31,7 +31,7 @@ const Section = () => {
   const openLeadModal = useLeadModalStore((state) => state.open);
 
   const section = sections.find(({ id }) => String(id) === sectionId);
-  const plan = plans[sectionId];
+  const plan = section?.plan;
 
   if (loading) {
     return (
@@ -191,6 +191,8 @@ const Section = () => {
               <img
                 src={plan.src}
                 alt={`Планування секції №${sectionId}`}
+                width={plan.width}
+                height={plan.height}
                 className={mapImageClass}
                 draggable="false"
               />

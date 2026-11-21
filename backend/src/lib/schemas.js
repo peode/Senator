@@ -53,6 +53,31 @@ export const sectionSchema = z
     error: "Для секції у продажу вкажіть ціну",
   });
 
+const planSize = z.number("Невірний розмір плану").int("Невірний розмір плану").min(1, "Невірний розмір плану").max(10_000, "Невірний розмір плану");
+
+const planPoint = z.tuple([z.number("Невірний контур квартири").min(0).max(10_000), z.number("Невірний контур квартири").min(0).max(10_000)], "Невірний контур квартири");
+
+export const sectionPlanSchema = z.object({
+  // лише коли завантажили новий план
+  plan: z
+    .object({
+      image: z.string().max(3_000_000, "Фото занадто велике").regex(/^data:image\/jpeg;base64,[A-Za-z0-9+/]+=*$/, "Невірний формат фото"),
+      width: planSize,
+      height: planSize,
+    })
+    .optional(),
+  apartments: z
+    .array(
+      z.object({
+        id: z.string().max(50, "Невірна квартира"),
+        rooms: z.number("Вкажіть кількість кімнат").int("Вкажіть кількість кімнат").min(1, "Вкажіть кількість кімнат").max(20, "Вкажіть кількість кімнат"),
+        area: z.number("Вкажіть площу").positive("Вкажіть площу").max(10_000, "Вкажіть площу"),
+        points: z.array(planPoint).min(3, "Контур квартири має щонайменше 3 точки").max(200, "Забагато точок у контурі"),
+      }),
+    )
+    .max(200, "Забагато квартир на плані"),
+});
+
 export const apartmentUnitSchema = z.object({ available: z.boolean("Невірний статус") });
 
 const filterNumber = z.coerce.number("Невірне значення фільтра").min(0, "Невірне значення фільтра").optional();

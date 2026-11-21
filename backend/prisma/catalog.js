@@ -18,6 +18,16 @@ export const defaultSections = [
   { id: 16, status: "COMING_SOON", price: null },
 ];
 
+// Файли лежать у prisma/plans. Далі план секції змінюють в адмін-панелі
+export const defaultPlans = [
+  { sectionId: 4, file: "Section4.jpg", width: 828, height: 507 },
+  { sectionId: 5, file: "Section5.jpg", width: 667, height: 552 },
+  { sectionId: 8, file: "Section8.jpg", width: 834, height: 429 },
+  { sectionId: 9, file: "Section9.jpg", width: 836, height: 542 },
+  { sectionId: 10, file: "Section10.jpg", width: 1201, height: 645 },
+  { sectionId: 11, file: "Section11.jpg", width: 779, height: 562 },
+];
+
 export const defaultApartments = [
   { id: "4-1", sectionId: 4, rooms: 2, area: 67.4, points: [[20, 30], [220, 30], [220, 290], [140, 290], [140, 490], [20, 490]] },
   { id: "4-2", sectionId: 4, rooms: 1, area: 40.3, points: [[220, 25], [440, 25], [440, 240], [220, 240]] },

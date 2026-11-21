@@ -31,6 +31,14 @@ export const useSectionsStore = create((set, get) => ({
     await useApartmentsStore.getState().fetchApartments({ force: true });
   },
 
+  savePlan: async (id, plan) => {
+    const updated = await api(`/sections/${id}/plan`, { method: "PUT", body: plan });
+    set({ sections: get().sections.map((section) => (section.id === id ? updated : section)) });
+    // квартири могли змінитися: каталог має це побачити
+    await useApartmentsStore.getState().fetchApartments({ force: true });
+    return updated;
+  },
+
   setUnitAvailable: async (unitId, available) => {
     const updated = await api(`/apartments/${unitId}`, { method: "PATCH", body: { available } });
     set({

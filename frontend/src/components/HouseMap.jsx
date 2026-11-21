@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ApartmentFilters from "@/components/ApartmentFilters";
-import { plans, sectionStatuses } from "@/data/sections";
+import { sectionStatuses } from "@/data/sections";
 import {
   mapClass,
   mapImageClass,
@@ -126,7 +126,7 @@ const HouseMap = () => {
                 setActiveHouse(house);
               }}
               onClick={() => {
-                if (plans[house.id]) navigate(`/apartments/${house.id}`);
+                if (sections.find(({ id }) => id === house.id)?.plan) navigate(`/apartments/${house.id}`);
               }}
             />
           ))}

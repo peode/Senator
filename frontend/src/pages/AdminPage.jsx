@@ -108,7 +108,10 @@ const Admin = () => {
 
         {tab === "leads" && <LeadsAdmin />}
         {tab === "news" && <NewsAdmin />}
-        {tab === "sections" && <SectionsAdmin />}
+        {/* лишається змонтованою: незбережений план не зникає при переході на іншу вкладку */}
+        <div hidden={tab !== "sections"}>
+          <SectionsAdmin />
+        </div>
         {tab === "settings" && <SettingsAdmin />}
       </div>
     </div>

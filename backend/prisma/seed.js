@@ -1,5 +1,6 @@
+import { readFile } from "node:fs/promises";
 import { createPrisma } from "../src/lib/db.js";
-import { defaultApartments, defaultSections, defaultSettings } from "./catalog.js";
+import { defaultApartments, defaultPlans, defaultSections, defaultSettings } from "./catalog.js";
 import { defaultNews } from "./news.js";
 
 try {
@@ -22,7 +23,23 @@ if ((await prisma.news.count()) === 0) {
 
 // skipDuplicates і upsert без update: повторний запуск не затирає змінене в адмінці
 await prisma.section.createMany({ data: defaultSections, skipDuplicates: true });
-await prisma.apartment.createMany({ data: defaultApartments, skipDuplicates: true });
+// Лише секціям без плану: інакше повернулися б квартири, видалені разом зі старим планом
+for (const { sectionId, file, width, height } of defaultPlans) {
+  const { count } = await prisma.section.updateMany({
+    where: { id: sectionId, planImage: null },
+    data: {
+      planImage: await readFile(new URL(`./plans/${file}`, import.meta.url)),
+      planWidth: width,
+      planHeight: height,
+    },
+  });
+  if (count > 0) {
+    await prisma.apartment.createMany({
+      data: defaultApartments.filter((apartment) => apartment.sectionId === sectionId),
+      skipDuplicates: true,
+    });
+  }
+}
 const sections = await prisma.section.findMany({ include: { apartments: true } });
 await prisma.apartmentUnit.createMany({
   data: sections.flatMap(({ apartments, floors }) =>

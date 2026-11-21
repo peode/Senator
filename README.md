@@ -26,7 +26,8 @@ Senator/
     ├── prisma/
     │   ├── schema.prisma   # моделі News і Lead
     │   ├── migrations/     # SQL-міграції
-    │   └── seed.js         # стартові новини
+    │   ├── plans/          # стартові зображення планів секцій
+    │   └── seed.js         # стартові дані
     └── src/
         ├── index.js        # точка входу сервера
         ├── app.js
@@ -245,6 +246,8 @@ npm run dev                             # термінал 2
 | DELETE | `/api/session` | всі | Вихід |
 | GET | `/api/sections` | всі | Секції зі статусом, ціною за м², кількістю поверхів, плануваннями та квартирами на кожному поверсі |
 | PATCH | `/api/sections/:id` | адмін | Змінити статус, ціну й кількість поверхів (`{ "status": "SOLD", "price": 1350, "floors": 9 }`) |
+| GET | `/api/sections/:id/plan` | всі | Зображення плану секції (JPEG). Адресу з версією повертає `GET /api/sections` у полі `plan` |
+| PUT | `/api/sections/:id/plan` | адмін | Зберегти квартири на плані й за потреби нове зображення (`{ "plan": { "image": "data:image/jpeg;base64,...", "width": 1000, "height": 600 }, "apartments": [{ "id": "4-1", "rooms": 2, "area": 67.4, "points": [[20, 30], [220, 30], [220, 290]] }] }`). Квартири, яких немає в списку, видаляються разом зі статусом продажу |
 | GET | `/api/apartments` | всі | Вільні квартири в продажу. Фільтри в query: `rooms`, `areaFrom`, `areaTo`, `budgetTo` |
 | PATCH | `/api/apartments/:id` | адмін | Змінити наявність квартири (`{ "available": false }`) |
 | GET | `/api/settings` | всі | Контакти ЖК |
@@ -253,8 +256,9 @@ npm run dev                             # термінал 2
 Статуси секцій: `SELLING` (у продажу, ціна обов'язкова), `PLANNED`, `SOLD`, `COMING_SOON`.
 Приклад: `GET /api/apartments?rooms=2&areaFrom=60&budgetTo=90000`.
 
-Статус і ціну секцій, а також контакти адмін змінює в `/admin` (вкладки «Секції» і «Налаштування»).
-Зображення планів і розташування будинків на карті лишаються у фронтенді (`frontend/src/data/sections.js`).
+Статус, ціну, план і квартири секцій, а також контакти адмін змінює в `/admin` (вкладки «Секції» і «Налаштування»).
+Щоб обвести квартиру, на плані секції натисніть «Обвести квартиру», клікайте по її кутах і закрийте фігуру кліком по першій точці.
+Плани зберігаються в базі, а розташування будинків на карті лишається у фронтенді (`frontend/src/components/HouseMap.jsx`).
 
 ## Можливі проблеми
 
@@ -263,6 +267,7 @@ npm run dev                             # термінал 2
 | `Cannot find module '.prisma/client'` / `@prisma/client did not initialize yet` | Виконати `npm exec -w backend -- prisma generate` |
 | `The table "public.News" does not exist` (або `Section`, `Apartment`, `SiteSettings`) | Не застосовані міграції — `npm run db:deploy` |
 | Порожній каталог квартир і карта без статусів | База не заповнена — `npm run db:seed` |
+| «Планування цієї секції поки що недоступне» | Секції без плану: завантажте його в `/admin` або виконайте `npm run db:seed` для стартових планів |
 | `P1001: Can't reach database server` | Перевірити `DATABASE_URL`, що Postgres запущений (`docker ps`) |
 | Міграція зависає на Neon | Використовується pooled-рядок — потрібен хост без `-pooler` або `DATABASE_URL_UNPOOLED` |
 | На сайті «Немає зв'язку із сервером» | Не запущений бекенд (`npm run dev:server`) або він не на порту 3001 |

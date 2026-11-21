@@ -50,6 +50,10 @@ model Section {
   status     SectionStatus @default(PLANNED)
   price      Int?
   floors     Int           @default(9)
+  // зображення плану (JPEG); координати квартир задані в його розмірах
+  planImage  Bytes?
+  planWidth  Int?
+  planHeight Int?
   apartments Apartment[]
   updatedAt  DateTime      @updatedAt
 }
