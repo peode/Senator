@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import News from "@/components/News";
 import { NewsDate } from "@/components/NewsCard";
 import { Section } from "@/components/Section";
+import Seo from "@/components/Seo";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -21,7 +22,7 @@ const ArticleHeader = ({ overlap = true, children }) => (
     <div className="mx-auto flex max-w-[900px] flex-col items-center">
       <Link
         to="/news"
-        className="inline-flex items-center gap-2 rounded text-sm font-semibold text-white/70 transition-colors outline-none hover:text-gold focus-visible:ring-3 focus-visible:ring-brand/50"
+        className="inline-flex items-center gap-2 rounded text-sm font-semibold text-white/70 transition-colors hover:text-gold"
       >
         <ArrowLeft size={16} /> Усі новини
       </Link>
@@ -67,6 +68,7 @@ const NewsArticle = () => {
   if (!article) {
     return (
       <>
+        <Seo title="Новину не знайдено" noindex />
         <ArticleHeader overlap={false}>
           <ArticleTitle>{error ? "Не вдалося завантажити новину" : "Новину не знайдено"}</ArticleTitle>
         </ArticleHeader>
@@ -97,6 +99,7 @@ const NewsArticle = () => {
 
   return (
     <>
+      <Seo title={article.title} description={article.text} />
       <ArticleHeader>
         <NewsDate date={article.date} className="mt-8 text-sm font-bold tracking-wide text-gold md:text-base" />
         <ArticleTitle>{article.title}</ArticleTitle>
@@ -123,7 +126,7 @@ const NewsArticle = () => {
                 <img
                   key={index}
                   src={resolveImage(image)}
-                  alt=""
+                  alt={`${article.title}, фото ${index + 1}`}
                   loading="lazy"
                   className={cn(
                     "aspect-[4/3] w-full rounded-2xl object-cover",

@@ -11,7 +11,7 @@ import { useSiteImage } from "@/stores/siteImagesStore";
 import { useSiteText } from "@/stores/siteTextsStore";
 
 const primaryLinks = [
-  { href: "/", label: "Про проект" },
+  { href: "/", label: "Про проєкт" },
   { href: "/advantages", label: "Переваги" },
   { href: "/apartments", label: "Планування" },
 ];
@@ -23,9 +23,9 @@ const secondaryLinks = [
 ];
 
 const navLinkClass =
-  "text-[15px] font-normal leading-snug text-white/90 transition-colors hover:text-brand";
+  "inline-flex min-h-11 items-center text-[15px] font-normal leading-snug text-white/90 transition-colors hover:text-brand";
 const contactLinkClass =
-  "text-[15px] font-light leading-relaxed text-white/70 transition-colors hover:text-brand";
+  "inline-flex min-h-11 items-center text-[15px] font-light leading-relaxed text-white/70 transition-colors hover:text-brand";
 
 const Footer = () => {
   const openLeadModal = useLeadModalStore((state) => state.open);
@@ -46,8 +46,8 @@ const Footer = () => {
           </Link>
         </div>
 
-        <div className="col-span-2 flex flex-col items-start gap-4 md:col-span-1">
-          <h3 className="text-base font-medium tracking-wide text-white">{t("footer.sales")}</h3>
+        <div className="col-span-2 flex flex-col items-start gap-2 md:col-span-1">
+          <h2 className="text-base font-medium tracking-wide text-white">{t("footer.sales")}</h2>
 
           <a
             className={contactLinkClass}
@@ -68,7 +68,7 @@ const Footer = () => {
         </div>
 
         <nav
-          className="flex flex-col items-start gap-4"
+          className="flex flex-col items-start"
           aria-label="Основна навігація"
         >
           {primaryLinks.map(({ href, label }) => (
@@ -79,7 +79,7 @@ const Footer = () => {
         </nav>
 
         <nav
-          className="flex flex-col items-start gap-4"
+          className="flex flex-col items-start"
           aria-label="Додаткова навігація"
         >
           {secondaryLinks.map(({ href, label }) => (
@@ -90,9 +90,9 @@ const Footer = () => {
         </nav>
 
         <div className="col-span-2 flex flex-col items-start gap-5 xl:col-span-1 md:max-xl:col-start-2 md:max-xl:col-end-[-1]">
-          <p className="text-base font-medium tracking-wide text-white">
+          <h2 className="text-base font-medium tracking-wide text-white">
             {t("footer.socials")}
-          </p>
+          </h2>
 
           <div className="flex gap-3">
             {Object.entries(socials).map(([key, href]) => {
@@ -103,7 +103,7 @@ const Footer = () => {
                   target="_blank"
                   rel="noreferrer"
                   aria-label={socialLabels[key]}
-                  className="flex size-10 items-center justify-center rounded-full border border-white/25 text-white/80 transition-colors hover:border-brand hover:text-brand"
+                  className="flex size-11 items-center justify-center rounded-full border border-white/25 text-white/80 transition-colors hover:border-brand hover:text-brand"
                 >
                   <SocialIcon name={key} size={18} />
                 </a>

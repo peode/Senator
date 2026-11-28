@@ -22,7 +22,7 @@ const numberFields = [
 ];
 
 const inputClass =
-  "w-28 rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-brand focus:ring-3 focus:ring-brand/20";
+  "h-11 w-28 rounded-lg border border-neutral-300 bg-white px-3 text-base text-ink transition-colors focus:border-brand-dark";
 
 const ApartmentFilters = ({ className }) => {
   const menuRef = useRef(null);
@@ -51,7 +51,7 @@ const ApartmentFilters = ({ className }) => {
 
   return (
     <div ref={menuRef} className={cn("relative w-fit", className)}>
-      <Button variant="outline" aria-expanded={open} onClick={() => setOpen(!open)}>
+      <Button variant="outline" className="h-11 px-4" aria-expanded={open} onClick={() => setOpen(!open)}>
         <SlidersHorizontal size={16} /> Фільтри
         {count > 0 && (
           <span className="flex size-5 items-center justify-center rounded-full bg-ink text-xs text-white">
@@ -62,8 +62,8 @@ const ApartmentFilters = ({ className }) => {
 
       {open && (
         <div className="absolute top-full left-0 z-20 mt-2 flex w-[min(640px,calc(100vw-2rem))] flex-wrap items-end gap-x-6 gap-y-4 rounded-2xl bg-white p-5 text-ink shadow-card-hover">
-          <div className="flex flex-col gap-1.5 text-sm font-medium text-slate-700">
-            Кімнат
+          <div role="group" aria-labelledby="filter-rooms" className="flex flex-col gap-1.5 text-sm font-medium text-slate-700">
+            <span id="filter-rooms">Кімнат</span>
             <div className="flex gap-2">
               {roomOptions.map(({ value, label }) => (
                 <button
@@ -71,7 +71,7 @@ const ApartmentFilters = ({ className }) => {
                   type="button"
                   aria-pressed={rooms === value}
                   onClick={() => setFilters({ rooms: value })}
-                  className={`h-9 min-w-9 cursor-pointer rounded-full px-3 text-sm font-medium transition-colors ${
+                  className={`h-11 min-w-11 cursor-pointer rounded-full px-3 text-sm font-medium transition-colors ${
                     rooms === value ? "bg-ink text-white" : "bg-surface text-slate-700 hover:text-brand-dark"
                   }`}
                 >
@@ -86,6 +86,7 @@ const ApartmentFilters = ({ className }) => {
               {label}
               <input
                 type="number"
+                inputMode="numeric"
                 min="0"
                 value={filters[name]}
                 onChange={(event) => setFilters({ [name]: event.target.value })}
@@ -95,7 +96,7 @@ const ApartmentFilters = ({ className }) => {
           ))}
 
           {hasActiveFilters(filters) && (
-            <Button variant="outline" onClick={resetFilters}>
+            <Button variant="outline" className="h-11 px-4" onClick={resetFilters}>
               Скинути
             </Button>
           )}

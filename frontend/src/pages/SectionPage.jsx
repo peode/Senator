@@ -4,21 +4,35 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 
 import ApartmentFilters from "@/components/ApartmentFilters";
 import FloorPicker from "@/components/FloorPicker";
+import MapZone from "@/components/MapZone";
 import PageBanner from "@/components/PageBanner";
+import Seo from "@/components/Seo";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatPrice, leadComment, roomsLabel, sectionStatuses } from "@/data/sections";
 import { useApartments } from "@/stores/apartmentsStore";
+import { hasActiveFilters, useApartmentFiltersStore } from "@/stores/apartmentFiltersStore";
 import { useLeadModalStore } from "@/stores/leadModalStore";
 import { useSections } from "@/stores/sectionsStore";
 import {
   mapClass,
   mapImageClass,
+  mapPointer,
   mapSvgClass,
   mapTooltipClass,
+  mapTooltipStyle,
   mapZoneClass,
 } from "@/lib/mapClasses";
-import { cn } from "@/lib/utils";
+import { cn, scrollMotion } from "@/lib/utils";
+
+// Закріплена шапка плюс відступ: блок вище за цю межу вже не видно
+const HEADER_OFFSET = 104;
+
+const legend = [
+  { label: "Вільна", className: "border-2 border-status-selling-strong bg-white" },
+  { label: "Продана", className: "bg-black/55" },
+  { label: "Не підходить під фільтри", className: "border border-slate-300 bg-slate-100" },
+];
 
 const Section = () => {
   const { sectionId } = useParams();
@@ -26,11 +40,13 @@ const Section = () => {
   const mapRef = useRef(null);
   const infoRef = useRef(null);
   const [hovered, setHovered] = useState(null);
-  const [selected, setSelected] = useState(null);
-  const [cursor, setCursor] = useState({ x: 0, y: 0 });
+  // квартира й поверх в адресі: посиланням можна поділитися, а каталог веде одразу до квартири
+  const [selectedId, setSelectedId] = useState(() => searchParams.get("apt"));
+  const [cursor, setCursor] = useState({ x: 0, y: 0, width: 0, height: 0 });
   const { sections, loading, error } = useSections();
   const { apartments: matching, loaded } = useApartments();
   const openLeadModal = useLeadModalStore((state) => state.open);
+  const filters = useApartmentFiltersStore();
 
   const section = sections.find(({ id }) => String(id) === sectionId);
   const plan = section?.plan;
@@ -38,6 +54,7 @@ const Section = () => {
   if (loading) {
     return (
       <>
+        <Seo title={`Секція №${sectionId}`} />
         <PageBanner title={`Секція №${sectionId}`} />
         <div className="mx-auto max-w-[1100px] px-[3.5%] py-8">
           <Skeleton className="mb-6 h-24 w-full" />
@@ -50,6 +67,7 @@ const Section = () => {
   if (error || !section || !plan) {
     return (
       <>
+        <Seo title={`Секція №${sectionId}`} noindex={!error} />
         <PageBanner title={`Секція №${sectionId}`} />
         <div className="px-[5%] py-16 text-center text-ink">
           <p className="mb-6">
@@ -80,6 +98,7 @@ const Section = () => {
     ? requestedFloor
     : (floorNumbers.toReversed().find((value) => freeCount(value) > 0) ?? 1);
 
+  const selected = apartments.find(({ id }) => String(id) === selectedId) ?? null;
   const unitOf = (apartment) => apartment.units.find((unit) => unit.floor === floor);
   const isMatch = (apartment) => {
     const unit = unitOf(apartment);
@@ -94,44 +113,53 @@ const Section = () => {
       : [];
   const active = hovered ?? chosen;
   const hasMatches = apartments.some(isMatch);
+  // порожній поверх не має бути глухим кутом: пропонуємо найближчий із вільними квартирами
+  const nearestFloor = floorNumbers
+    .filter((value) => value !== floor && freeCount(value) > 0)
+    .toSorted((a, b) => Math.abs(a - floor) - Math.abs(b - floor))[0];
 
   const selectApartment = (apartment) => {
     // блок змінює висоту разом із квартирою, тому міряємо його вже з новим вмістом
-    flushSync(() => setSelected(apartment));
+    flushSync(() => setSelectedId(String(apartment.id)));
+    setSearchParams({ floor, apt: apartment.id }, { replace: true });
 
     // інформація над планом: якщо її вже прокрутили, повертаємо до неї; вищий за екран блок — від його верху
     const { top, height } = infoRef.current.getBoundingClientRect();
-    if (top < 0) {
+    if (top < HEADER_OFFSET) {
       infoRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: height < window.innerHeight ? "center" : "start",
+        behavior: scrollMotion(),
+        block: height < window.innerHeight - HEADER_OFFSET ? "center" : "start",
       });
     }
   };
 
-  const selectFloor = (value) => setSearchParams({ floor: value }, { replace: true });
+  const selectFloor = (value) =>
+    setSearchParams(selectedId ? { floor: value, apt: selectedId } : { floor: value }, { replace: true });
 
-  const updateCursor = (event) => {
-    const rect = mapRef.current.getBoundingClientRect();
-    setCursor({ x: event.clientX - rect.left, y: event.clientY - rect.top });
-  };
+  const updateCursor = (event) => setCursor(mapPointer(event, mapRef.current));
+
+  const zoneLabel = (apartment) =>
+    `${roomsLabel(apartment)} квартира, ${apartment.area} м², ${
+      isSold(apartment) ? "продана" : `${formatPrice(apartment.area * price)} $`
+    }`;
 
   return (
     <>
-      <PageBanner
-        title={`Секція №${sectionId}`}
-        subtitle="Такий план на всіх поверхах секції"
+      <Seo
+        title={`Секція №${sectionId}: планування`}
+        description={`Планування секції №${sectionId} ЖК «Senator»: вільні квартири, площа й вартість за поверхами.`}
       />
+      <PageBanner title={`Секція №${sectionId}`} />
 
       <section className="bg-white px-[3.5%] py-8 text-ink">
-        <Link className="mb-5 inline-block text-sm font-semibold text-brand-dark" to="/apartments">
+        <Link className="mb-2 inline-flex min-h-11 items-center text-sm font-semibold text-brand-dark" to="/apartments">
           ← До вибору секції
         </Link>
 
         <div className="mx-auto max-w-[1100px]">
           <ApartmentFilters className="mb-6" />
 
-          <div ref={infoRef} className="mb-6 scroll-mt-4 rounded-md bg-surface p-5">
+          <div ref={infoRef} aria-live="polite" className="mb-6 rounded-md bg-surface p-5">
             {chosen && isSold(chosen) ? (
               <>
                 <div className="flex flex-wrap items-center gap-3">
@@ -147,7 +175,7 @@ const Section = () => {
                     <p>Ця квартира вже продана, але таке саме планування вільне на поверхах:</p>
                     <div className="mt-2 flex flex-wrap gap-2">
                       {freeFloors.map((value) => (
-                        <Button key={value} variant="outline" onClick={() => selectFloor(value)}>
+                        <Button key={value} variant="outline" className="h-11 px-4" onClick={() => selectFloor(value)}>
                           {value} поверх
                         </Button>
                       ))}
@@ -178,14 +206,28 @@ const Section = () => {
             ) : status !== "SELLING" ? (
               <p>Статус секції: {sectionStatuses[status].label}.</p>
             ) : !hasMatches ? (
-              <p>На {floor} поверсі немає вільних квартир за обраними фільтрами.</p>
+              <>
+                <p>
+                  На {floor} поверсі немає вільних квартир
+                  {hasActiveFilters(filters) && " за обраними фільтрами"}.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {nearestFloor && (
+                    <Button variant="gold" className="h-11 px-4" onClick={() => selectFloor(nearestFloor)}>
+                      Перейти на {nearestFloor} поверх
+                    </Button>
+                  )}
+                  {hasActiveFilters(filters) && (
+                    <Button variant="outline" className="h-11 px-4" onClick={filters.resetFilters}>
+                      Скинути фільтри
+                    </Button>
+                  )}
+                </div>
+              </>
             ) : (
-              <p>Наведіть або оберіть квартиру на плані, щоб побачити площу та вартість.</p>
+              <p>Оберіть квартиру на плані, щоб побачити площу та вартість.</p>
             )}
-            <p className="mt-3 text-sm text-ink/70">
-              Такий план на всіх поверхах секції, затемнені квартири продані або не підходять під фільтри. Для більш детальної інформації зверніться до
-              менеджера.
-            </p>
+            <p className="mt-3 text-sm text-ink/80">Такий план на всіх поверхах секції.</p>
           </div>
 
           <div className="flex flex-col gap-4 md:flex-row md:items-start">
@@ -207,6 +249,7 @@ const Section = () => {
               <img
                 src={plan.src}
                 alt={`Планування секції №${sectionId}`}
+                fetchPriority="high"
                 width={plan.width}
                 height={plan.height}
                 className={mapImageClass}
@@ -216,30 +259,42 @@ const Section = () => {
               <svg
                 className={mapSvgClass}
                 viewBox={`0 0 ${plan.width} ${plan.height}`}
+                role="group"
                 aria-label="Квартири"
               >
-                {apartments.map((apartment) => (
-                  <polygon
-                    key={apartment.id}
-                    className={mapZoneClass({
-                      active: active?.id === apartment.id,
-                      dimmed: !isMatch(apartment),
-                      disabled: !isMatch(apartment) && !isSold(apartment),
-                      sold: isSold(apartment),
-                    })}
-                    points={apartment.points.map((point) => point.join(",")).join(" ")}
-                    onPointerEnter={(event) => {
-                      updateCursor(event);
-                      setHovered(apartment);
-                    }}
-                    onPointerLeave={() => setHovered(null)}
-                    onClick={() => selectApartment(apartment)}
-                  />
-                ))}
+                {apartments.map((apartment) => {
+                  const sold = isSold(apartment);
+                  const match = isMatch(apartment);
+
+                  return (
+                    <MapZone
+                      key={apartment.id}
+                      label={zoneLabel(apartment)}
+                      points={apartment.points}
+                      pressed={chosen?.id === apartment.id}
+                      className={mapZoneClass({
+                        active: active?.id === apartment.id,
+                        tint: sold
+                          ? "fill-black/55"
+                          : match
+                            ? "stroke-status-selling-strong"
+                            : "fill-white/70",
+                        disabled: !match && !sold,
+                        sold,
+                      })}
+                      onSelect={match || sold ? () => selectApartment(apartment) : undefined}
+                      onPreview={(event) => {
+                        updateCursor(event);
+                        setHovered(apartment);
+                      }}
+                      onPreviewEnd={() => setHovered(null)}
+                    />
+                  );
+                })}
               </svg>
 
               {hovered && (
-                <div className={mapTooltipClass} style={{ left: cursor.x, top: cursor.y }}>
+                <div className={mapTooltipClass} style={mapTooltipStyle(cursor)}>
                   <strong>{roomsLabel(hovered)} квартира</strong>
                   <p>Поверх: {floor}</p>
                   <p>Площа: {hovered.area} м²</p>
@@ -253,6 +308,14 @@ const Section = () => {
             </div>
           </div>
 
+          <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[13px] text-slate-700">
+            {legend.map(({ label, className }) => (
+              <li key={label} className="flex items-center gap-2">
+                <span className={cn("inline-block size-4 rounded-sm", className)} />
+                {label}
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
     </>

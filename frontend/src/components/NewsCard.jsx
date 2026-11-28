@@ -20,8 +20,8 @@ export const NewsDate = ({ date, className }) => {
   );
 };
 
-const NewsCard = ({ item, row = false }) => (
-  <Card className="group h-full gap-0 rounded-2xl py-0 shadow-card ring-0 transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover has-focus-visible:ring-3 has-focus-visible:ring-brand/50">
+const NewsCard = ({ item, row = false, headingLevel: Heading = "h3" }) => (
+  <Card className="group h-full gap-0 rounded-2xl py-0 shadow-card ring-0 transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover has-focus-visible:ring-3 has-focus-visible:ring-focus">
     <Link
       to={`/news/${item.id}`}
       className={cn("flex h-full flex-col outline-none", row && "sm:flex-row")}
@@ -40,9 +40,9 @@ const NewsCard = ({ item, row = false }) => (
       </div>
 
       <div className="flex flex-1 flex-col p-5 md:p-6">
-        <h3 className="line-clamp-3 text-[19px] leading-[1.3] font-bold text-ink transition-colors group-hover:text-brand-dark md:text-xl">
+        <Heading className="line-clamp-3 text-[19px] leading-[1.3] font-bold text-ink transition-colors group-hover:text-brand-dark md:text-xl">
           {item.title}
-        </h3>
+        </Heading>
         <p className="mt-2.5 mb-5 line-clamp-3 text-[15px] leading-relaxed text-slate-600">
           {item.text}
         </p>

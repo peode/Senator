@@ -1,12 +1,16 @@
 import { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowDown } from "lucide-react";
+import MapZone from "@/components/MapZone";
 import { Skeleton } from "@/components/ui/skeleton";
-import { sectionStatuses } from "@/data/sections";
+import { formatPrice, sectionStatuses } from "@/data/sections";
 import {
   mapClass,
   mapImageClass,
+  mapPointer,
   mapSvgClass,
   mapTooltipClass,
+  mapTooltipStyle,
   mapZoneClass,
 } from "@/lib/mapClasses";
 import { cn } from "@/lib/utils";
@@ -14,25 +18,58 @@ import { useSections } from "@/stores/sectionsStore";
 import { useComplexMap } from "@/stores/siteImagesStore";
 import { useSiteText } from "@/stores/siteTextsStore";
 
-const formatPrice = (value) => value.toLocaleString("uk-UA");
+const statusOrder = Object.keys(sectionStatuses);
+
+const freeUnits = ({ apartments }) =>
+  apartments.flatMap(({ units }) => units).filter(({ available }) => available).length;
+
+const SectionCard = ({ section }) => {
+  const status = sectionStatuses[section.status];
+  const free = section.status === "SELLING" ? freeUnits(section) : 0;
+  const content = (
+    <>
+      <span className="block text-base font-bold">Секція №{section.id}</span>
+      <span className="mt-1 flex items-center gap-2 text-[13px] font-medium text-slate-700">
+        <span className={cn("inline-block size-[9px] shrink-0 rounded-full", status.dotClass)} />
+        {status.label}
+      </span>
+      {section.status === "SELLING" && (
+        <span className="mt-2 block text-[13px] text-slate-700">
+          від {formatPrice(section.price)} $/м²
+          <br />
+          вільних квартир: {free}
+        </span>
+      )}
+    </>
+  );
+  const cardClass = "block h-full rounded-xl border border-slate-200 p-3.5";
+
+  return section.plan ? (
+    <Link
+      to={`/apartments/${section.id}`}
+      className={cn(cardClass, "bg-white shadow-card transition-colors hover:border-brand-dark")}
+    >
+      {content}
+    </Link>
+  ) : (
+    <div className={cn(cardClass, "bg-surface")}>{content}</div>
+  );
+};
 
 const HouseMap = () => {
   const navigate = useNavigate();
   const mapRef = useRef(null);
   const [activeHouse, setActiveHouse] = useState(null);
-  const [cursor, setCursor] = useState({ x: 0, y: 0 });
+  const [cursor, setCursor] = useState({ x: 0, y: 0, width: 0, height: 0 });
   const { sections, error } = useSections();
   const complexMap = useComplexMap();
   const t = useSiteText();
   const houses = sections.filter(({ mapPoints }) => mapPoints);
+  const sortedSections = sections.toSorted(
+    (a, b) => statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status) || a.id - b.id,
+  );
 
-  const updateCursor = (event) => {
-    const rect = mapRef.current.getBoundingClientRect();
-    setCursor({
-      x: event.clientX - rect.left,
-      y: event.clientY - rect.top,
-    });
-  };
+  const updateCursor = (event) => setCursor(mapPointer(event, mapRef.current));
 
   const activeStatus = activeHouse && sectionStatuses[activeHouse.status];
 
@@ -44,6 +81,12 @@ const HouseMap = () => {
           <p className="mt-1 text-sm text-white/70 md:text-[15px]">
             {t("apartments.hint")}
           </p>
+          <a
+            href="#catalog"
+            className="mt-1 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-gold hover:text-gold-hover"
+          >
+            Підібрати квартиру за параметрами <ArrowDown size={16} />
+          </a>
         </div>
 
         <ul className="flex flex-wrap gap-2">
@@ -83,6 +126,7 @@ const HouseMap = () => {
               alt="Вигляд ЖК Senator зверху"
               width={complexMap.width}
               height={complexMap.height}
+              fetchPriority="high"
               className={mapImageClass}
               draggable="false"
             />
@@ -90,27 +134,31 @@ const HouseMap = () => {
             <svg
               className={mapSvgClass}
               viewBox={`0 0 ${complexMap.width} ${complexMap.height}`}
+              role="group"
               aria-label="Карта будинків"
             >
-              {houses.map((house) => (
-                <polygon
-                  key={house.id}
-                  className={mapZoneClass({ active: activeHouse?.id === house.id })}
-                  points={house.mapPoints.map((point) => point.join(",")).join(" ")}
-                  onPointerEnter={(event) => {
-                    updateCursor(event);
-                    setActiveHouse(house);
-                  }}
-                  onPointerLeave={() => setActiveHouse(null)}
-                  onPointerDown={(event) => {
-                    updateCursor(event);
-                    setActiveHouse(house);
-                  }}
-                  onClick={() => {
-                    if (house.plan) navigate(`/apartments/${house.id}`);
-                  }}
-                />
-              ))}
+              {houses.map((house) => {
+                const status = sectionStatuses[house.status];
+
+                return (
+                  <MapZone
+                    key={house.id}
+                    label={`Секція №${house.id}, ${status.label}`}
+                    points={house.mapPoints}
+                    className={mapZoneClass({
+                      active: activeHouse?.id === house.id,
+                      tint: status.zoneClass,
+                      clickable: Boolean(house.plan),
+                    })}
+                    onSelect={house.plan ? () => navigate(`/apartments/${house.id}`) : undefined}
+                    onPreview={(event) => {
+                      updateCursor(event);
+                      setActiveHouse(house);
+                    }}
+                    onPreviewEnd={() => setActiveHouse(null)}
+                  />
+                );
+              })}
             </svg>
           </>
         ) : (
@@ -118,10 +166,7 @@ const HouseMap = () => {
         )}
 
         {activeStatus && (
-          <div
-            className={mapTooltipClass}
-            style={{ left: cursor.x, top: cursor.y }}
-          >
+          <div className={mapTooltipClass} style={mapTooltipStyle(cursor)}>
             <strong>Секція №{activeHouse.id}</strong>
             <span
               className={cn(
@@ -137,6 +182,19 @@ const HouseMap = () => {
           </div>
         )}
       </div>
+
+      {sections.length > 0 && (
+        <div className="px-[5%] py-8 text-ink md:px-[3.5%] md:py-12">
+          <h2 className="mb-5 text-2xl font-extrabold">Усі секції</h2>
+          <ul className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-6">
+            {sortedSections.map((section) => (
+              <li key={section.id}>
+                <SectionCard section={section} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </section>
   );
 };

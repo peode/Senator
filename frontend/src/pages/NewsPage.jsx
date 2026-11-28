@@ -3,6 +3,7 @@ import { Newspaper, TriangleAlert } from "lucide-react";
 import NewsCard, { NewsCardSkeleton } from "@/components/NewsCard";
 import PageBanner from "@/components/PageBanner";
 import { Section } from "@/components/Section";
+import Seo from "@/components/Seo";
 import { Button } from "@/components/ui/button";
 import { useNews, useNewsStore } from "@/stores/newsStore";
 import { useSiteText } from "@/stores/siteTextsStore";
@@ -27,6 +28,7 @@ const News = () => {
 
   return (
     <>
+      <Seo title="Новини" description="Новини ЖК «Senator»: хід будівництва, благоустрій і життя комплексу в Чернівцях." />
       <PageBanner title={t("news.banner")} subtitle={t("news.subtitle")} />
 
       <Section className="bg-surface">
@@ -70,7 +72,7 @@ const News = () => {
         ) : (
           <div className={NEWS_GRID}>
             {news.map((item) => (
-              <NewsCard key={item.id} item={item} row />
+              <NewsCard key={item.id} item={item} row headingLevel="h2" />
             ))}
           </div>
         )}

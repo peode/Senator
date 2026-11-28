@@ -2,19 +2,41 @@ import { create } from "zustand";
 import { api } from "@/lib/api";
 import { defaultComplexMap, siteImageSlots } from "@/data/siteImages";
 
-// Якщо сервер довго мовчить, показуємо стандартні картинки, а не порожні місця
-const WAIT_LIMIT_MS = 3000;
+// Перший екран не чекає на сервер довше за цей час: далі показуємо стандартні картинки
+const WAIT_LIMIT_MS = 800;
+const CACHE_KEY = "senator:site-images";
+
+// Сховище може бути заблоковане браузером: тоді просто працюємо без кешу
+const readCache = () => {
+  try {
+    return JSON.parse(localStorage.getItem(CACHE_KEY));
+  } catch {
+    return null;
+  }
+};
+
+const writeCache = (images) => {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(images));
+  } catch {
+    // без кешу наступний візит лише трохи довше чекатиме на картинки
+  }
+};
+
+const cachedImages = readCache();
 
 export const useSiteImagesStore = create((set, get) => ({
-  images: {},
-  // до відповіді сервера картинок немає: інакше замінена картинка блимала б стандартною
-  loaded: false,
+  images: cachedImages ?? {},
+  // до відповіді сервера картинок немає: інакше замінена картинка блимала б стандартною.
+  // Хто вже був на сайті, одразу бачить збережені адреси
+  loaded: cachedImages !== null,
 
   fetchImages: async () => {
     const timer = setTimeout(() => set({ loaded: true }), WAIT_LIMIT_MS);
     try {
-      const images = await api("/images");
-      set({ images: Object.fromEntries(images.map((image) => [image.key, image])), loaded: true });
+      const images = Object.fromEntries((await api("/images")).map((image) => [image.key, image]));
+      writeCache(images);
+      set({ images, loaded: true });
     } catch {
       set({ loaded: true });
     } finally {

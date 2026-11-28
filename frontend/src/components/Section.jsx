@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 const Section = ({ className, children, ...props }) => (
   <section
     className={cn(
-      "bg-white px-[5%] py-[50px] text-neutral-950 md:px-[4%] md:py-[70px] lg:px-[6.5%] lg:py-[90px]",
+      "bg-white px-[5%] py-[50px] text-ink md:px-[4%] md:py-[70px] lg:px-[6.5%] lg:py-[90px]",
       className
     )}
     {...props}
@@ -42,7 +42,7 @@ const SectionSubtitle = ({ className, children }) => (
 const SectionLink = ({ to, children }) => (
   <Button
     variant="link"
-    className="h-auto gap-2 p-0 text-base font-bold text-neutral-950 hover:text-brand hover:no-underline"
+    className="min-h-11 gap-2 p-0 text-base font-bold text-ink hover:text-brand-dark hover:no-underline"
     render={<Link to={to} />}
     nativeButton={false}
   >

@@ -1,5 +1,6 @@
 import { MapPin, Phone, Clock } from "lucide-react";
 import PageBanner from "@/components/PageBanner";
+import Seo from "@/components/Seo";
 import { SocialIcon } from "@/components/SocialIcons";
 import {
   Section,
@@ -16,8 +17,8 @@ import { useSiteText } from "@/stores/siteTextsStore";
 const ContactCard = ({ icon: Icon, title, children, href }) => {
   const content = (
     <Card className="grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-0 rounded-xl bg-surface px-5 py-[18px] ring-0">
-      <Icon size={26} strokeWidth={1.5} className="row-span-2 text-brand" />
-      <span className="text-sm text-slate-500">{title}</span>
+      <Icon size={26} strokeWidth={1.5} className="row-span-2 text-brand-dark" />
+      <span className="text-sm text-slate-600">{title}</span>
       <span className="text-base font-bold whitespace-pre-line">{children}</span>
     </Card>
   );
@@ -39,6 +40,7 @@ const Contacts = () => {
 
   return (
     <>
+      <Seo title="Контакти" description="Відділ продажу ЖК «Senator» у Чернівцях: телефон, адреса, години роботи й маршрут на карті." />
       <PageBanner title={t("contacts.banner")} />
 
       <Section>

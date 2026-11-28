@@ -10,15 +10,14 @@ import {
   ShoppingBasket,
   X,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, scrollMotion } from "@/lib/utils";
 import {
   Section,
   SectionHeading,
   SectionSubtitle,
 } from "@/components/Section";
+import { useSettings } from "@/stores/settingsStore";
 import { useSiteText } from "@/stores/siteTextsStore";
-
-const ADDRESS = "Чернівці, вулиця Руська, 236Б";
 
 // query — що шукати на карті поруч із ЖК, mode: "w" — пішки, "d" — авто,
 // destination — точні координати, якщо пошук за назвою знаходить не ту точку
@@ -31,14 +30,14 @@ const places = [
 ];
 
 // З вибраним місцем показуємо маршрут від ЖК — так на карті видно обидві точки
-const getMapSrc = (place) => {
+const getMapSrc = (address, place) => {
   if (!place) {
-    return `https://www.google.com/maps?q=${encodeURIComponent(ADDRESS)}&output=embed`;
+    return `https://www.google.com/maps?q=${encodeURIComponent(address)}&output=embed`;
   }
 
   const params = new URLSearchParams({
-    saddr: ADDRESS,
-    daddr: place.destination ?? `${place.query} near ${ADDRESS}`,
+    saddr: address,
+    daddr: place.destination ?? `${place.query} near ${address}`,
     dirflg: place.mode,
     output: "embed",
   });
@@ -49,6 +48,7 @@ const getMapSrc = (place) => {
 const Location = () => {
   const [activePlace, setActivePlace] = useState(null);
   const mapRef = useRef(null);
+  const { address } = useSettings();
   const t = useSiteText();
   const activeTitle = activePlace && t(`location.${activePlace.id}.title`);
 
@@ -58,7 +58,7 @@ const Location = () => {
     // На телефоні карта під списком, тож показуємо її, щоб було видно результат натискання
     const map = mapRef.current;
     if (map.getBoundingClientRect().bottom > window.innerHeight) {
-      map.scrollIntoView({ behavior: "smooth", block: "center" });
+      map.scrollIntoView({ behavior: scrollMotion(), block: "center" });
     }
   };
 
@@ -87,7 +87,7 @@ const Location = () => {
                     aria-pressed={isActive}
                     onClick={() => selectPlace(isActive ? null : place)}
                     className={cn(
-                      "group grid w-full cursor-pointer grid-cols-[auto_1fr_auto] items-center gap-3 rounded-xl border p-3 text-left shadow-card transition-all outline-none focus-visible:ring-3 focus-visible:ring-brand/50 active:translate-y-px md:gap-4 md:p-3.5",
+                      "group grid w-full cursor-pointer grid-cols-[auto_1fr_auto] items-center gap-3 rounded-xl border p-3 text-left shadow-card transition-all active:translate-y-px md:gap-4 md:p-3.5",
                       isActive
                         ? "border-ink bg-ink text-white"
                         : "border-slate-200 bg-white hover:-translate-y-0.5 hover:border-brand hover:shadow-card-hover"
@@ -143,13 +143,13 @@ const Location = () => {
             <p className="min-w-0 flex-1 font-semibold">
               {activePlace
                 ? `Маршрут: ${activeTitle}, ${t(`location.${activePlace.id}.distance`)}`
-                : "ЖК «Senator», вул. Руська, 236Б"}
+                : `ЖК «Senator», ${address}`}
             </p>
             {activePlace && (
               <button
                 type="button"
                 onClick={() => setActivePlace(null)}
-                className="inline-flex shrink-0 cursor-pointer items-center gap-1 rounded-lg bg-white/10 px-2.5 py-1.5 font-semibold transition-colors outline-none hover:bg-white/20 focus-visible:ring-3 focus-visible:ring-brand/50"
+                className="inline-flex min-h-11 shrink-0 cursor-pointer items-center gap-1 rounded-lg bg-white/10 px-3 font-semibold transition-colors hover:bg-white/20"
               >
                 <X size={15} /> Скинути
               </button>
@@ -162,7 +162,7 @@ const Location = () => {
                 ? `${activeTitle} на карті`
                 : "Розташування ЖК Senator на карті"
             }
-            src={getMapSrc(activePlace)}
+            src={getMapSrc(address, activePlace)}
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
             className="block min-h-[320px] w-full flex-1 border-0"

@@ -30,11 +30,11 @@ const FloorPicker = ({ floors, current, freeCount, onSelect }) => {
                 ? "bg-ink text-white"
                 : free > 0
                   ? "bg-surface text-ink hover:text-brand-dark"
-                  : "bg-surface text-slate-400"
+                  : "bg-surface text-slate-600"
             }`}
           >
             <span>{floor} пов.</span>
-            <span className="text-xs opacity-70">{free} вільн.</span>
+            <span className="text-xs">{free} вільн.</span>
           </button>
         );
       })}

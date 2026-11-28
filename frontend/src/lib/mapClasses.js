@@ -1,20 +1,36 @@
 import { cn } from "@/lib/utils";
 
-// Спільні стилі інтерактивних карт: карта ЖК і плани секцій
-export const mapClass = "relative w-full touch-pan-y overflow-hidden";
+// Спільні стилі інтерактивних карт: карта ЖК і плани секцій.
+// touch-manipulation лишає масштабування двома пальцями: підписи на планах дрібні
+export const mapClass = "relative w-full touch-manipulation overflow-hidden";
 
 export const mapImageClass = "block h-auto w-full select-none";
 
 export const mapSvgClass = "absolute inset-0 size-full";
 
 export const mapTooltipClass =
-  "pointer-events-none absolute z-5 flex min-w-40 translate-4.5 flex-col gap-1.5 rounded-md bg-ink/94 px-3 py-2.5 leading-[1.3] text-white shadow-tooltip md:min-w-[190px] md:px-4 md:py-3 [&_p]:text-[13px] [&_p]:text-white/85 [&_strong]:text-base";
+  "pointer-events-none absolute z-5 flex w-max max-w-[calc(50%-18px)] flex-col gap-1.5 rounded-md bg-ink/94 px-3 py-2.5 leading-[1.3] text-white shadow-tooltip md:min-w-[190px] md:px-4 md:py-3 [&_p]:text-[13px] [&_p]:text-white/85 [&_strong]:text-base";
 
-export const mapZoneClass = ({ active = false, dimmed = false, disabled = false, sold = false }) =>
+// Карта обрізає все за своїми межами, тому підказка відкривається туди, де більше місця
+export const mapPointer = (event, element) => {
+  const { left, top, width, height } = element.getBoundingClientRect();
+  return { x: event.clientX - left, y: event.clientY - top, width, height };
+};
+
+export const mapTooltipStyle = ({ x, y, width, height }) => ({
+  left: x,
+  top: y,
+  transform: `translate(${x > width / 2 ? "calc(-100% - 18px)" : "18px"}, ${
+    y > height / 2 ? "calc(-100% - 18px)" : "18px"
+  })`,
+});
+
+export const mapZoneClass = ({ active = false, tint, clickable = true, disabled = false, sold = false }) =>
   cn(
-    "cursor-pointer fill-transparent stroke-transparent stroke-3 transition-[fill,stroke] duration-200",
+    "fill-transparent stroke-transparent stroke-2 transition-[fill,stroke] duration-200 outline-none [vector-effect:non-scaling-stroke] focus-visible:stroke-white focus-visible:stroke-4",
+    clickable ? "cursor-pointer" : "cursor-default",
+    tint,
     active && "fill-white/50 stroke-white",
-    dimmed && "fill-black/45",
     disabled && "pointer-events-none",
     sold && active && "fill-slate-400/75 stroke-slate-300",
   );

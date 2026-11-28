@@ -27,7 +27,7 @@ const Overview = () => {
 
       <div className="grid items-center gap-8 md:gap-[60px] lg:grid-cols-2">
         <div className="space-y-[18px] text-[15px] leading-[1.75] text-slate-700 md:text-[17px]">
-          <p className="text-[clamp(19px,1.7vw,24px)] leading-normal font-semibold text-neutral-950">
+          <p className="text-[clamp(19px,1.7vw,24px)] leading-normal font-semibold text-ink">
             {t("overview.lead")}
           </p>
           <p>{t("overview.text1")}</p>
@@ -36,7 +36,7 @@ const Overview = () => {
 
         <Link
           to="/apartments"
-          className="group relative block aspect-[4/3] overflow-hidden rounded-2xl shadow-card-hover outline-none focus-visible:ring-3 focus-visible:ring-brand/50"
+          className="group relative block aspect-[4/3] overflow-hidden rounded-2xl shadow-card-hover"
         >
           <img
             src={siteImage("overview")}

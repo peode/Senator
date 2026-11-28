@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import PageBanner from "@/components/PageBanner";
 import { Section } from "@/components/Section";
+import Seo from "@/components/Seo";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { resolveImage } from "@/data/images";
@@ -18,6 +19,7 @@ const Advantages = () => {
 
   return (
     <>
+      <Seo title="Переваги" description="Переваги ЖК «Senator» у Чернівцях: закрита територія, паркінг, укриття, продумані планування." />
       <PageBanner title={t("advantages.banner")} subtitle={t("advantages.subtitle")} />
 
       <Section>

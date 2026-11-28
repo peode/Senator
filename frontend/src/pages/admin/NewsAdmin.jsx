@@ -6,6 +6,7 @@ import { useNewsStore } from "@/stores/newsStore";
 import AdminListSkeleton from "./AdminListSkeleton";
 import ImagePicker from "./ImagePicker";
 import { fieldClass } from "./fields";
+import { useLeaveWarning } from "./useLeaveWarning";
 
 const emptyArticle = () => ({
   id: null,
@@ -25,10 +26,13 @@ const Label = ({ title, children }) => (
 );
 
 const NewsEditor = ({ article, onSave, onCancel, error, saving }) => {
-  const [draft, setDraft] = useState({
+  const [initial] = useState(() => ({
     ...article,
     body: article.paragraphs.join("\n\n"),
-  });
+  }));
+  const [draft, setDraft] = useState(initial);
+  const dirty = JSON.stringify(draft) !== JSON.stringify(initial);
+  useLeaveWarning(dirty);
   const update = (patch) => setDraft((current) => ({ ...current, ...patch }));
 
   const submit = (event) => {
@@ -115,7 +119,12 @@ const NewsEditor = ({ article, onSave, onCancel, error, saving }) => {
         <Button type="submit" variant="gold" size="xl" disabled={saving}>
           {saving ? "Зберігаємо..." : "Зберегти"}
         </Button>
-        <Button type="button" variant="outline" size="xl" onClick={onCancel}>
+        <Button
+          type="button"
+          variant="outline"
+          size="xl"
+          onClick={() => (!dirty || window.confirm("Зміни не збережено. Вийти без збереження?")) && onCancel()}
+        >
           Скасувати
         </Button>
       </div>
@@ -210,10 +219,10 @@ const NewsAdmin = () => {
             <p className="truncate text-base font-medium">{article.title}</p>
           </div>
           <div className="flex shrink-0 gap-2">
-            <Button variant="outline" size="icon" onClick={() => edit(article)} aria-label="Редагувати">
+            <Button variant="outline" size="icon-lg" onClick={() => edit(article)} aria-label={`Редагувати: ${article.title}`}>
               <Pencil size={16} />
             </Button>
-            <Button variant="outline" size="icon" onClick={() => remove(article)} aria-label="Видалити">
+            <Button variant="outline" size="icon-lg" onClick={() => remove(article)} aria-label={`Видалити: ${article.title}`}>
               <Trash2 size={16} />
             </Button>
           </div>

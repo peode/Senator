@@ -29,7 +29,7 @@ const amenities = [
 ];
 
 const ARROW_BUTTON =
-  "flex size-11 cursor-pointer items-center justify-center rounded-full bg-white text-ink shadow-card transition-colors outline-none hover:bg-gold focus-visible:ring-3 focus-visible:ring-gold/60";
+  "flex size-11 cursor-pointer items-center justify-center rounded-full bg-white text-ink shadow-card transition-colors hover:bg-gold";
 
 const About = () => {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -104,7 +104,7 @@ const About = () => {
                 onClick={() => setActiveIndex(index)}
                 aria-pressed={isActive}
                 className={cn(
-                  "group flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-xl text-left text-ink transition-all outline-none focus-visible:ring-3 focus-visible:ring-gold/60 active:translate-y-px",
+                  "group flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-xl text-left text-ink transition-all active:translate-y-px",
                   isActive ? "bg-gold ring-3 ring-gold" : "bg-white hover:-translate-y-1 hover:bg-gold-soft"
                 )}
               >

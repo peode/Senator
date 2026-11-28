@@ -18,6 +18,8 @@ const formatDateTime = (iso) =>
 const LeadsAdmin = () => {
   const [leads, setLeads] = useState(null);
   const [error, setError] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     api("/leads")
@@ -46,12 +48,48 @@ const LeadsAdmin = () => {
 
   if (!leads) return error ? <p className="text-sm text-red-600">{error}</p> : <AdminListSkeleton />;
 
+  const query = search.trim().toLowerCase();
+  const visibleLeads = leads.filter(
+    ({ name, phone, comment, status }) =>
+      (!statusFilter || status === statusFilter) &&
+      [name, phone, comment].some((value) => value?.toLowerCase().includes(query)),
+  );
+
   return (
     <div className="flex flex-col gap-4">
       {error && <p className="text-sm text-red-600">{error}</p>}
       {leads.length === 0 && <p className="text-slate-500">Заявок поки немає.</p>}
 
-      {leads.map((lead) => (
+      {leads.length > 0 && (
+        <div className="flex flex-wrap items-center gap-3">
+          <input
+            type="search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Пошук за ім'ям, телефоном, коментарем"
+            aria-label="Пошук заявок"
+            className={`${fieldClass} sm:max-w-[360px]`}
+          />
+          <select
+            value={statusFilter}
+            onChange={(event) => setStatusFilter(event.target.value)}
+            aria-label="Фільтр за статусом"
+            className={`${fieldClass} w-auto`}
+          >
+            <option value="">Усі статуси</option>
+            {Object.entries(statuses).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label} ({leads.filter((lead) => lead.status === value).length})
+              </option>
+            ))}
+          </select>
+          <p role="status" className="text-sm text-slate-600">
+            Показано: {visibleLeads.length} із {leads.length}
+          </p>
+        </div>
+      )}
+
+      {visibleLeads.map((lead) => (
         <div
           key={lead.id}
           className="flex flex-col gap-4 rounded-2xl bg-white p-5 shadow-card md:flex-row md:items-center md:justify-between"
@@ -75,6 +113,7 @@ const LeadsAdmin = () => {
           <div className="flex shrink-0 items-center gap-2">
             <select
               value={lead.status}
+              aria-label={`Статус заявки від ${lead.name}`}
               onChange={(event) => setStatus(lead, event.target.value)}
               className={`${fieldClass} w-auto`}
             >
@@ -84,7 +123,7 @@ const LeadsAdmin = () => {
                 </option>
               ))}
             </select>
-            <Button variant="outline" size="icon" onClick={() => remove(lead)} aria-label="Видалити">
+            <Button variant="outline" size="icon-lg" onClick={() => remove(lead)} aria-label={`Видалити заявку від ${lead.name}`}>
               <Trash2 size={16} />
             </Button>
           </div>

@@ -8,6 +8,7 @@ import { useAdvantagesStore } from "@/stores/advantagesStore";
 import AdminListSkeleton from "./AdminListSkeleton";
 import ImagePicker from "./ImagePicker";
 import { fieldClass } from "./fields";
+import { useLeaveWarning } from "./useLeaveWarning";
 
 const groups = [
   { placement: "HOME", title: "Блок на головній сторінці", empty: { icon: "shield" } },
@@ -23,6 +24,8 @@ const Label = ({ title, children }) => (
 
 const AdvantageEditor = ({ advantage, onSave, onCancel, error, saving }) => {
   const [draft, setDraft] = useState(advantage);
+  const dirty = JSON.stringify(draft) !== JSON.stringify(advantage);
+  useLeaveWarning(dirty);
   const update = (patch) => setDraft((current) => ({ ...current, ...patch }));
 
   const submit = (event) => {
@@ -83,7 +86,12 @@ const AdvantageEditor = ({ advantage, onSave, onCancel, error, saving }) => {
         <Button type="submit" variant="gold" size="xl" disabled={saving}>
           {saving ? "Зберігаємо..." : "Зберегти"}
         </Button>
-        <Button type="button" variant="outline" size="xl" onClick={onCancel}>
+        <Button
+          type="button"
+          variant="outline"
+          size="xl"
+          onClick={() => (!dirty || window.confirm("Зміни не збережено. Вийти без збереження?")) && onCancel()}
+        >
           Скасувати
         </Button>
       </div>
@@ -112,16 +120,16 @@ const AdvantageRow = ({ item, isFirst, isLast, onMove, onEdit, onRemove }) => (
     </div>
 
     <div className="flex shrink-0 flex-wrap justify-end gap-2">
-      <Button variant="outline" size="icon" disabled={isFirst} onClick={() => onMove(-1)} aria-label="Вище">
+      <Button variant="outline" size="icon-lg" disabled={isFirst} onClick={() => onMove(-1)} aria-label={`Вище: ${item.title}`}>
         <ArrowUp size={16} />
       </Button>
-      <Button variant="outline" size="icon" disabled={isLast} onClick={() => onMove(1)} aria-label="Нижче">
+      <Button variant="outline" size="icon-lg" disabled={isLast} onClick={() => onMove(1)} aria-label={`Нижче: ${item.title}`}>
         <ArrowDown size={16} />
       </Button>
-      <Button variant="outline" size="icon" onClick={onEdit} aria-label="Редагувати">
+      <Button variant="outline" size="icon-lg" onClick={onEdit} aria-label={`Редагувати: ${item.title}`}>
         <Pencil size={16} />
       </Button>
-      <Button variant="outline" size="icon" onClick={onRemove} aria-label="Видалити">
+      <Button variant="outline" size="icon-lg" onClick={onRemove} aria-label={`Видалити: ${item.title}`}>
         <Trash2 size={16} />
       </Button>
     </div>

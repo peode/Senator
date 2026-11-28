@@ -6,6 +6,7 @@ import {
   SquareParking,
 } from "lucide-react";
 import PageBanner from "@/components/PageBanner";
+import Seo from "@/components/Seo";
 import {
   Section,
   SectionHeading,
@@ -34,6 +35,7 @@ const AboutDeveloper = () => {
 
   return (
     <>
+      <Seo title="Про забудовника" description="Забудовник ЖК «Senator» у Чернівцях: про компанію, проєкт і соціальні мережі." />
       <PageBanner title={t("developer.banner")} subtitle={t("developer.subtitle")} />
 
       <Section>
@@ -41,7 +43,7 @@ const AboutDeveloper = () => {
 
         <div className="grid items-center gap-8 md:gap-[60px] lg:grid-cols-2">
           <div className="space-y-5 text-base leading-[1.8] text-slate-700 md:text-[17px]">
-            <p className="text-[clamp(19px,1.7vw,24px)] leading-normal font-semibold text-neutral-950">
+            <p className="text-[clamp(19px,1.7vw,24px)] leading-normal font-semibold text-ink">
               {t("developer.lead")}
             </p>
             <p>{t("developer.text")}</p>
@@ -50,7 +52,7 @@ const AboutDeveloper = () => {
               {companyFacts.map((key) => (
                 <div key={key}>
                   <dt className="text-sm text-slate-500">{t(`developer.${key}.label`)}</dt>
-                  <dd className="text-base font-semibold text-neutral-950">{t(`developer.${key}.value`)}</dd>
+                  <dd className="text-base font-semibold text-ink">{t(`developer.${key}.value`)}</dd>
                 </div>
               ))}
             </dl>
@@ -109,7 +111,7 @@ const AboutDeveloper = () => {
                   <span className="block text-lg font-bold">
                     {socialLabels[key]}
                   </span>
-                  <span className="block text-sm text-slate-500">
+                  <span className="block text-sm text-slate-600">
                     {t(`developer.social.${key}`)}
                   </span>
                 </span>

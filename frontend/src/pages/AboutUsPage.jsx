@@ -1,4 +1,5 @@
 import Hero from "@/components/Hero"
+import Seo from "@/components/Seo"
 import Overview from "@/components/Overview"
 import About from "@/components/About"
 import Benefits from "@/components/Benefits"
@@ -8,6 +9,7 @@ import News from "@/components/News"
 const AboutUsPage = () => {
   return (
     <>
+      <Seo/>
       <Hero/>
       <Overview/>
       <About/>
